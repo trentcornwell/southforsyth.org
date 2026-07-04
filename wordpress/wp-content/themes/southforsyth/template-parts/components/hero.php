@@ -15,7 +15,7 @@
             <form class="hero__search" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                 <label class="visually-hidden" for="site-search">Search the site</label>
                 <input id="site-search" type="search" name="s" placeholder="Search guides, schools, parks, and events" value="<?php echo esc_attr(get_search_query()); ?>">
-                <button class="btn btn--primary" type="submit">Search</button>
+                <button class="btn btn-primary" type="submit">Search</button>
             </form>
         </div>
     </div>

@@ -9,7 +9,7 @@
             <form class="newsletter__form">
                 <label class="visually-hidden" for="newsletter-email">Email address</label>
                 <input id="newsletter-email" type="email" placeholder="Enter your email">
-                <button class="btn btn--primary" type="submit">Subscribe</button>
+                <button class="btn btn-primary" type="submit">Subscribe</button>
             </form>
         </div>
     </div>

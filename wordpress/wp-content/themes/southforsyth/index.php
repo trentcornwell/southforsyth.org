@@ -1,10 +1,10 @@
 <?php get_header(); ?>
 
 <main id="main-content" class="site-main">
-    <div class="container grid grid--sidebar">
-        <div class="content-area">
+    <div class="container layout-content">
+        <div class="stack">
             <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-                    <article class="card card--post">
+                    <article class="card card-post">
                         <header class="card__header">
                             <p class="eyebrow"><?php echo esc_html(get_the_date()); ?></p>
                             <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>

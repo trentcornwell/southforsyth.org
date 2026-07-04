@@ -2,7 +2,7 @@
 
 <main id="main-content" class="site-main">
     <div class="container">
-        <section class="card card--post">
+        <section class="card card-post">
             <header class="card__header">
                 <h1>Page not found</h1>
             </header>

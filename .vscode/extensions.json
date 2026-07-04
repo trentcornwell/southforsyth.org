@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "openai.chatgpt",
+    "eamodio.gitlens",
+    "editorconfig.editorconfig",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "bmewburn.vscode-intelephense-client",
+    "esbenp.prettier-vscode"
+  ]
+}

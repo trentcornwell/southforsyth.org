@@ -1,0 +1,58 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.hotExit": "onExitAndWindowClose",
+
+    "window.restoreWindows": "all",
+    "workbench.editor.restoreViewState": true,
+    "workbench.startupEditor": "none",
+    "workbench.panel.defaultLocation": "bottom",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.defaultLocation": "panel",
+
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+      ".env": "deploy.example.env, .env.*",
+      "deploy.sh": "pull-live.sh",
+      "README.md": "CLAUDE.md",
+      "SouthForsyth.code-workspace": ".gitignore"
+    },
+
+    "files.exclude": {
+      "**/.git": true,
+      "**/node_modules": true,
+      "**/vendor": true,
+      "**/.DS_Store": true
+    },
+    "search.exclude": {
+      "**/.git": true,
+      "**/node_modules": true,
+      "**/vendor": true,
+      "**/.DS_Store": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "anthropic.claude-code",
+      "openai.chatgpt",
+      "eamodio.gitlens",
+      "editorconfig.editorconfig",
+      "usernamehw.errorlens",
+      "streetsidesoftware.code-spell-checker",
+      "bmewburn.vscode-intelephense-client",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}

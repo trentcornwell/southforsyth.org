@@ -1,6 +1,6 @@
 # South Forsyth.org
 
-SouthForsyth.org is a community-focused WordPress site for South Forsyth, Georgia. The goal is to become a trusted local resource for residents, visitors, businesses, and families.
+SouthForsyth.org is a long-term community content platform for South Forsyth, Georgia — not a business website. The goal is to become the definitive local resource for residents, visitors, and families, covering events, restaurants, parks, neighborhoods, schools, churches, the business directory, evergreen guides, and local news as real, queryable WordPress content.
 
 ## Purpose
 - Provide a polished, mobile-first hub for local community information
@@ -18,15 +18,178 @@ SouthForsyth.org is a community-focused WordPress site for South Forsyth, Georgi
 - inc/enqueue.php — CSS and JS asset loading
 - inc/menus.php — menu registration
 - inc/widgets.php — widget area registration
+- inc/post-types.php — the 9 custom post types (events, restaurants, parks, neighborhoods, schools, churches, businesses, guides, articles)
+- inc/taxonomies.php — taxonomies attached to those post types, including the cross-cutting `sf_area` taxonomy
+- inc/meta.php — post meta fields (directory info, event date/time/venue, the `sf_featured` flag)
+- inc/queries.php — query helpers that fetch live content per post type with realistic placeholder fallback
 - inc/schema.php — SEO and schema helpers
-- inc/helpers.php — reusable rendering helpers
+- inc/helpers.php — reusable rendering helpers, including the card-section renderer used by the homepage
+- inc/performance.php — lean asset delivery (lazy-loaded images, no emoji script, JPEG quality)
+- inc/template-functions.php — small presentation helpers (SVG icons, excerpts)
+- inc/architecture.php / inc/evergreen-content.php / inc/community-platform.php — editorial strategy and content-planning data, not rendered templates (see docs below)
 - template-parts/header/site-header.php — header partial
 - template-parts/footer/site-footer.php — footer partial
 - template-parts/components/hero.php — homepage hero
-- template-parts/components/card-grid.php — reusable card-grid section
+- template-parts/components/card-grid.php — reusable generic card-grid section
+- template-parts/components/search.php — search form component
+- template-parts/components/cta.php — call-to-action component
 - template-parts/components/newsletter.php — newsletter signup block
-- assets/css/main.css — stylesheet
+- template-parts/components/section-header.php — reusable section intro
+- template-parts/components/breadcrumbs.php — breadcrumbs for interior pages
+- template-parts/components/post-meta.php — type-specific meta list (event date/venue, directory address/phone/hours) on single templates
+- template-parts/components/directory-card.php — directory listing card (businesses)
+- template-parts/components/restaurant-card.php — restaurant listing card
+- template-parts/components/church-card.php — church/community card
+- template-parts/components/school-card.php — school card
+- template-parts/components/park-card.php — park card
+- template-parts/components/neighborhood-card.php — neighborhood card
+- template-parts/components/event-card.php — event card
+- template-parts/components/article-card.php — article/story card
+- template-parts/components/guide-card.php — guide card
+- template-parts/components/weather-placeholder.php / traffic-placeholder.php — local-conditions placeholders
+- template-parts/components/community-spotlight.php — resident/organization spotlight
+- template-parts/components/sidebar-callout.php — editorial sidebar component
+- template-parts/components/feature-banner.php — feature banner component
+- template-parts/components/quote-block.php — pull quote or testimonial block
+- template-parts/components/statistics.php — stats/metrics section
+- assets/css/main.css — design-system stylesheet
 - assets/js/main.js — small interactive enhancements
+
+See [wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md) for the full rationale behind the post types, taxonomies, meta fields, and the "one archive.php, not eighteen" template approach.
+
+## Design system overview
+The theme now includes a custom design system built without Bootstrap, Tailwind, or any other CSS framework. It is designed to feel like a premium regional publication with strong hierarchy, generous spacing, polished cards, accessible forms, and mobile-first responsive behavior.
+
+## Information architecture
+The theme now includes a planning layer for a large-scale local publishing site. The information architecture is documented in [wordpress/wp-content/themes/southforsyth/docs/information-architecture.md](wordpress/wp-content/themes/southforsyth/docs/information-architecture.md) and backed by reusable architecture helpers in [wordpress/wp-content/themes/southforsyth/inc/architecture.php](wordpress/wp-content/themes/southforsyth/inc/architecture.php).
+
+### Planned section coverage
+- Home
+- Things To Do
+- Events
+- Weekend Guide
+- Restaurants
+- Coffee Shops
+- Parks
+- Trails
+- Playgrounds
+- Schools
+- Churches
+- Neighborhoods
+- New Resident Guide
+- Business Directory
+- Healthcare
+- Senior Resources
+- Family Activities
+- Youth Sports
+- Shopping
+- History
+- Volunteer
+- Community Organizations
+- Public Safety
+- Government
+- Local News
+- Weather
+- Traffic
+- Seasonal Guides
+- Holiday Guides
+
+The structure is centered on topical authority, internal linking, and long-term scalability for thousands of pages.
+
+## Evergreen content strategy
+The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).
+
+### Priority guides
+1. Best Parks
+2. Every Playground
+3. Walking Trails
+4. Restaurants
+5. Coffee Shops
+6. Breakfast
+7. Pizza
+8. BBQ
+9. Family Activities
+10. Rainy Day Activities
+11. Date Night
+12. Summer Camps
+13. Christmas Events
+14. Pumpkin Patches
+15. Farmers Markets
+16. Fourth of July
+17. Halloween
+18. Christmas Lights
+19. Neighborhood Guides
+20. Church Guide
+21. Moving Guide
+22. School Guide
+23. Business Guide
+24. Volunteer Guide
+
+### Design tokens
+The stylesheet defines tokens for:
+- primary and secondary brand colors
+- accent, success, warning, and error colors
+- neutral grays
+- typography scale, line heights, and letter spacing
+- spacing scale using 4, 8, 12, 16, 24, 32, 48, 64, and 96
+- container widths
+- buttons, forms, cards, radius, shadows, and transitions
+
+### Utility classes
+Reusable utilities include:
+- .container and .container-wide
+- .grid, .grid-2, .grid-3, .grid-4
+- .flex, .stack, .cluster, .center, .flow
+- .card, .card-feature, .card-directory, .card-event
+- .btn, .btn-primary, .btn-secondary, .btn-outline
+- .badge, .tag
+- .section, .section-title, .section-subtitle
+- .visually-hidden
+
+### Responsive system
+Breakpoints are defined for:
+- 480px
+- 768px
+- 1024px
+- 1280px
+- 1440px
+
+### Accessibility
+The theme includes:
+- a skip navigation link
+- visible focus states
+- keyboard-friendly mobile navigation
+- ARIA labels and accessible form controls
+- a clear heading and content hierarchy
+
+## Component usage notes
+Each component is built as a reusable template partial and should be used as a foundation for future WordPress-driven content.
+
+- Hero: use for landing pages and top-of-page storytelling
+- Search: use in hero areas or directory pages
+- CTA: use for announcements, campaigns, or newsletter signups
+- Newsletter signup: use as a lightweight conversion block
+- Section header: use for consistent section intros
+- Breadcrumbs: use on interior pages
+- Directory cards: use for businesses, directories, and services
+- Restaurant cards: use for dining content
+- Church cards: use for community and church directories
+- School cards: use for education-focused content
+- Park cards: use for parks, trails, and outdoor recreation
+- Neighborhood cards: use for neighborhood profiles
+- Event cards: use for upcoming events and programming
+- Article cards: use for editorial pieces and stories
+- Guide cards: use for how-to and local explainer content
+- Post meta: use on single templates to show event date/venue or directory address/phone/hours
+- Weather / traffic placeholders: use in a "local conditions" section until a live data feed is connected
+- Community spotlight: use to highlight a resident, volunteer, or organization
+- Sidebar callout: use for related stories or quick links
+- Feature banner: use for premium editorial highlights
+- Quote block: use for testimonials or editorial pull quotes
+- Statistics section: use for metrics, community milestones, and numbers
+
+## Placeholder content
+The homepage queries each custom post type for live content first (see the architecture doc above) and only shows the realistic placeholder cards baked into `front-page.php` when a post type has no published posts yet. As real Events, Restaurants, Parks, and so on are authored in wp-admin, the placeholders are replaced automatically — no template edits required. Weather and traffic remain static placeholders pending a live data feed.
 
 ## DreamHost deployment workflow
 
@@ -89,11 +252,13 @@ This keeps local development first, uses GitHub as the source of truth, and only
 - Review SEO metadata and schema output regularly as content expands.
 
 ## Current status
-- Theme foundation and homepage are implemented with placeholder content.
+- Nine custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above).
+- The homepage queries live content per post type via `southforsyth_get_latest_items()` / `southforsyth_get_featured_places()`, falling back to realistic placeholder cards until each post type has published content.
+- `archive.php`, `search.php`, and `single.php` are post-type aware, rendering the right card component and meta fields for whatever type is being displayed.
 - Navigation, widgets, footer, and reusable components are wired up.
-- SEO-ready metadata and schema placeholders are included.
+- SEO-ready metadata and schema output are included.
 
 ## Next steps
-- Replace placeholder content with WordPress-driven dynamic queries.
-- Add custom post types for events, guides, businesses, and restaurants.
-- Expand the homepage into richer local content sections and search experiences.
+- Author real Events, Restaurants, Parks, Neighborhoods, Schools, Churches, Businesses, Guides, and Articles in wp-admin — the templates will pick them up automatically.
+- Tag content with `sf_area` so neighborhood pages can cross-link nearby restaurants, parks, and events.
+- Expand search/filtering beyond the basic keyword search once there's enough content to filter.

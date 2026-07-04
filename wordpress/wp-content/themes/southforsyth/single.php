@@ -1,8 +1,8 @@
 <?php get_header(); ?>
 
 <main id="main-content" class="site-main">
-    <div class="container grid grid--sidebar">
-        <article class="content-area card card--post">
+    <div class="container layout-content">
+        <article class="card card-post">
             <header class="card__header">
                 <p class="eyebrow"><?php echo esc_html(get_the_date()); ?></p>
                 <h1><?php the_title(); ?></h1>
@@ -11,6 +11,7 @@
                 <?php if (has_post_thumbnail()) : ?>
                     <?php the_post_thumbnail('southforsyth-hero', array('class' => 'card__media-image')); ?>
                 <?php endif; ?>
+                <?php get_template_part('template-parts/components/post-meta'); ?>
                 <?php the_content(); ?>
             </div>
         </article>

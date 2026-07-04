@@ -12,7 +12,7 @@
             </span>
         </a>
 
-        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-navigation">
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-navigation" aria-label="Toggle navigation">
             <span class="visually-hidden">Toggle navigation</span>
             <span></span><span></span><span></span>
         </button>
