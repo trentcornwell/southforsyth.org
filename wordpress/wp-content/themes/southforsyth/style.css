@@ -1,0 +1,11 @@
+/*
+Theme Name: South Forsyth
+Theme URI: https://southforsyth.org
+Author: Trent Cornwell
+Description: A production-quality, SEO-first WordPress theme for South Forsyth, Georgia.
+Version: 1.0.0
+Text Domain: southforsyth
+Tags: responsive, accessibility-ready, custom-logo, featured-images, threaded-comments, translation-ready
+*/
+
+@import url('assets/css/main.css');

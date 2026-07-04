@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="South Forsyth logo">
+  <rect width="64" height="64" rx="16" fill="#0f4c81"/>
+  <path d="M17 18h30v10H17z" fill="#f4b400"/>
+  <path d="M20 32h24v10H20z" fill="#ffffff"/>
+  <path d="M24 46h16v4H24z" fill="#f4b400"/>
+</svg>
