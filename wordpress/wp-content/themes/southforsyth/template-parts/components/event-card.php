@@ -2,7 +2,9 @@
 
 /**
  * Event card component.
- * TODO: Replace with dynamic event data from a calendar or custom post type.
+ * Use for community events, markets, and recurring programming.
+ * Data-agnostic: fed real Event posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Event';

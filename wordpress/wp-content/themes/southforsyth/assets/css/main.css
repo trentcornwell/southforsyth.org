@@ -1,3 +1,10 @@
+/* =============================================================
+   Design tokens
+   Single source of truth for color, spacing, type, and radius.
+   Every rule below should reference these variables rather than
+   hardcoding new values — that's what keeps the design system
+   consistent as new sections and post types are added.
+   ============================================================= */
 :root {
   --color-primary: #0f4c81;
   --color-primary-dark: #0a3559;
@@ -60,6 +67,9 @@
   --transition-medium: 260ms ease;
 }
 
+/* =============================================================
+   Base & reset
+   ============================================================= */
 * { box-sizing: border-box; }
 html { font-size: 16px; scroll-behavior: smooth; }
 body {
@@ -95,6 +105,12 @@ input, button, textarea, select { font: inherit; }
 }
 .skip-link:focus { top: var(--space-4); }
 
+/* =============================================================
+   Layout utilities
+   Generic, content-agnostic building blocks (containers, grids,
+   flex helpers). Nothing in this section should know about a
+   specific post type or page.
+   ============================================================= */
 .container { width: min(100% - 1.5rem, var(--container)); margin-inline: auto; }
 .container-wide { width: min(100% - 1.5rem, var(--container-wide)); margin-inline: auto; }
 .grid { display: grid; gap: var(--space-6); }
@@ -106,22 +122,16 @@ input, button, textarea, select { font: inherit; }
 .cluster { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .center { display: grid; place-items: center; }
 .flow > * + * { margin-top: var(--space-4); }
-.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
-.card-feature { background: linear-gradient(135deg, #fffef8 0%, #fff8e3 100%); }
-.card-directory { border-left: 4px solid var(--color-primary); }
-.card-event { border-top: 4px solid var(--color-accent); }
-.card-editorial { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; }
-.card-editorial .eyebrow { color: var(--color-accent-soft); }
-.card-editorial .card__body p { color: rgba(255,255,255,0.9); }
-.card-placeholder { border-style: dashed; background: var(--color-bg-soft); }
-.card-placeholder .card__body { gap: 0.5rem; }
-.card-spotlight { display: grid; gap: var(--space-5); grid-template-columns: 1fr; padding: var(--space-8); }
-.card-spotlight__quote { font-size: 1.2rem; line-height: 1.7; margin: 0; }
-.card-spotlight__name { font-weight: 700; color: var(--color-text); }
-.card-spotlight__role { color: var(--color-muted); }
-.card__body { padding: 1.35rem; display: grid; gap: 0.85rem; }
-.card__body h3 { margin: 0; font-size: 1.15rem; }
-.card__body p { margin: 0; color: var(--color-muted); }
+.split-panel { display: grid; gap: var(--space-6); grid-template-columns: 1.15fr 0.85fr; }
+.card-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.layout-content { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+.sidebar { display: grid; gap: var(--space-5); align-content: start; }
+.list { margin: 0; padding-left: 1.2rem; color: var(--color-muted); display: grid; gap: 0.65rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* =============================================================
+   Buttons, badges, pills
+   ============================================================= */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -137,25 +147,120 @@ input, button, textarea, select { font: inherit; }
   transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 .btn:hover { transform: translateY(-1px); }
+/* Modifiers below must stay after .btn: they share its specificity
+   and rely on source order to win when both classes are applied. */
 .btn-primary { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 .btn-primary:hover { background: var(--color-primary-dark); color: white; }
 .btn-secondary { background: var(--color-accent); color: var(--color-text); border-color: var(--color-accent); }
 .btn-outline { background: transparent; color: var(--color-primary); border-color: var(--color-primary); }
 .badge, .tag { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.7rem; border-radius: var(--radius-pill); background: var(--color-accent-soft); color: var(--color-primary-dark); font-size: var(--font-size-sm); font-weight: 600; }
+/* "Coming soon" chip used by coming-soon-card.php — deliberately quieter
+   than .badge-launch since it repeats many times per page. */
+.badge-soon { display: inline-flex; align-items: center; padding: 0.3rem 0.7rem; border-radius: var(--radius-pill); background: var(--color-bg-soft); border: 1px solid var(--color-border); color: var(--color-primary-dark); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--letter-spacing-sm); justify-self: start; }
+/* "Preview Mode / Launching Soon" hero badge — the one loud announcement
+   on the page, used exactly once. */
+.badge-launch { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.5rem 1rem 0.5rem 0.8rem; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-primary-dark); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--letter-spacing-sm); }
+.badge-launch__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary-dark); animation: sf-pulse 2s ease-in-out infinite; }
+@keyframes sf-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) {
+  .badge-launch__dot { animation: none; }
+}
+.pill { display: inline-flex; align-items: center; padding: 0.45rem 0.8rem; border-radius: var(--radius-pill); background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.22); font-size: 0.9rem; font-weight: 600; }
+.pill-link { display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; border-radius: var(--radius-pill); background: var(--color-bg-soft); border: 1px solid var(--color-border); font-size: 0.9rem; font-weight: 600; color: var(--color-primary-dark); }
+.pill-link:hover { background: var(--color-primary); border-color: var(--color-primary); color: white; }
+.pill-row { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: var(--space-6); }
+
+/* =============================================================
+   Cards
+   .card is the base surface used by every content-type card
+   component (event-card, restaurant-card, etc.). Modifiers below
+   must stay after .card: same specificity, source order decides
+   which wins when both classes are on the same element.
+   ============================================================= */
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.card-feature { background: linear-gradient(135deg, #fffef8 0%, #fff8e3 100%); }
+.card-directory { border-left: 4px solid var(--color-primary); }
+.card-event { border-top: 4px solid var(--color-accent); }
+.card-editorial { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; }
+.card-editorial .eyebrow { color: var(--color-accent-soft); }
+.card-editorial .card__body p { color: rgba(255,255,255,0.9); }
+.card-placeholder { border-style: dashed; background: var(--color-bg-soft); }
+.card-placeholder .card__body { gap: 0.5rem; }
+.card-spotlight { display: grid; gap: var(--space-5); grid-template-columns: 1fr; padding: var(--space-8); }
+.card-spotlight .eyebrow { margin: 0; }
+.card-spotlight__quote { font-size: 1.2rem; line-height: 1.7; margin: 0; }
+.card-spotlight__name { font-weight: 700; color: var(--color-text); }
+.card-spotlight__role { color: var(--color-muted); }
+.card__body { padding: 1.35rem; display: grid; gap: 0.85rem; }
+.card__body h3 { margin: 0; font-size: 1.15rem; }
+.card__body p { margin: 0; color: var(--color-muted); }
+/* Single-template ("card-post") variants, used by single.php/page.php. */
+.card__header { padding: 1.35rem 1.35rem 0; }
+.card__header h1,
+.card__header h2 { margin: 0.35rem 0 0; }
+.card__media-image { width: 100%; border-radius: var(--radius-md) var(--radius-md) 0 0; margin-top: 1rem; }
+.card-meta { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); color: var(--color-muted); font-size: var(--font-size-sm); margin: 0; padding: 0; list-style: none; }
+.card-meta li { display: flex; gap: 0.35rem; }
+.card-meta strong { color: var(--color-text); }
+/* Coming-soon preview cards (template-parts/components/coming-soon-card.php).
+   The icon is a single letter in a colored badge — no icon library. Colors
+   cycle across the grid via nth-child so a row of cards reads as a set
+   rather than a flat list. */
+.coming-soon-card .card__body { gap: 0.65rem; }
+.coming-soon-card__icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: white;
+  background: var(--color-primary);
+}
+.coming-soon-card:nth-child(3n+2) .coming-soon-card__icon { background: var(--color-secondary); }
+.coming-soon-card:nth-child(3n+3) .coming-soon-card__icon { background: var(--color-accent); color: var(--color-primary-dark); }
+.coming-soon-card .badge-soon { margin-top: 0.25rem; }
+
+/* =============================================================
+   Audience grid
+   "Built for the Community" homepage section — lighter-weight than a
+   full card since these are audience descriptors, not feature previews.
+   ============================================================= */
+.audience-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.audience-item { padding: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.audience-item h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.audience-item p { margin: 0; color: var(--color-muted); font-size: 0.92rem; }
+
+/* =============================================================
+   Sections & headings
+   Shared by every homepage/archive section via section-header.php
+   and southforsyth_render_card_section(). .section--soft and
+   .section--accent must stay after .section (same specificity,
+   source order decides).
+   ============================================================= */
 .section { padding: var(--space-10) 0; }
+.section--soft { background: rgba(255,255,255,0.64); }
+.section--accent { background: linear-gradient(180deg, #f3f7fd 0%, #edf4fb 100%); }
 .section-title { margin: 0 0 0.4rem; font-size: clamp(1.45rem, 2.4vw, 2rem); line-height: var(--line-height-tight); }
 .section-subtitle { margin: 0; color: var(--color-muted); max-width: 44rem; }
 .section-header { display: grid; gap: var(--space-3); margin-bottom: var(--space-6); }
+/* Must stay after .section-header for the same source-order reason. */
 .section-header--center { text-align: center; justify-items: center; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.card-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.feature-strip { display: grid; gap: var(--space-6); grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.split-panel { display: grid; gap: var(--space-6); grid-template-columns: 1.15fr 0.85fr; }
-.list { margin: 0; padding-left: 1.2rem; color: var(--color-muted); display: grid; gap: 0.65rem; }
+.eyebrow { text-transform: uppercase; letter-spacing: var(--letter-spacing-md); font-size: 0.78rem; font-weight: 700; color: var(--color-accent); }
+.text-link { font-weight: 700; }
 .stats-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stat-card { background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
 .stat-card strong { display: block; font-size: 1.8rem; color: var(--color-primary); }
 .stat-card span { color: var(--color-muted); }
+
+/* =============================================================
+   Editorial components
+   Available building blocks not yet wired into a template — ready
+   for future single-guide/single-article layouts. See
+   docs/content-platform-architecture.md.
+   ============================================================= */
 .quote-block { margin: 0; padding: var(--space-6); border-left: 4px solid var(--color-accent); background: var(--color-surface); border-radius: 0 var(--radius-md) var(--radius-md) 0; box-shadow: var(--shadow-sm); }
 .quote-block p { font-size: 1.2rem; line-height: 1.7; margin: 0 0 var(--space-3); }
 .quote-block footer { color: var(--color-muted); font-weight: 600; }
@@ -166,6 +271,13 @@ input, button, textarea, select { font: inherit; }
 .cta { display: flex; justify-content: space-between; align-items: center; gap: var(--space-6); padding: var(--space-8); background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--color-border); }
 .newsletter { display: grid; gap: var(--space-5); grid-template-columns: 1.2fr 0.8fr; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); }
 .newsletter__form { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.newsletter__form input:disabled,
+.newsletter__form button:disabled { opacity: 0.55; cursor: not-allowed; }
+.newsletter__note { margin: 0.6rem 0 0; color: var(--color-muted); font-size: var(--font-size-sm); }
+
+/* =============================================================
+   Forms & search
+   ============================================================= */
 .newsletter__form input,
 .search__field,
 form input,
@@ -180,9 +292,17 @@ form select {
 }
 .search { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .search__field { min-width: min(100%, 24rem); flex: 1 1 18rem; }
+
+/* =============================================================
+   Breadcrumbs
+   ============================================================= */
 .breadcrumbs { padding: var(--space-5) 0 var(--space-2); }
 .breadcrumbs__list { display: flex; flex-wrap: wrap; gap: var(--space-3); list-style: none; padding: 0; margin: 0; color: var(--color-muted); }
 .breadcrumbs__item + .breadcrumbs__item::before { content: "/"; margin-right: var(--space-3); color: var(--color-neutral-400); }
+
+/* =============================================================
+   Site header & navigation
+   ============================================================= */
 .site-header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); }
 .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); padding: 1rem 0; }
 .brand { display: flex; align-items: center; gap: 0.75rem; color: var(--color-text); font-weight: 700; }
@@ -194,41 +314,38 @@ form select {
 .site-navigation__list { display: flex; gap: var(--space-4); list-style: none; padding: 0; margin: 0; }
 .site-navigation__list a { color: var(--color-text); font-weight: 600; }
 .site-navigation__list a:hover { color: var(--color-primary); }
+
+/* =============================================================
+   Hero
+   ============================================================= */
 .hero { padding: var(--space-10) 0; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; position: relative; }
 .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 34%); pointer-events: none; }
 .hero__inner { min-height: 430px; display: grid; align-items: center; position: relative; z-index: 1; }
 .hero h1 { font-size: var(--font-size-4xl); margin: 0; color: white; line-height: var(--line-height-tight); max-width: 46rem; }
 .hero__lede { max-width: 44rem; font-size: var(--font-size-lg); color: rgba(255,255,255,0.94); margin-top: 0.5rem; }
-.hero__meta { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.75rem; }
-.pill { display: inline-flex; align-items: center; padding: 0.45rem 0.8rem; border-radius: var(--radius-pill); background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.22); font-size: 0.9rem; font-weight: 600; }
-.pill-link { display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; border-radius: var(--radius-pill); background: var(--color-bg-soft); border: 1px solid var(--color-border); font-size: 0.9rem; font-weight: 600; color: var(--color-primary-dark); }
-.pill-link:hover { background: var(--color-primary); border-color: var(--color-primary); color: white; }
-.pill-row { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: var(--space-6); }
-.hero__search { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: var(--space-5); }
-.hero__search input { min-width: min(100%, 24rem); flex: 1 1 18rem; border: 1px solid rgba(255,255,255,0.25); border-radius: var(--radius-pill); padding: 0.9rem 1rem; background: rgba(255,255,255,0.95); }
-.section--soft { background: rgba(255,255,255,0.64); }
-.section--accent { background: linear-gradient(180deg, #f3f7fd 0%, #edf4fb 100%); }
-.section-intro { max-width: 42rem; margin-bottom: var(--space-6); }
-.section-intro h2 { margin: 0 0 0.4rem; font-size: clamp(1.45rem, 2.4vw, 2rem); }
-.section-intro p { margin: 0; color: var(--color-muted); }
-.eyebrow { text-transform: uppercase; letter-spacing: var(--letter-spacing-md); font-size: 0.78rem; font-weight: 700; color: var(--color-accent); }
-.text-link { font-weight: 700; }
+.hero__actions { margin-top: var(--space-6); }
+/* Hero sits on a dark gradient, so .btn-outline's default (dark-on-dark)
+   styling needs a light variant scoped to this section only. */
+.hero .btn-outline { color: white; border-color: rgba(255,255,255,0.6); }
+.hero .btn-outline:hover { background: rgba(255,255,255,0.12); color: white; }
+
+/* =============================================================
+   Site footer
+   ============================================================= */
 .site-footer { background: var(--color-primary-dark); color: white; padding: var(--space-10) 0; }
 .site-footer__inner { display: grid; gap: var(--space-6); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .site-footer a { color: white; }
 .widget { margin-bottom: 1rem; }
 .widget__title { margin-bottom: 0.4rem; font-size: 1rem; }
-.layout-content { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
-.sidebar { display: grid; gap: var(--space-5); align-content: start; }
-.card-post { padding: 0; }
-.card__header { padding: 1.35rem 1.35rem 0; }
-.card__header h1,
-.card__header h2 { margin: 0.35rem 0 0; }
-.card__media-image { width: 100%; border-radius: var(--radius-md) var(--radius-md) 0 0; margin-top: 1rem; }
-.card-meta { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); color: var(--color-muted); font-size: var(--font-size-sm); margin: 0; padding: 0; list-style: none; }
-.card-meta li { display: flex; gap: 0.35rem; }
-.card-meta strong { color: var(--color-text); }
+.widget--footer { margin-bottom: var(--space-5); }
 
+/* =============================================================
+   Responsive
+   Mobile-first; each block below must stay in ascending min-width
+   (and descending max-width) order — at any given viewport width
+   more than one of these blocks can be simultaneously true, and the
+   later block in source order wins ties for the same selector.
+   ============================================================= */
 @media (min-width: 480px) {
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -237,7 +354,6 @@ form select {
 @media (min-width: 768px) {
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .feature-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .split-panel { grid-template-columns: 1.15fr 0.85fr; }
   .newsletter { grid-template-columns: 1.2fr 0.8fr; }
   .site-footer__inner { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -250,7 +366,6 @@ form select {
 }
 
 @media (max-width: 900px) {
-  .feature-strip,
   .split-panel { grid-template-columns: 1fr; }
   .newsletter { grid-template-columns: 1fr; }
   .site-footer__inner { grid-template-columns: 1fr; }
@@ -261,8 +376,7 @@ form select {
   .site-navigation { display: none; width: 100%; }
   .site-navigation.is-open { display: block; }
   .site-navigation__list { flex-direction: column; padding: 1rem 0; }
-  .hero__search { flex-direction: column; }
-  .hero__meta { gap: 0.45rem; }
+  .hero__actions { display: flex; flex-direction: column; align-items: stretch; }
   .cta { flex-direction: column; align-items: flex-start; }
 }
 

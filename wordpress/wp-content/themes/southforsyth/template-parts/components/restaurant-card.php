@@ -2,7 +2,9 @@
 
 /**
  * Restaurant card component.
- * TODO: Replace with dynamic restaurant listings and ratings when content is available.
+ * Use for restaurants, coffee shops, and dining listings.
+ * Data-agnostic: fed real Restaurant posts or placeholder data via query
+ * vars — see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Dining';

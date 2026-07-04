@@ -3,6 +3,8 @@
 /**
  * Neighborhood card component.
  * Use for neighborhood profiles covering lifestyle, schools, and amenities.
+ * Data-agnostic: fed real Neighborhood posts or placeholder data via query
+ * vars — see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Neighborhood';

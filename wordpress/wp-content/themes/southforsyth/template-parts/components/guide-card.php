@@ -3,7 +3,8 @@
 /**
  * Guide card component.
  * Use for curated guides, explainer content, and how-to posts.
- * TODO: Replace with dynamic guide content once custom post types or categories are ready.
+ * Data-agnostic: fed real Guide posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Guide';

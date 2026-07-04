@@ -26,11 +26,10 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 - inc/helpers.php — reusable rendering helpers, including the card-section renderer used by the homepage
 - inc/performance.php — lean asset delivery (lazy-loaded images, no emoji script, JPEG quality)
 - inc/template-functions.php — small presentation helpers (SVG icons, excerpts)
-- inc/architecture.php / inc/evergreen-content.php / inc/community-platform.php — editorial strategy and content-planning data, not rendered templates (see docs below)
+- inc/architecture.php / inc/evergreen-content.php / inc/community-platform.php — editorial strategy and content-planning data. Not required by `functions.php` (nothing at runtime reads them) — require the specific file directly if you need to read it programmatically; see docs below
 - template-parts/header/site-header.php — header partial
 - template-parts/footer/site-footer.php — footer partial
 - template-parts/components/hero.php — homepage hero
-- template-parts/components/card-grid.php — reusable generic card-grid section
 - template-parts/components/search.php — search form component
 - template-parts/components/cta.php — call-to-action component
 - template-parts/components/newsletter.php — newsletter signup block
@@ -48,6 +47,7 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 - template-parts/components/guide-card.php — guide card
 - template-parts/components/weather-placeholder.php / traffic-placeholder.php — local-conditions placeholders
 - template-parts/components/community-spotlight.php — resident/organization spotlight
+- template-parts/components/coming-soon-card.php — icon + title + description + "Coming Soon" badge, used by the preview homepage's "What We're Building" and "Preview Content" sections
 - template-parts/components/sidebar-callout.php — editorial sidebar component
 - template-parts/components/feature-banner.php — feature banner component
 - template-parts/components/quote-block.php — pull quote or testimonial block
@@ -98,6 +98,9 @@ The structure is centered on topical authority, internal linking, and long-term 
 
 ## Evergreen content strategy
 The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).
+
+## Data integration roadmap
+Planning for how South Forsyth.org will eventually pull in outside data — official government/school sources, calendar/ICS feeds, GIS/open data, local news RSS, and community submissions — without compromising accuracy or attribution. Documentation only today; no importers exist yet. See [wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md).
 
 ### Priority guides
 1. Best Parks
@@ -181,6 +184,7 @@ Each component is built as a reusable template partial and should be used as a f
 - Article cards: use for editorial pieces and stories
 - Guide cards: use for how-to and local explainer content
 - Post meta: use on single templates to show event date/venue or directory address/phone/hours
+- Coming soon card: use for feature/category previews with no published content behind them yet — no link, so it never dead-ends on an empty archive
 - Weather / traffic placeholders: use in a "local conditions" section until a live data feed is connected
 - Community spotlight: use to highlight a resident, volunteer, or organization
 - Sidebar callout: use for related stories or quick links
@@ -188,8 +192,10 @@ Each component is built as a reusable template partial and should be used as a f
 - Quote block: use for testimonials or editorial pull quotes
 - Statistics section: use for metrics, community milestones, and numbers
 
-## Placeholder content
-The homepage queries each custom post type for live content first (see the architecture doc above) and only shows the realistic placeholder cards baked into `front-page.php` when a post type has no published posts yet. As real Events, Restaurants, Parks, and so on are authored in wp-admin, the placeholders are replaced automatically — no template edits required. Weather and traffic remain static placeholders pending a live data feed.
+## Homepage status: preview / launching soon
+The current homepage (`front-page.php`) is intentionally a **static preview**, not the live content-driven portal. It doesn't query any custom post type yet — every section ("What We're Building", "Preview Content," etc.) is static "Coming Soon" copy, on purpose, so the site is honest about how much content actually exists today. The full content-model architecture described below (custom post types, taxonomies, query helpers) is built and untouched; it's just not wired into the homepage output yet. Each place in `front-page.php` where a live query should eventually replace a static array has a `TODO` comment pointing at the exact `inc/queries.php` function to use — see "Homepage: preview vs. live" in the architecture doc for the full explanation and how to switch it over once real content exists.
+
+Placeholder wording throughout (hero, "What We're Building," "Preview Content") is deliberately generic where it describes future content, and factual where it describes the area itself — see "Placeholder content policy" in the architecture doc before adding more.
 
 ## DreamHost deployment workflow
 
@@ -252,13 +258,11 @@ This keeps local development first, uses GitHub as the source of truth, and only
 - Review SEO metadata and schema output regularly as content expands.
 
 ## Current status
-- Nine custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above).
-- The homepage queries live content per post type via `southforsyth_get_latest_items()` / `southforsyth_get_featured_places()`, falling back to realistic placeholder cards until each post type has published content.
-- `archive.php`, `search.php`, and `single.php` are post-type aware, rendering the right card component and meta fields for whatever type is being displayed.
+- The homepage is a static "preview / launching soon" page (see above) — an honest, polished front door while real content is authored.
+- Nine custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above), fully built but not yet surfaced on the homepage.
+- `archive.php`, `search.php`, and `single.php` are post-type aware, rendering the right card component and meta fields for whatever type is being displayed, and work today for any post type that gets published.
 - Navigation, widgets, footer, and reusable components are wired up.
 - SEO-ready metadata and schema output are included.
 
 ## Next steps
-- Author real Events, Restaurants, Parks, Neighborhoods, Schools, Churches, Businesses, Guides, and Articles in wp-admin — the templates will pick them up automatically.
-- Tag content with `sf_area` so neighborhood pages can cross-link nearby restaurants, parks, and events.
-- Expand search/filtering beyond the basic keyword search once there's enough content to filter.
+See "Future roadmap" in [docs/content-platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md) for the full, prioritized list. In short: author real content first (the archive/single templates are ready and waiting even though the homepage isn't querying them yet), tag it with `sf_area` as it's published, switch the homepage's "Coming Soon" sections over to live queries one at a time as each post type gets real content, then build out search/filtering, maps, and submission workflows as content volume justifies them.

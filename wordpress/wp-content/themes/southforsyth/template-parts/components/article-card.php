@@ -3,7 +3,8 @@
 /**
  * Article card component.
  * Use for stories, editorial content, and publication-style listing cards.
- * TODO: Replace with dynamic post data when articles are available.
+ * Data-agnostic: fed real Article posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Story';

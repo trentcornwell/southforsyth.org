@@ -3,6 +3,8 @@
 /**
  * Park card component.
  * Use for parks, trails, and outdoor recreation listings.
+ * Data-agnostic: fed real Park posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Outdoors';

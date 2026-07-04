@@ -2,25 +2,71 @@
 
 /**
  * Theme bootstrap.
- * Keeps the theme modular so it can scale from a local community homepage into a larger content platform.
+ *
+ * Keeps the theme modular so it can scale from a local community homepage
+ * into a larger content platform. Each require below is a single-purpose
+ * module grouped by responsibility — see the section comments here for what
+ * each group does, and the individual inc/*.php file headers for details.
  */
 
 if (! defined('ABSPATH')) {
     exit;
 }
 
-require_once get_template_directory() . '/inc/setup.php';
-require_once get_template_directory() . '/inc/enqueue.php';
-require_once get_template_directory() . '/inc/menus.php';
-require_once get_template_directory() . '/inc/widgets.php';
-require_once get_template_directory() . '/inc/template-functions.php';
-require_once get_template_directory() . '/inc/helpers.php';
-require_once get_template_directory() . '/inc/performance.php';
-require_once get_template_directory() . '/inc/post-types.php';
-require_once get_template_directory() . '/inc/taxonomies.php';
-require_once get_template_directory() . '/inc/meta.php';
-require_once get_template_directory() . '/inc/queries.php';
-require_once get_template_directory() . '/inc/schema.php';
-require_once get_template_directory() . '/inc/architecture.php';
-require_once get_template_directory() . '/inc/evergreen-content.php';
-require_once get_template_directory() . '/inc/community-platform.php';
+if (! function_exists('southforsyth_require_theme_files')) {
+    /**
+     * Require a list of inc/ files relative to the theme directory.
+     * Keeps the section groups below a readable one-line-per-file list
+     * instead of repeating get_template_directory() . '/inc/' everywhere.
+     */
+    function southforsyth_require_theme_files(array $files)
+    {
+        $theme_dir = get_template_directory();
+        foreach ($files as $file) {
+            require_once $theme_dir . '/inc/' . $file;
+        }
+    }
+}
+
+// Core WordPress setup: theme supports, asset enqueueing, navigation menus,
+// widget/sidebar areas.
+southforsyth_require_theme_files(array(
+    'setup.php',
+    'enqueue.php',
+    'menus.php',
+    'widgets.php',
+));
+
+// Content model: the custom post types, taxonomies, and post meta that make
+// South Forsyth a structured content platform, plus the query helpers that
+// read them back out for templates (see docs/content-platform-architecture.md).
+southforsyth_require_theme_files(array(
+    'post-types.php',
+    'taxonomies.php',
+    'meta.php',
+    'queries.php',
+));
+
+// Presentation: rendering helpers shared by template parts (breadcrumbs,
+// excerpts, the card-section renderer), plus performance and SEO/schema
+// output hooks.
+southforsyth_require_theme_files(array(
+    'template-functions.php',
+    'helpers.php',
+    'performance.php',
+    'schema.php',
+));
+
+/**
+ * Content strategy reference data — inc/architecture.php,
+ * inc/evergreen-content.php, and inc/community-platform.php — is
+ * intentionally NOT required here.
+ *
+ * Those files hold large, static planning arrays (the information
+ * architecture, the evergreen guide plan, and future platform systems) that
+ * no template currently reads; requiring them on every request would mean
+ * parsing roughly 1,500 lines of unused PHP on every single page load. They
+ * stay in the repo as reference material for planning new Guide/Article
+ * content — require the specific file directly (e.g. from a WP-CLI command
+ * or an admin-only tool) if something needs to read it programmatically.
+ */

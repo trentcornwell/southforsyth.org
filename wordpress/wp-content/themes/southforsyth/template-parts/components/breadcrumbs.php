@@ -2,29 +2,13 @@
 
 /**
  * Breadcrumbs component.
- * Intended for interior pages once WordPress content hierarchy is in place.
+ * Renders on every interior page (skipped on the front page). The actual
+ * breadcrumb trail is built by southforsyth_the_breadcrumbs() in
+ * inc/template-functions.php — this file only supplies the container.
  */
-
-if (! function_exists('southforsyth_breadcrumbs')) {
-    function southforsyth_breadcrumbs()
-    {
-        echo '<nav class="breadcrumbs" aria-label="Breadcrumb">';
-        echo '<ol class="breadcrumbs__list">';
-        echo '<li class="breadcrumbs__item"><a href="' . esc_url(home_url('/')) . '">Home</a></li>';
-
-        if (is_single()) {
-            echo '<li class="breadcrumbs__item"><span>' . esc_html(get_the_title()) . '</span></li>';
-        } elseif (is_page()) {
-            echo '<li class="breadcrumbs__item"><span>' . esc_html(get_the_title()) . '</span></li>';
-        }
-
-        echo '</ol>';
-        echo '</nav>';
-    }
-}
 
 if (! is_front_page()) : ?>
     <div class="container">
-        <?php southforsyth_breadcrumbs(); ?>
+        <?php southforsyth_the_breadcrumbs(); ?>
     </div>
 <?php endif; ?>

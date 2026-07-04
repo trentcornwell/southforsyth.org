@@ -1,22 +1,28 @@
+<?php
+
+/**
+ * Homepage hero.
+ *
+ * This is the "preview / launching soon" version of the hero: a badge,
+ * headline, subhead, and two anchor-link CTAs into the on-page preview
+ * sections below. No search form or category pills here on purpose — see
+ * the note in front-page.php for why, and how to bring the full portal
+ * hero back once there's real content to search.
+ */
+?>
 <section class="hero">
     <div class="container hero__inner">
         <div class="hero__content stack">
-            <p class="eyebrow">South Forsyth, Georgia</p>
-            <h1>Your trusted guide to local life in South Forsyth</h1>
-            <p class="hero__lede">Find weekend plans, school and family resources, parks, restaurants, churches, local businesses, and community stories in one polished place.</p>
-            <div class="hero__meta" aria-label="Featured local categories">
-                <span class="pill">Events</span>
-                <span class="pill">Schools</span>
-                <span class="pill">Parks</span>
-                <span class="pill">Restaurants</span>
-                <span class="pill">Churches</span>
-                <span class="pill">Businesses</span>
+            <span class="badge-launch">
+                <span class="badge-launch__dot" aria-hidden="true"></span>
+                Preview Mode &mdash; Launching Soon
+            </span>
+            <h1>Your Guide to Life in South Forsyth</h1>
+            <p class="hero__lede">SouthForsyth.org is being built as a local guide to weekend events, restaurants, parks, schools, churches, neighborhoods, and community resources &mdash; all in one place.</p>
+            <div class="hero__actions cluster">
+                <a class="btn btn-primary" href="#building">Explore the Preview</a>
+                <a class="btn btn-outline" href="#newsletter">Get Updates</a>
             </div>
-            <form class="hero__search" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                <label class="visually-hidden" for="site-search">Search the site</label>
-                <input id="site-search" type="search" name="s" placeholder="Search guides, schools, parks, and events" value="<?php echo esc_attr(get_search_query()); ?>">
-                <button class="btn btn-primary" type="submit">Search</button>
-            </form>
         </div>
     </div>
 </section>

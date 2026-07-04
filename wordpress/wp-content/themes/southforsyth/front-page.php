@@ -1,241 +1,171 @@
 <?php
 
 /**
- * Homepage: the South Forsyth community portal.
+ * Homepage: PREVIEW / LAUNCHING-SOON VERSION.
  *
- * Every section below queries its matching custom post type first
- * (southforsyth_get_latest_items / southforsyth_get_featured_places) and
- * only falls back to the placeholder array when that post type has no
- * published content yet. As soon as real Events, Restaurants, Parks, etc.
- * are published, this template starts rendering them automatically.
+ * This intentionally does not query the custom post types yet. The full
+ * content-platform architecture (post types, taxonomies, post meta, and
+ * the southforsyth_get_latest_items() / southforsyth_render_card_section()
+ * query helpers) is still in place and untouched — see inc/post-types.php,
+ * inc/queries.php, and docs/content-platform-architecture.md. Nothing has
+ * been published yet, so this page is a static, honest "here's what we're
+ * building" preview instead of a live portal showing empty sections.
+ *
+ * To bring back the live, data-driven homepage once real content exists:
+ * replace a "Coming Soon" section below with a
+ * southforsyth_render_card_section() call fed by
+ * southforsyth_get_latest_items('event', 3, $fallback) (etc.) — the exact
+ * pattern used by archive.php and search.php already. Each spot where that
+ * applies is marked with a TODO comment.
  */
 
 get_header();
 
-$upcoming_events = southforsyth_get_latest_items('event', 3, array(
-    array('eyebrow' => 'This weekend', 'title' => 'Farmers Market & Live Music', 'description' => 'A recurring Saturday morning market with local vendors, produce, and family activities.', 'link' => home_url('/events/'), 'date' => 'Saturdays'),
-    array('eyebrow' => 'Community', 'title' => 'Movie Night in the Park', 'description' => 'A free outdoor screening with lawn seating, food trucks, and pre-show games.', 'link' => home_url('/events/'), 'date' => 'Monthly'),
-    array('eyebrow' => 'Family', 'title' => 'Fall Festival & Craft Fair', 'description' => 'Seasonal vendors, food, and activities for the whole family.', 'link' => home_url('/events/'), 'date' => 'Seasonal'),
-), 'Event');
+// TODO: once Event posts exist, replace with
+// southforsyth_get_latest_items('event', 3, $fallback) and an
+// event-card-based southforsyth_render_card_section() call.
+$what_were_building = array(
+    array('icon' => 'W', 'title' => 'Weekend Events', 'description' => 'Markets, festivals, and things to do around South Forsyth, organized by weekend.'),
+    array('icon' => 'R', 'title' => 'Restaurants & Coffee', 'description' => 'A guide to local dining, coffee shops, and weekend brunch spots.'),
+    array('icon' => 'P', 'title' => 'Parks & Trails', 'description' => 'Parks, greenways, and outdoor spaces worth the drive.'),
+    array('icon' => 'S', 'title' => 'Schools & Family Resources', 'description' => 'A clear, practical overview of schools and family-focused resources.'),
+    array('icon' => 'C', 'title' => 'Churches & Community', 'description' => 'A respectful directory of local congregations and community groups.'),
+    array('icon' => 'N', 'title' => 'Neighborhood Guides', 'description' => 'What it\'s like to live in Halcyon, Vickery, Windermere, and more.'),
+    array('icon' => 'B', 'title' => 'Local Business Directory', 'description' => 'A trusted place to find and support South Forsyth businesses.'),
+    array('icon' => 'N', 'title' => 'New Resident Guide', 'description' => 'Everything you need to know if you just moved here — or are thinking about it.'),
+);
 
-$newest_guides = southforsyth_get_latest_items('guide', 3, array(
-    array('eyebrow' => 'Guide', 'title' => 'Best Parks in South Forsyth', 'description' => 'A roundup of the best parks for families, walkers, and weekend outings.', 'link' => home_url('/guides/')),
-    array('eyebrow' => 'Guide', 'title' => 'Every Playground Worth Knowing', 'description' => 'A parent-first guide to the area\'s best play spaces.', 'link' => home_url('/guides/')),
-    array('eyebrow' => 'Guide', 'title' => 'New Resident Moving Guide', 'description' => 'A practical starting point for anyone relocating to the area.', 'link' => home_url('/guides/')),
-), 'Guide');
-
-$popular_places = southforsyth_get_featured_places(6, array(
-    array('eyebrow' => 'Outdoors', 'title' => 'Big Creek Greenway', 'description' => 'A favorite paved trail for walking, running, and biking.', 'link' => home_url('/parks/')),
-    array('eyebrow' => 'Nature', 'title' => 'Lake Lanier Access', 'description' => 'A popular spot for boating, fishing, and scenic weekend outings.', 'link' => home_url('/parks/')),
-    array('eyebrow' => 'Dining', 'title' => 'Neighborhood Coffee & Brunch', 'description' => 'A reliable local favorite for weekend mornings.', 'link' => home_url('/restaurants/')),
-    array('eyebrow' => 'Community', 'title' => 'Vickery Village', 'description' => 'A walkable neighborhood hub with shops, dining, and events.', 'link' => home_url('/neighborhoods/')),
-));
-
-$featured_restaurants = southforsyth_get_latest_items('restaurant', 3, array(
-    array('eyebrow' => 'Dining', 'title' => 'Neighborhood Bistro', 'description' => 'A relaxed spot for family dinners and weekend brunch.', 'link' => home_url('/restaurants/')),
-    array('eyebrow' => 'Coffee', 'title' => 'Corner Coffee House', 'description' => 'A cozy cafe with reliable Wi-Fi and weekend pastries.', 'link' => home_url('/restaurants/')),
-    array('eyebrow' => 'Casual', 'title' => 'Family Pizza & Pasta', 'description' => 'An easy weeknight option with a kid-friendly menu.', 'link' => home_url('/restaurants/')),
-), 'Dining');
-
-$parks = southforsyth_get_latest_items('park', 3, array(
-    array('eyebrow' => 'Outdoors', 'title' => 'Fowler Park', 'description' => 'Ballfields, playgrounds, and open green space for the whole family.', 'link' => home_url('/parks/')),
-    array('eyebrow' => 'Nature', 'title' => 'Big Creek Greenway', 'description' => 'Miles of paved trail connecting neighborhoods and parks.', 'link' => home_url('/parks/')),
-    array('eyebrow' => 'Recreation', 'title' => 'Central Community Park', 'description' => 'Sports fields, walking paths, and picnic areas.', 'link' => home_url('/parks/')),
-), 'Outdoors');
-
-$neighborhoods = southforsyth_get_latest_items('neighborhood', 3, array(
-    array('eyebrow' => 'Neighborhood', 'title' => 'Vickery', 'description' => 'A walkable, amenity-rich neighborhood near shops and dining.', 'link' => home_url('/neighborhoods/')),
-    array('eyebrow' => 'Neighborhood', 'title' => 'River Club', 'description' => 'A golf-course community with family-friendly amenities.', 'link' => home_url('/neighborhoods/')),
-    array('eyebrow' => 'Neighborhood', 'title' => 'Windermere', 'description' => 'An established neighborhood known for its schools and parks.', 'link' => home_url('/neighborhoods/')),
-), 'Neighborhood');
-
-$schools = southforsyth_get_latest_items('school', 3, array(
-    array('eyebrow' => 'Education', 'title' => 'South Forsyth High School', 'description' => 'Serving families across the southern part of the county.', 'link' => home_url('/schools/')),
-    array('eyebrow' => 'Education', 'title' => 'Vickery Creek Middle School', 'description' => 'A neighborhood middle school with strong community involvement.', 'link' => home_url('/schools/')),
-    array('eyebrow' => 'Education', 'title' => 'Local Elementary Schools', 'description' => 'An overview of nearby elementary options and boundaries.', 'link' => home_url('/schools/')),
-), 'Education');
-
-$churches = southforsyth_get_latest_items('church', 3, array(
-    array('eyebrow' => 'Community', 'title' => 'South Forsyth Community Church', 'description' => 'A welcoming congregation with family and youth programs.', 'link' => home_url('/churches/')),
-    array('eyebrow' => 'Faith', 'title' => 'Lakeside Fellowship', 'description' => 'A close-knit congregation active in local volunteer work.', 'link' => home_url('/churches/')),
-    array('eyebrow' => 'Service', 'title' => 'Neighborhood Worship Center', 'description' => 'Multiple weekend services and community outreach programs.', 'link' => home_url('/churches/')),
-), 'Community');
-
-$businesses = southforsyth_get_latest_items('business', 3, array(
-    array('eyebrow' => 'Services', 'title' => 'Local Home Services Co.', 'description' => 'A trusted provider for repairs, maintenance, and installations.', 'link' => home_url('/business-directory/')),
-    array('eyebrow' => 'Retail', 'title' => 'Main Street Boutique', 'description' => 'A locally owned shop for gifts and everyday essentials.', 'link' => home_url('/business-directory/')),
-    array('eyebrow' => 'Professional', 'title' => 'South Forsyth Family Dentistry', 'description' => 'A friendly practice welcoming new patients of all ages.', 'link' => home_url('/business-directory/')),
-), 'Business');
-
-$latest_articles = southforsyth_get_latest_items('article', 3, array(
-    array('eyebrow' => 'Local News', 'title' => 'New Sidewalk Project Connects Two Neighborhoods', 'description' => 'A look at the latest infrastructure project and what it means for walkability.', 'link' => home_url('/articles/')),
-    array('eyebrow' => 'Community', 'title' => 'Volunteers Rebuild Playground After Storm Damage', 'description' => 'Neighbors came together to restore a favorite family gathering spot.', 'link' => home_url('/articles/')),
-    array('eyebrow' => 'Local News', 'title' => 'County Announces New Farmers Market Schedule', 'description' => 'Updated days, hours, and vendor lineup for the coming season.', 'link' => home_url('/articles/')),
-), 'Story');
+// TODO: once Guide posts exist, replace with
+// southforsyth_get_latest_items('guide', 6, $fallback) and a
+// guide-card-based southforsyth_render_card_section() call.
+$preview_content = array(
+    array('icon' => 'B', 'title' => 'Best Playgrounds in South Forsyth', 'description' => 'A parent-tested roundup of the best play spaces in the area.'),
+    array('icon' => 'M', 'title' => 'Moving to South Forsyth', 'description' => 'A practical starting point for anyone relocating to the area.'),
+    array('icon' => 'W', 'title' => 'Weekend Guide', 'description' => 'A curated plan for making the most of a South Forsyth weekend.'),
+    array('icon' => 'C', 'title' => 'South Forsyth Church Guide', 'description' => 'A directory of local congregations, service times, and programs.'),
+    array('icon' => 'P', 'title' => 'Parks and Trails Guide', 'description' => 'Where to walk, ride, and spend time outside.'),
+    array('icon' => 'L', 'title' => 'Local Business Directory', 'description' => 'A directory of trusted local businesses and services.'),
+);
 ?>
 
 <main id="main-content" class="site-main">
     <?php get_template_part('template-parts/components/hero'); ?>
 
-    <section class="section section--soft" id="search">
+    <section class="section section--soft" id="about">
         <div class="container">
             <?php
-            set_query_var('eyebrow', 'Start here');
-            set_query_var('title', 'Search South Forsyth');
-            set_query_var('subtitle', 'Find guides, schools, parks, restaurants, events, and businesses in one place.');
-            set_query_var('align', 'center');
+            set_query_var('eyebrow', 'The area');
+            set_query_var('title', 'What is South Forsyth?');
+            set_query_var('subtitle', '');
+            set_query_var('align', 'left');
             get_template_part('template-parts/components/section-header');
-            get_template_part('template-parts/components/search');
             ?>
-            <div class="pill-row" aria-label="Browse by category">
-                <a class="pill-link" href="<?php echo esc_url(home_url('/events/')); ?>">Events</a>
-                <a class="pill-link" href="<?php echo esc_url(home_url('/restaurants/')); ?>">Restaurants</a>
-                <a class="pill-link" href="<?php echo esc_url(home_url('/parks/')); ?>">Parks</a>
-                <a class="pill-link" href="<?php echo esc_url(home_url('/schools/')); ?>">Schools</a>
-                <a class="pill-link" href="<?php echo esc_url(home_url('/churches/')); ?>">Churches</a>
-                <a class="pill-link" href="<?php echo esc_url(home_url('/business-directory/')); ?>">Businesses</a>
-            </div>
-        </div>
-    </section>
-
-    <?php
-    southforsyth_render_card_section('template-parts/components/event-card', $upcoming_events, array(
-        'id' => 'events',
-        'eyebrow' => 'Calendar',
-        'title' => 'Upcoming events',
-        'intro' => 'Markets, festivals, and community programming happening soon.',
-        'cta_text' => 'View all events',
-        'cta_link' => home_url('/events/'),
-    ));
-
-    southforsyth_render_card_section('template-parts/components/guide-card', $newest_guides, array(
-        'id' => 'guides',
-        'eyebrow' => 'Local guides',
-        'title' => 'Newest local guides',
-        'intro' => 'Evergreen guides built to help residents and visitors plan with confidence.',
-        'cta_text' => 'Browse all guides',
-        'cta_link' => home_url('/guides/'),
-        'soft' => true,
-    ));
-
-    southforsyth_render_card_section('template-parts/components/directory-card', $popular_places, array(
-        'id' => 'popular',
-        'eyebrow' => 'Trending',
-        'title' => 'Popular places',
-        'intro' => 'A mix of parks, restaurants, and neighborhoods residents keep coming back to.',
-    ));
-    ?>
-
-    <section class="section">
-        <div class="container split-panel">
-            <div class="card card-editorial">
-                <div class="card__body">
-                    <p class="eyebrow">New resident essentials</p>
-                    <h2>Moving to South Forsyth?</h2>
-                    <p>From school zones and local favorites to parks, services, and weekend ideas, this guide is a dependable starting point for newcomers who want to feel at home quickly.</p>
-                    <a class="btn btn-primary" href="<?php echo esc_url(home_url('/guides/')); ?>">Read the moving guide</a>
+            <div class="split-panel">
+                <div class="stack">
+                    <p>South Forsyth isn&rsquo;t an incorporated city &mdash; there&rsquo;s no city hall, mayor, or official municipal boundary. It&rsquo;s the name residents use for the southern part of Forsyth County, Georgia: the community around Halcyon, Big Creek, Denmark, Vickery, Windermere, Polo Fields, and the neighborhoods along the Alpharetta and Cumming border.</p>
+                    <p>SouthForsyth.org exists because even without a city limit sign, this is a real, connected community &mdash; and it deserves a single, trustworthy place to keep up with it.</p>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card__body">
-                    <p class="eyebrow">Need to know</p>
-                    <ul class="list">
-                        <li>Local service recommendations and practical moving tips.</li>
-                        <li>School district boundaries and family-friendly resources.</li>
-                        <li>A searchable directory for businesses, restaurants, and churches.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <?php
-    southforsyth_render_card_section('template-parts/components/restaurant-card', $featured_restaurants, array(
-        'id' => 'restaurants',
-        'eyebrow' => 'Dining',
-        'title' => 'Featured restaurants',
-        'intro' => 'Local favorites for breakfast, brunch, lunch, and coffee.',
-        'cta_text' => 'View all restaurants',
-        'cta_link' => home_url('/restaurants/'),
-        'soft' => true,
-    ));
-
-    southforsyth_render_card_section('template-parts/components/park-card', $parks, array(
-        'id' => 'parks',
-        'eyebrow' => 'Outdoors',
-        'title' => 'Parks',
-        'intro' => 'Green space, trails, and playgrounds across South Forsyth.',
-        'cta_text' => 'View all parks',
-        'cta_link' => home_url('/parks/'),
-    ));
-
-    southforsyth_render_card_section('template-parts/components/neighborhood-card', $neighborhoods, array(
-        'id' => 'neighborhoods',
-        'eyebrow' => 'Where to live',
-        'title' => 'Neighborhoods',
-        'intro' => 'Lifestyle, schools, and amenities across the area\'s neighborhoods.',
-        'cta_text' => 'View all neighborhoods',
-        'cta_link' => home_url('/neighborhoods/'),
-        'soft' => true,
-    ));
-
-    southforsyth_render_card_section('template-parts/components/school-card', $schools, array(
-        'id' => 'schools',
-        'eyebrow' => 'Education',
-        'title' => 'Schools',
-        'intro' => 'A quick overview of the local school landscape.',
-        'cta_text' => 'View all schools',
-        'cta_link' => home_url('/schools/'),
-    ));
-
-    southforsyth_render_card_section('template-parts/components/church-card', $churches, array(
-        'id' => 'churches',
-        'eyebrow' => 'Faith & community',
-        'title' => 'Churches',
-        'intro' => 'Local congregations, service times, and volunteer opportunities.',
-        'cta_text' => 'View all churches',
-        'cta_link' => home_url('/churches/'),
-        'soft' => true,
-    ));
-
-    southforsyth_render_card_section('template-parts/components/directory-card', $businesses, array(
-        'id' => 'business-directory',
-        'eyebrow' => 'Support local',
-        'title' => 'Business directory',
-        'intro' => 'Trusted shops, services, and professionals in South Forsyth.',
-        'cta_text' => 'Browse the directory',
-        'cta_link' => home_url('/business-directory/'),
-    ));
-    ?>
-
-    <section class="section section--soft" aria-labelledby="conditions-title">
-        <div class="container">
-            <div class="section-header">
-                <p class="eyebrow">Local conditions</p>
-                <h2 id="conditions-title" class="section-title">Weather &amp; traffic</h2>
-                <p class="section-subtitle">A quick-glance snapshot for planning your day.</p>
-            </div>
-            <div class="grid-2">
                 <?php
-                get_template_part('template-parts/components/weather-placeholder');
-                get_template_part('template-parts/components/traffic-placeholder');
+                set_query_var('eyebrow', 'Good to know');
+                set_query_var('title', 'Not an official city');
+                set_query_var('description', 'South Forsyth is a community identity, not a legal or municipal boundary. You won\'t find it on a city charter — but you\'ll find it in how residents describe where they live.');
+                set_query_var('link_text', 'See what we\'re building');
+                set_query_var('link_url', '#building');
+                get_template_part('template-parts/components/sidebar-callout');
                 ?>
             </div>
         </div>
     </section>
 
     <?php
-    southforsyth_render_card_section('template-parts/components/article-card', $latest_articles, array(
-        'id' => 'articles',
-        'eyebrow' => 'Editorial',
-        'title' => 'Latest articles',
-        'intro' => 'Local news and community stories from South Forsyth.',
-        'cta_text' => 'Read more articles',
-        'cta_link' => home_url('/articles/'),
+    southforsyth_render_card_section('template-parts/components/coming-soon-card', $what_were_building, array(
+        'id' => 'building',
+        'eyebrow' => 'What we\'re building',
+        'title' => 'What We\'re Building',
+        'intro' => 'SouthForsyth.org is being built section by section. Here\'s what\'s coming.',
+    ));
+    ?>
+
+    <section class="section section--soft" id="why">
+        <div class="container">
+            <?php
+            set_query_var('eyebrow', 'Our why');
+            set_query_var('title', 'Why This Site Exists');
+            set_query_var('subtitle', '');
+            set_query_var('align', 'left');
+            get_template_part('template-parts/components/section-header');
+            ?>
+            <div class="split-panel">
+                <div class="stack">
+                    <p>South Forsyth is growing fast, but there has never been one place to keep up with all of it &mdash; the restaurant that just opened, which park has the best playground, what&rsquo;s happening this weekend, or which neighborhood might be the right fit for your family.</p>
+                    <p>SouthForsyth.org is being built as that place: a helpful, independent local guide for residents, newcomers, families, churches, schools, and small businesses. It isn&rsquo;t a government portal, and it isn&rsquo;t run by or for any single church or organization &mdash; just a community-minded guide, built by and for the people who live here.</p>
+                </div>
+                <?php
+                set_query_var('quote', 'A single, trustworthy place to answer the question: what\'s happening in South Forsyth, and where should we go?');
+                set_query_var('attribution', 'The SouthForsyth.org team');
+                get_template_part('template-parts/components/quote-block');
+                ?>
+            </div>
+        </div>
+    </section>
+
+    <?php
+    southforsyth_render_card_section('template-parts/components/coming-soon-card', $preview_content, array(
+        'id' => 'preview',
+        'eyebrow' => 'Sneak peek',
+        'title' => 'Preview Content',
+        'intro' => 'A sample of the guides we\'re working on. None of these are published yet — this is what\'s in progress.',
+        'soft' => true,
     ));
 
     get_template_part('template-parts/components/newsletter');
-    get_template_part('template-parts/components/community-spotlight');
+    ?>
+
+    <section class="section" id="community">
+        <div class="container">
+            <?php
+            set_query_var('eyebrow', 'Built for');
+            set_query_var('title', 'Built for the Community');
+            set_query_var('subtitle', 'SouthForsyth.org is designed to be useful for everyone who calls this area home.');
+            set_query_var('align', 'center');
+            get_template_part('template-parts/components/section-header');
+            ?>
+            <div class="audience-grid">
+                <div class="audience-item">
+                    <h3>Residents</h3>
+                    <p>Stay in the loop on what&rsquo;s happening nearby.</p>
+                </div>
+                <div class="audience-item">
+                    <h3>New Families</h3>
+                    <p>Get oriented quickly in a new community.</p>
+                </div>
+                <div class="audience-item">
+                    <h3>Local Businesses</h3>
+                    <p>Get discovered by the neighbors around you.</p>
+                </div>
+                <div class="audience-item">
+                    <h3>Churches</h3>
+                    <p>Reach families looking for a church home.</p>
+                </div>
+                <div class="audience-item">
+                    <h3>Schools</h3>
+                    <p>Share resources with the families you serve.</p>
+                </div>
+                <div class="audience-item">
+                    <h3>Community Organizations</h3>
+                    <p>Reach residents who want to get involved.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <?php
+    set_query_var('eyebrow', 'Coming soon');
+    set_query_var('title', 'SouthForsyth.org is launching soon.');
+    set_query_var('description', 'We\'re building this guide one neighborhood, one guide, and one local favorite at a time. Check back soon — or get updates below.');
+    set_query_var('link_text', 'Get Updates');
+    set_query_var('link_url', '#newsletter');
+    get_template_part('template-parts/components/cta');
     ?>
 </main>
 

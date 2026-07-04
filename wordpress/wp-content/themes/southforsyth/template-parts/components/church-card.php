@@ -3,7 +3,8 @@
 /**
  * Church card component.
  * Use for faith communities and civic organizations.
- * TODO: Replace with dynamic church directory content.
+ * Data-agnostic: fed real Church posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Community';

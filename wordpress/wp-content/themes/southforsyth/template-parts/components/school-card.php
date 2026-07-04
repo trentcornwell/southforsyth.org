@@ -2,7 +2,9 @@
 
 /**
  * School card component.
- * TODO: Replace with dynamic school or district content.
+ * Use for education-focused content: schools and district resources.
+ * Data-agnostic: fed real School posts or placeholder data via query vars —
+ * see inc/queries.php and docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Education';

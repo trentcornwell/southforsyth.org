@@ -2,8 +2,11 @@
 
 /**
  * Directory card component.
- * Use for directory-style listings such as businesses, organizations, and local services.
- * TODO: Replace placeholder values with dynamic WordPress data.
+ * Use for directory-style listings such as businesses, organizations, and
+ * cross-post-type listings (e.g. the "Popular Places" homepage section).
+ * Data-agnostic: fed real Business posts (or a featured-post mix) or
+ * placeholder data via query vars — see inc/queries.php and
+ * docs/content-platform-architecture.md.
  */
 
 $eyebrow = get_query_var('eyebrow') ?: 'Directory';
