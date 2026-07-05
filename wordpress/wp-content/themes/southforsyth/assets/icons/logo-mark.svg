@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="South Forsyth logo">
-  <rect width="64" height="64" rx="16" fill="#0f4c81"/>
-  <path d="M17 18h30v10H17z" fill="#f4b400"/>
-  <path d="M20 32h24v10H20z" fill="#ffffff"/>
-  <path d="M24 46h16v4H24z" fill="#f4b400"/>
+  <circle cx="32" cy="32" r="30" fill="#faf6ec" stroke="#16263d" stroke-width="3"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#2f5233" stroke-width="1" stroke-dasharray="1.5 3.5"/>
+  <path d="M32 14c-7 7-11.5 13.5-11.5 19.5a11.5 11.5 0 0 0 23 0C43.5 27.5 39 21 32 14z" fill="#2f5233"/>
+  <circle cx="32" cy="47" r="2.6" fill="#c9973e"/>
 </svg>

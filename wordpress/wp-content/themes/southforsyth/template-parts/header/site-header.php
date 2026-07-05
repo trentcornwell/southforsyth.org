@@ -1,16 +1,30 @@
 <header class="site-header">
     <div class="container site-header__inner">
-        <a class="brand" href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php bloginfo('name'); ?>">
+        <?php
+        /**
+         * .brand is a plain container, not a link, because the_custom_logo()
+         * already renders its own <a href="home_url">...</a> around the
+         * uploaded logo (WordPress core behavior) — wrapping that in a
+         * second <a> here would produce invalid nested anchors and a
+         * screen reader announcing "home" twice. The site name/tagline get
+         * their own separate link to home instead.
+         */
+        ?>
+        <div class="brand">
             <?php if (has_custom_logo()) : ?>
                 <?php the_custom_logo(); ?>
             <?php else : ?>
-                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/logo-mark.svg'); ?>" alt="South Forsyth" width="48" height="48">
+                <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php bloginfo('name'); ?>">
+                    <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/icons/logo-mark.svg'); ?>" alt="South Forsyth" width="48" height="48">
+                </a>
             <?php endif; ?>
-            <span class="brand__text">
-                <strong><?php bloginfo('name'); ?></strong>
-                <span><?php bloginfo('description'); ?></span>
-            </span>
-        </a>
+            <a class="brand__link" href="<?php echo esc_url(home_url('/')); ?>">
+                <span class="brand__text">
+                    <strong><?php bloginfo('name'); ?></strong>
+                    <span class="brand__tagline">Discover &bull; Connect &bull; Volunteer</span>
+                </span>
+            </a>
+        </div>
 
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-navigation" aria-label="Toggle navigation">
             <span class="visually-hidden">Toggle navigation</span>

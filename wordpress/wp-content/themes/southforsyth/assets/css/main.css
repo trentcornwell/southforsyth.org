@@ -4,33 +4,56 @@
    Every rule below should reference these variables rather than
    hardcoding new values — that's what keeps the design system
    consistent as new sections and post types are added.
+
+   Brand palette (see docs/brand-identity.md and README.md "Brand
+   identity"): inspired by the South Forsyth badge/logo — a circular
+   community badge with a navy border, warm cream fill, and forest-green
+   accents. --color-navy/--color-forest/--color-cream/--color-sky/
+   --color-gold are the source of truth; --color-primary/--color-secondary/
+   --color-accent/--color-bg (etc.) are kept as aliases pointing at them
+   rather than renamed everywhere, since ~40+ existing rules across this
+   file already reference those names — this re-themes the whole site from
+   one place without a risky mass find-and-replace.
    ============================================================= */
 :root {
-  --color-primary: #0f4c81;
-  --color-primary-dark: #0a3559;
-  --color-secondary: #1f6fa7;
-  --color-secondary-dark: #144b73;
-  --color-accent: #f4b400;
-  --color-accent-soft: #fff2c8;
+  /* Brand palette */
+  --color-navy: #16263d;
+  --color-navy-dark: #0c1622;
+  --color-forest: #2f5233;
+  --color-forest-dark: #203c24;
+  --color-cream: #faf6ec;
+  --color-cream-soft: #f2ead9;
+  --color-sky: #cfe3ee;
+  --color-sky-soft: #e7f1f6;
+  --color-gold: #c9973e;
+  --color-gold-soft: #f3e3c2;
+
+  /* Semantic aliases — existing rules below reference these names */
+  --color-primary: var(--color-navy);
+  --color-primary-dark: var(--color-navy-dark);
+  --color-secondary: var(--color-forest);
+  --color-secondary-dark: var(--color-forest-dark);
+  --color-accent: var(--color-gold);
+  --color-accent-soft: var(--color-gold-soft);
   --color-success: #2f7d4f;
-  --color-warning: #c97a00;
+  --color-warning: #ad7a1e;
   --color-error: #b33a3a;
-  --color-bg: #f4f7fb;
-  --color-bg-soft: #eef4fa;
+  --color-bg: var(--color-cream);
+  --color-bg-soft: var(--color-cream-soft);
   --color-surface: #ffffff;
-  --color-text: #16212c;
-  --color-muted: #5d6c7a;
-  --color-border: #dce5ee;
-  --color-neutral-100: #f8fafc;
-  --color-neutral-200: #e9eff4;
-  --color-neutral-300: #d4dde5;
-  --color-neutral-400: #9ba9b2;
-  --color-neutral-500: #6e7b87;
-  --color-neutral-600: #46525c;
-  --color-neutral-700: #2f3740;
-  --shadow-sm: 0 8px 24px rgba(15, 76, 129, 0.08);
-  --shadow-md: 0 18px 44px rgba(15, 76, 129, 0.14);
-  --shadow-lg: 0 28px 70px rgba(15, 76, 129, 0.18);
+  --color-text: #17232d;
+  --color-muted: #595e54;
+  --color-border: #e4dcc8;
+  --color-neutral-100: #faf8f3;
+  --color-neutral-200: #efe8d8;
+  --color-neutral-300: #ddd2ba;
+  --color-neutral-400: #a89e88;
+  --color-neutral-500: #7d7565;
+  --color-neutral-600: #55503f;
+  --color-neutral-700: #322e24;
+  --shadow-sm: 0 8px 24px rgba(22, 38, 61, 0.08);
+  --shadow-md: 0 18px 44px rgba(22, 38, 61, 0.14);
+  --shadow-lg: 0 28px 70px rgba(22, 38, 61, 0.18);
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
@@ -75,18 +98,22 @@ html { font-size: 16px; scroll-behavior: smooth; }
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: linear-gradient(180deg, #f7fafe 0%, var(--color-bg) 100%);
+  background: linear-gradient(180deg, #fffdf7 0%, var(--color-bg) 100%);
   color: var(--color-text);
   line-height: var(--line-height-relaxed);
 }
 a { color: var(--color-primary); text-decoration: none; transition: color var(--transition-fast), opacity var(--transition-fast); }
 a:hover { color: var(--color-primary-dark); }
+/* Gold on purpose, not navy: this outline needs to read clearly on both
+   light (cream/white) and dark (navy/forest hero, footer) backgrounds, and
+   a mid-tone gold is one of the few brand colors with enough contrast
+   against both extremes at once. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(244, 180, 0, 0.5);
+  outline: 3px solid rgba(201, 151, 62, 0.65);
   outline-offset: 2px;
 }
 img { max-width: 100%; height: auto; display: block; }
@@ -185,7 +212,7 @@ input, button, textarea, select { font: inherit; }
    (event, restaurant, directory, coming-soon, etc.) instead of the flat,
    static look a plain bordered box reads as. */
 .card-grid .card:hover, .hub-samples .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.card-feature { background: linear-gradient(135deg, #fffef8 0%, #fff8e3 100%); }
+.card-feature { background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-gold-soft) 100%); }
 .card-directory { border-left: 4px solid var(--color-primary); }
 .card-event { border-top: 4px solid var(--color-accent); }
 .card-editorial { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; }
@@ -219,7 +246,9 @@ input, button, textarea, select { font: inherit; }
   height: 52px;
   display: grid;
   place-items: center;
-  border-radius: var(--radius-md);
+  /* Circular, not rounded-square — echoes the circular badge motif of the
+     logo across every "coming soon" category card on the site. */
+  border-radius: 50%;
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.3rem;
@@ -287,7 +316,7 @@ input, button, textarea, select { font: inherit; }
    ============================================================= */
 .section { padding: var(--space-10) 0; }
 .section--soft { background: rgba(255,255,255,0.64); }
-.section--accent { background: linear-gradient(180deg, #f3f7fd 0%, #edf4fb 100%); }
+.section--accent { background: linear-gradient(180deg, var(--color-sky-soft) 0%, var(--color-cream-soft) 100%); }
 .section-title { margin: 0 0 0.4rem; font-size: clamp(1.45rem, 2.4vw, 2rem); line-height: var(--line-height-tight); }
 .section-subtitle { margin: 0; color: var(--color-muted); max-width: 44rem; }
 .section-header { display: grid; gap: var(--space-3); margin-bottom: var(--space-6); }
@@ -348,12 +377,28 @@ form select {
 /* =============================================================
    Site header & navigation
    ============================================================= */
-.site-header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); }
+.site-header { position: sticky; top: 0; z-index: 20; background: rgba(250, 246, 236, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); }
 .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); padding: 1rem 0; }
 .brand { display: flex; align-items: center; gap: 0.75rem; color: var(--color-text); font-weight: 700; }
-.brand img { width: 48px; height: 48px; }
+.brand__link { display: flex; align-items: center; color: inherit; }
+/* Circular crop on any logo — the bundled mark is already drawn as a
+   circular badge, and this also guarantees the "circular community badge
+   feel" holds even if a future custom logo upload (Appearance > Customize
+   > Site Identity) isn't circular to begin with. */
+.brand img,
+.brand .custom-logo { width: 48px; height: 48px; border-radius: 50%; }
 .brand__text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand__text span { color: var(--color-muted); font-size: 0.9rem; font-weight: 500; }
+/* More specific than ".brand__text span" above on purpose, so the tagline's
+   distinct styling (smaller, forest green, letter-spaced) wins without an
+   !important. */
+.brand__text .brand__tagline {
+  color: var(--color-forest);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-sm);
+}
 .nav-toggle { display: none; border: 0; background: transparent; padding: 0.25rem; }
 .nav-toggle span { display: block; width: 24px; height: 2px; margin: 4px 0; background: var(--color-text); }
 .site-navigation__list { display: flex; gap: var(--space-4); list-style: none; padding: 0; margin: 0; }
@@ -363,8 +408,22 @@ form select {
 /* =============================================================
    Hero
    ============================================================= */
-.hero { padding: var(--space-10) 0; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; position: relative; }
+.hero { padding: var(--space-10) 0; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; position: relative; overflow: hidden; }
 .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 34%); pointer-events: none; }
+/* A single faint ring, echoing the logo's circular badge shape — subtle
+   enough to read as texture, not a literal graphic, so it doesn't compete
+   with the headline or look like a stock "AI-generated" decoration. */
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -90px;
+  bottom: -110px;
+  width: 320px;
+  height: 320px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  pointer-events: none;
+}
 .hero__inner { min-height: 430px; display: grid; align-items: center; position: relative; z-index: 1; }
 .hero h1 { font-size: var(--font-size-4xl); margin: 0; color: white; line-height: var(--line-height-tight); max-width: 46rem; }
 .hero__lede { max-width: 44rem; font-size: var(--font-size-lg); color: rgba(255,255,255,0.94); margin-top: 0.5rem; }
@@ -381,6 +440,9 @@ form select {
 .site-footer__inner { display: grid; gap: var(--space-6); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .site-footer a { color: white; }
 .footer-brand p { color: rgba(255, 255, 255, 0.78); max-width: 28rem; }
+/* Gold reads clearly against the dark navy footer background — same
+   reasoning as the header tagline, adapted for a dark surface. */
+.footer-tagline { display: inline-block; margin: 0.35rem 0 0.75rem; color: var(--color-gold); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--letter-spacing-md); }
 .footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .footer-links a { font-weight: 600; }
 .footer-links a:hover { color: var(--color-accent); }
@@ -429,6 +491,9 @@ form select {
   .site-navigation__list { flex-direction: column; padding: 1rem 0; }
   .hero__actions { display: flex; flex-direction: column; align-items: stretch; }
   .cta { flex-direction: column; align-items: flex-start; }
+  /* Keeps the compact mobile header from feeling crowded — the site name
+     alone is enough at this width. */
+  .brand__tagline { display: none; }
 }
 
 @media (min-width: 1280px) {

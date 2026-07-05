@@ -2,6 +2,7 @@
     <div class="container site-footer__inner">
         <div class="footer-brand">
             <h2>South Forsyth</h2>
+            <span class="footer-tagline">Discover &bull; Connect &bull; Volunteer</span>
             <p>An independent, community-minded guide to life in South Forsyth, Georgia &mdash; not a government site, and not run by or for any single church or organization.</p>
         </div>
         <div>

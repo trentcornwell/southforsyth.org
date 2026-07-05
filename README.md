@@ -67,11 +67,44 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 - template-parts/components/faq-block.php — accessible `<details>`/`<summary>` FAQ list, used by every hub page (archive.php and page-templates/hub.php) via `southforsyth_render_hub_faq()`
 - assets/css/main.css — design-system stylesheet
 - assets/js/main.js — small interactive enhancements
+- assets/icons/logo-mark.svg — bundled circular badge fallback logo, used when no custom logo is uploaded in wp-admin
+- assets/images/logo/ — drop location for the final logo image file (none added yet); see its README.md and "Brand identity" above
 
 See [wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md) for the full rationale behind the post types, taxonomies, meta fields, and the "one archive.php, not eighteen" template approach.
 
 ## Design system overview
 The theme now includes a custom design system built without Bootstrap, Tailwind, or any other CSS framework. It is designed to feel like a premium regional publication with strong hierarchy, generous spacing, polished cards, accessible forms, and mobile-first responsive behavior.
+
+## Brand identity
+The visual identity is built around the South Forsyth badge/logo direction: a circular community badge with a navy border, a warm cream fill, and forest-green accents, natural/local imagery cues, and the tagline **Discover • Connect • Volunteer**. The goal is a clean regional-guide identity — professional, not cartoonish, and not "AI-generated stock art."
+
+### Color palette
+Defined as CSS custom properties in `wordpress/wp-content/themes/southforsyth/assets/css/main.css`. The brand tokens (`--color-navy`, `--color-forest`, etc.) are the source of truth; the older semantic names (`--color-primary`, `--color-secondary`, `--color-accent`, `--color-bg`, ...) are aliases pointing at them, so the whole site re-themes from one place without a risky rename across every rule that already references those names.
+
+| Token | Hex | Used for |
+|---|---|---|
+| `--color-navy` (`--color-primary`) | `#16263d` | Primary text-on-light, headers, primary buttons, borders, nav links |
+| `--color-navy-dark` (`--color-primary-dark`) | `#0c1622` | Hover/dark state for navy elements, footer background |
+| `--color-forest` (`--color-secondary`) | `#2f5233` | Secondary accents, hero/feature-banner gradient, badge cycling |
+| `--color-forest-dark` (`--color-secondary-dark`) | `#203c24` | Hover/dark state for forest-green elements |
+| `--color-cream` (`--color-bg`) | `#faf6ec` | Page background |
+| `--color-cream-soft` (`--color-bg-soft`) | `#f2ead9` | Soft-section backgrounds, placeholder cards |
+| `--color-sky` | `#cfe3ee` | Soft sky-blue highlight accents |
+| `--color-sky-soft` | `#e7f1f6` | Accent-section background gradient (with cream) |
+| `--color-gold` (`--color-accent`) | `#c9973e` | Callouts, eyebrows, "Coming Soon" badges, focus outlines |
+| `--color-gold-soft` (`--color-accent-soft`) | `#f3e3c2` | Soft gold backgrounds (badges, feature cards) |
+| `--color-surface` | `#ffffff` | Clean white cards |
+| `--color-text` | `#17232d` | Body text |
+| `--color-muted` | `#595e54` | Secondary/muted text (warm neutral gray) |
+| `--color-border` | `#e4dcc8` | Card and input borders (warm, not cool blue-gray) |
+
+`--color-success`/`--color-warning`/`--color-error` stay separate, distinct semantic colors (status messaging, not decorative brand accents) and were left largely as-is.
+
+### Logo
+No final logo image file exists in the repo yet — nothing assumes a specific filename. `wordpress/wp-content/themes/southforsyth/assets/images/logo/README.md` documents exactly where to place one and how naming/format should work; the real, production way to set it is via **Appearance → Customize → Site Identity** in wp-admin (WordPress's native custom-logo support, already enabled in `inc/setup.php`) — `site-header.php` picks it up automatically, no template change required. Until then, the header falls back to `assets/icons/logo-mark.svg`, a small circular badge (navy ring, cream fill, forest-green mark, gold accent) already matching this palette, plus the site title text — the header never depends on an image successfully loading.
+
+### Tagline
+**Discover • Connect • Volunteer** appears next to the site name in the header (hidden on narrow mobile widths to keep the header compact) and in the footer brand block.
 
 ## Information architecture
 The theme now includes a planning layer for a large-scale local publishing site. The information architecture is documented in [wordpress/wp-content/themes/southforsyth/docs/information-architecture.md](wordpress/wp-content/themes/southforsyth/docs/information-architecture.md) and backed by reusable architecture helpers in [wordpress/wp-content/themes/southforsyth/inc/architecture.php](wordpress/wp-content/themes/southforsyth/inc/architecture.php).
