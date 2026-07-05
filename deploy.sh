@@ -38,7 +38,6 @@ rsync -avz --delete \
   --exclude='.git' \
   --exclude='*.log' \
   --exclude='logs' \
-  --exclude='cache' \
   --exclude='*.cache' \
   --exclude='.env' \
   --exclude='deploy.example.env' \

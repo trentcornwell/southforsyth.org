@@ -18,12 +18,48 @@ if (! function_exists('southforsyth_require_theme_files')) {
      * Require a list of inc/ files relative to the theme directory.
      * Keeps the section groups below a readable one-line-per-file list
      * instead of repeating get_template_directory() . '/inc/' everywhere.
+     *
+     * Reserved for core files the theme cannot function without (setup,
+     * post types, hub content, etc.) — these are expected to always exist,
+     * so this uses require_once with no existence check, matching "use
+     * require_once only for files that definitely exist." For anything
+     * newer/optional that shouldn't be able to take the whole site down if
+     * it's ever missing (e.g. from a deploy/sync mistake), use
+     * southforsyth_require_optional_theme_files() below instead.
      */
     function southforsyth_require_theme_files(array $files)
     {
         $theme_dir = get_template_directory();
         foreach ($files as $file) {
             require_once $theme_dir . '/inc/' . $file;
+        }
+    }
+}
+
+if (! function_exists('southforsyth_require_optional_theme_files')) {
+    /**
+     * Same idea as southforsyth_require_theme_files(), but for files that
+     * are allowed to be missing without a fatal error taking down every
+     * page on the site — e.g. the data-platform layer (inc/cache,
+     * inc/import, inc/providers, inc/search, inc/automation.php,
+     * inc/admin), which nothing else in the theme depends on at parse
+     * time (see docs/platform-architecture.md). A missing file here is
+     * logged via error_log() and skipped instead of a PHP fatal
+     * ("Failed opening required ...") — this is exactly the class of bug
+     * that took the live site down when a deploy script's rsync
+     * --exclude pattern accidentally stripped out inc/cache/ (fixed
+     * separately in deploy.sh; see its comment).
+     */
+    function southforsyth_require_optional_theme_files(array $files)
+    {
+        $theme_dir = get_template_directory();
+        foreach ($files as $file) {
+            $path = $theme_dir . '/inc/' . $file;
+            if (file_exists($path)) {
+                require_once $path;
+            } else {
+                error_log('South Forsyth theme: optional file missing, skipped: inc/' . $file);
+            }
         }
     }
 }
@@ -79,8 +115,14 @@ southforsyth_require_theme_files(array(
  * depend on the two before them. All four loader files are class
  * definitions plus a couple of hook registrations — no request does real
  * work (an HTTP call, a DB write) just by these being required.
+ *
+ * Loaded via southforsyth_require_optional_theme_files(), not
+ * southforsyth_require_theme_files(): this whole layer is optional
+ * infrastructure that no core template depends on, so a missing file here
+ * (e.g. a bad deploy) logs a warning and skips it instead of fatally
+ * erroring the entire site — see that function's doc comment.
  */
-southforsyth_require_theme_files(array(
+southforsyth_require_optional_theme_files(array(
     'cache/cache.php',
     'import/import.php',
     'providers/providers.php',
@@ -91,9 +133,9 @@ southforsyth_require_theme_files(array(
 // Admin-only tooling (the "Community Platform" wp-admin menu) — gated
 // behind is_admin() so none of it parses on a front-end page request,
 // matching this theme's existing performance philosophy (see
-// inc/performance.php).
+// inc/performance.php). Also optional-loaded, same reasoning as above.
 if (is_admin()) {
-    southforsyth_require_theme_files(array(
+    southforsyth_require_optional_theme_files(array(
         'admin/admin.php',
     ));
 }
