@@ -54,13 +54,16 @@ and any future headless use.
 |-----------------|--------------------------|---------|
 | `event`         | `/events/`               | Community events, markets, recurring programming |
 | `restaurant`    | `/restaurants/`          | Restaurants, coffee shops, dining |
-| `park`          | `/parks/`                | Parks, trails, playgrounds |
+| `park`          | `/parks/`                | Parks and playgrounds |
+| `trail`         | `/trails/`               | Walking/biking trails and greenways — split out of `park` (see platform-architecture.md) |
 | `neighborhood`  | `/neighborhoods/`        | Neighborhood profiles (lifestyle, schools, amenities) |
 | `school`        | `/schools/`              | Local schools and education resources |
 | `church`        | `/churches/`             | Faith communities and volunteer programs |
 | `business`      | `/business-directory/`   | Local businesses and service providers |
 | `guide`         | `/guides/`               | Evergreen guides (best parks, moving guide, seasonal roundups) |
 | `article`       | `/articles/`             | Editorial stories and local news (uses core `category`/`post_tag`) |
+| `topic`         | `/topics/`               | Pillar "topic cluster" pages tying Guides/Articles together via `sf_topic` |
+| `community_resource` | `/community-resources/` | General civic/community resources (libraries, senior resources, public safety) |
 
 `business` is one content type among nine — it is deliberately not
 over-weighted relative to the others, since this is a community platform
@@ -304,8 +307,11 @@ Roughly in priority order:
    code.
 3. **Wire up the remaining systems documented in
    `inc/community-platform.php`** as real content volume justifies them:
-   search/filtering, interactive maps, event/business submission forms,
-   member accounts and favorites, featured/sponsored listings.
+   filtering, interactive maps, event/business submission forms, member
+   accounts and favorites, featured/sponsored listings. Normalized
+   cross-post-type search itself is no longer just planned —
+   `Southforsyth_Search_Service` (`inc/search/`) exists and works today;
+   see platform-architecture.md.
 4. **Consider single-{post_type}.php templates** only if a specific post
    type's detail page needs meaningfully different structure than the
    shared `single.php` + `post-meta.php` combination already provides —
@@ -322,4 +328,7 @@ Roughly in priority order:
    local news, community submissions) once manual content authoring alone
    can't keep up — see
    [data-integration-roadmap.md](data-integration-roadmap.md) for the full
-   plan. Planning only today; no importers exist yet.
+   plan. The infrastructure for this now exists (providers, an import
+   pipeline, a queue/log, an admin area to run and monitor it — see
+   [platform-architecture.md](platform-architecture.md)); no provider is
+   configured with real credentials and no import has actually run yet.

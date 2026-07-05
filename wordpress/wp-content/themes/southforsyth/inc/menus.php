@@ -37,6 +37,7 @@ if (! function_exists('southforsyth_get_primary_nav_items')) {
             array('label' => 'Events', 'key' => 'event'),
             array('label' => 'Eat & Drink', 'key' => 'restaurant'),
             array('label' => 'Parks', 'key' => 'park'),
+            array('label' => 'Trails', 'key' => 'trail'),
             array('label' => 'Schools', 'key' => 'school'),
             array('label' => 'Churches', 'key' => 'church'),
             array('label' => 'Neighborhoods', 'key' => 'neighborhood'),

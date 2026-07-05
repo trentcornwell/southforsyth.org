@@ -80,29 +80,55 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                 ),
             ),
             'park' => array(
-                'title' => 'Parks & Trails',
+                'title' => 'Parks',
                 'intro' => array(
-                    'Parks, greenways, trails, and playgrounds across South Forsyth — where to walk, ride, and let kids run.',
-                    'Each listing is meant to answer the practical questions: parking, amenities, and whether it\'s worth the drive.',
+                    'Parks and playgrounds across South Forsyth — where to let kids run, walk the dog, or find some shade.',
+                    'Each listing is meant to answer the practical questions: parking, amenities, and whether it\'s worth the drive. Looking for a trail or greenway specifically? See Trails.',
                 ),
                 'empty_title' => 'No parks published yet',
                 'empty_description' => 'We haven\'t published any Park listings yet. Real listings will appear here automatically once they\'re added.',
                 'samples' => array(
                     array('icon' => 'P', 'title' => 'Neighborhood Parks', 'description' => 'Smaller parks worth a quick visit close to home.'),
-                    array('icon' => 'T', 'title' => 'Trails & Greenways', 'description' => 'Walking and biking routes, including greenway connections.'),
                     array('icon' => 'K', 'title' => 'Playgrounds', 'description' => 'Play spaces organized by age range and amenities.'),
                     array('icon' => 'D', 'title' => 'Dog-Friendly Spaces', 'description' => 'Parks with dog-friendly rules or dedicated off-leash areas.'),
+                    array('icon' => 'R', 'title' => 'Picnic & Reservable Spaces', 'description' => 'Pavilions and spaces worth reserving ahead for a group.'),
                 ),
                 'links' => array(
+                    array('label' => 'Trails', 'key' => 'trail'),
                     array('label' => 'Things To Do', 'key' => 'things-to-do'),
                     array('label' => 'Weekend Guide', 'key' => 'weekend-guide'),
                     array('label' => 'Neighborhoods', 'key' => 'neighborhood'),
-                    array('label' => 'Restaurants & Coffee', 'key' => 'restaurant'),
                 ),
                 'faq' => array(
-                    array('question' => 'Do you list trail difficulty and distance?', 'answer' => 'That\'s the plan for each Park/Trail listing once real content is published — see the custom fields already built for this post type.'),
-                    array('question' => 'Are these county parks or private amenities?', 'answer' => 'This section is meant to cover public parks and trails. Private, HOA-only amenities generally won\'t be listed here.'),
+                    array('question' => 'Are these county parks or private amenities?', 'answer' => 'This section is meant to cover public parks. Private, HOA-only amenities generally won\'t be listed here.'),
+                    array('question' => 'Do you cover trails and greenways here too?', 'answer' => 'Trails have their own section — see the Trails link above — so each can be browsed and filtered on its own terms.'),
                     array('question' => 'Can I suggest a park to add?', 'answer' => 'Not through a public form yet — that\'s part of the planned submission workflow. For now, reach out through the site\'s normal contact channels.'),
+                ),
+            ),
+            'trail' => array(
+                'title' => 'Trails',
+                'intro' => array(
+                    'Walking, biking, and greenway trails across South Forsyth — routes worth lacing up for.',
+                    'Split out from Parks so distance, surface, and difficulty can be first-class details instead of buried in a park listing.',
+                ),
+                'empty_title' => 'No trails published yet',
+                'empty_description' => 'We haven\'t published any Trail listings yet. Real listings will appear here automatically once they\'re added.',
+                'samples' => array(
+                    array('icon' => 'G', 'title' => 'Greenways', 'description' => 'Paved, multi-use greenway connections like the Big Creek Greenway corridor.'),
+                    array('icon' => 'N', 'title' => 'Nature Trails', 'description' => 'Unpaved, natural-surface trails through wooded areas.'),
+                    array('icon' => 'F', 'title' => 'Family-Friendly Routes', 'description' => 'Shorter, flatter routes that work well with a stroller or young kids.'),
+                    array('icon' => 'B', 'title' => 'Bike Routes', 'description' => 'Routes worth riding, not just walking.'),
+                ),
+                'links' => array(
+                    array('label' => 'Parks', 'key' => 'park'),
+                    array('label' => 'Things To Do', 'key' => 'things-to-do'),
+                    array('label' => 'Weekend Guide', 'key' => 'weekend-guide'),
+                    array('label' => 'Neighborhoods', 'key' => 'neighborhood'),
+                ),
+                'faq' => array(
+                    array('question' => 'Do you list distance and difficulty?', 'answer' => 'That\'s the plan for each Trail listing once real content is published — the post type already has fields ready for it.'),
+                    array('question' => 'Is this the same as the Parks section?', 'answer' => 'No — Trails is its own section now, specifically for walking/biking routes, separate from park amenities like playgrounds and picnic areas.'),
+                    array('question' => 'Can I suggest a trail to add?', 'answer' => 'Not through a public form yet — that\'s part of the planned submission workflow. For now, reach out through the site\'s normal contact channels.'),
                 ),
             ),
             'school' => array(

@@ -70,6 +70,35 @@ southforsyth_require_theme_files(array(
 ));
 
 /**
+ * Data platform (Phases 1–10 of the community-platform-scaling work — see
+ * docs/platform-architecture.md for the full picture). Load order matters
+ * a little here even though nothing calls these classes at parse time:
+ * cache first (providers/automation call Southforsyth_Cache_Manager),
+ * import second (Southforsyth_Normalizer is used by every provider's
+ * normalize()), then providers, then search and automation, which both
+ * depend on the two before them. All four loader files are class
+ * definitions plus a couple of hook registrations — no request does real
+ * work (an HTTP call, a DB write) just by these being required.
+ */
+southforsyth_require_theme_files(array(
+    'cache/cache.php',
+    'import/import.php',
+    'providers/providers.php',
+    'search/search.php',
+    'automation.php',
+));
+
+// Admin-only tooling (the "Community Platform" wp-admin menu) — gated
+// behind is_admin() so none of it parses on a front-end page request,
+// matching this theme's existing performance philosophy (see
+// inc/performance.php).
+if (is_admin()) {
+    southforsyth_require_theme_files(array(
+        'admin/admin.php',
+    ));
+}
+
+/**
  * Content strategy reference data — inc/architecture.php,
  * inc/evergreen-content.php, and inc/community-platform.php — is
  * intentionally NOT required here.

@@ -9,6 +9,21 @@
  * cross-linked from a Neighborhood profile page. Every other taxonomy here
  * is scoped to a single post type. Names are prefixed with `sf_` to avoid
  * colliding with plugin or core taxonomies as the site grows.
+ *
+ * Geographic hierarchy (added for the Phase 1–10 platform-scaling work —
+ * see docs/platform-architecture.md, "Taxonomies"): `sf_region` > `sf_city`
+ * > `sf_area` > `sf_community`, broadest to narrowest. `sf_area` (Halcyon,
+ * Vickery, Windermere, ...) already existed and keeps its existing meaning;
+ * the three new tiers exist for content whose scope genuinely doesn't fit
+ * that one level — e.g. a regional festival (`sf_region`), a listing best
+ * described as "near Cumming" rather than a specific area (`sf_city`), or a
+ * specific subdivision/HOA within one area (`sf_community`). Deliberately
+ * NOT added: separate "Category"/"Tags"/"Business Type"/"Cuisine"/
+ * "Denomination"/"Park Type" taxonomies — those already exist (core
+ * `category`/`post_tag`, or `sf_business_category`/`sf_cuisine`/
+ * `sf_denomination`/`sf_park_amenity` below); registering parallel
+ * taxonomies with the same meaning would confuse editors choosing between
+ * two "cuisine-like" fields, not make the taxonomy layer more reusable.
  */
 
 if (! defined('ABSPATH')) {
@@ -22,7 +37,7 @@ if (! function_exists('southforsyth_get_taxonomy_definitions')) {
             'sf_area' => array(
                 'label'       => 'Areas',
                 'singular'    => 'Area',
-                'post_types'  => array('event', 'restaurant', 'park', 'school', 'church', 'business'),
+                'post_types'  => array('event', 'restaurant', 'park', 'school', 'church', 'business', 'trail', 'community_resource'),
                 'hierarchical' => false,
                 'slug'        => 'area',
             ),
@@ -64,7 +79,7 @@ if (! function_exists('southforsyth_get_taxonomy_definitions')) {
             'sf_park_amenity' => array(
                 'label'       => 'Park Amenities',
                 'singular'    => 'Amenity',
-                'post_types'  => array('park'),
+                'post_types'  => array('park', 'trail'),
                 'hierarchical' => false,
                 'slug'        => 'park-amenity',
             ),
@@ -81,6 +96,60 @@ if (! function_exists('southforsyth_get_taxonomy_definitions')) {
                 'post_types'  => array('guide'),
                 'hierarchical' => true,
                 'slug'        => 'guide-topic',
+            ),
+            // --- Added for the Phase 1–10 platform-scaling work; see the
+            // "Geographic hierarchy" and dedup notes in this file's header
+            // comment for why these seven (and not a full parallel set of
+            // Category/Tags/Business Type/Cuisine/Denomination/Park Type
+            // taxonomies) were added. ---
+            'sf_region' => array(
+                'label'       => 'Regions',
+                'singular'    => 'Region',
+                'post_types'  => array('event', 'guide', 'article'),
+                'hierarchical' => false,
+                'slug'        => 'region',
+            ),
+            'sf_city' => array(
+                'label'       => 'Cities',
+                'singular'    => 'City',
+                'post_types'  => array('event', 'restaurant', 'business', 'church', 'school'),
+                'hierarchical' => false,
+                'slug'        => 'city',
+            ),
+            'sf_community' => array(
+                'label'       => 'Communities',
+                'singular'    => 'Community',
+                'post_types'  => array('neighborhood', 'business', 'restaurant', 'church'),
+                'hierarchical' => false,
+                'slug'        => 'community',
+            ),
+            'sf_audience' => array(
+                'label'       => 'Audiences',
+                'singular'    => 'Audience',
+                'post_types'  => array('event', 'guide', 'article', 'topic', 'community_resource'),
+                'hierarchical' => false,
+                'slug'        => 'audience',
+            ),
+            'sf_interest' => array(
+                'label'       => 'Interests',
+                'singular'    => 'Interest',
+                'post_types'  => array('event', 'guide', 'article', 'topic'),
+                'hierarchical' => false,
+                'slug'        => 'interest',
+            ),
+            'sf_school_district' => array(
+                'label'       => 'School Districts',
+                'singular'    => 'School District',
+                'post_types'  => array('school', 'neighborhood'),
+                'hierarchical' => false,
+                'slug'        => 'school-district',
+            ),
+            'sf_topic' => array(
+                'label'       => 'Topics',
+                'singular'    => 'Topic',
+                'post_types'  => array('guide', 'article'),
+                'hierarchical' => false,
+                'slug'        => 'topic',
             ),
         );
     }

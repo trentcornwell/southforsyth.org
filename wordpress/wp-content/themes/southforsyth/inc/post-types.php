@@ -7,6 +7,12 @@
  * homepage and archive/single templates can query live WordPress content as
  * soon as it is authored. Definitions are data-driven so the registration
  * logic stays in one place as new types are added.
+ *
+ * Only three post types were added for the Phase 1–10 platform-scaling work
+ * (trail, topic, community_resource) — see docs/platform-architecture.md
+ * ("Content types"). The other nine already existed; they are not
+ * re-registered here to avoid duplicate `register_post_type()` calls for
+ * the same slug.
  */
 
 if (! defined('ABSPATH')) {
@@ -98,6 +104,34 @@ if (! function_exists('southforsyth_get_post_type_definitions')) {
                 'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
                 'taxonomies' => array('category', 'post_tag'),
                 'card_template' => 'template-parts/components/article-card',
+            ),
+            'trail' => array(
+                'singular' => 'Trail',
+                'plural'   => 'Trails',
+                'slug'     => 'trails',
+                'icon'     => 'dashicons-location-alt',
+                'description' => 'Walking, biking, and greenway routes — split out from Parks so each can be a proper hub of its own.',
+                'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
+                'card_template' => 'template-parts/components/trail-card',
+            ),
+            'topic' => array(
+                'singular' => 'Topic',
+                'plural'   => 'Topics',
+                'slug'     => 'topics',
+                'icon'     => 'dashicons-networking',
+                'description' => 'Pillar "topic cluster" pages (e.g. Moving, Family Activities) that pull related Guides and Articles together — see the sf_topic taxonomy in inc/taxonomies.php.',
+                'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
+                'taxonomies' => array('category', 'post_tag'),
+                'card_template' => 'template-parts/components/topic-card',
+            ),
+            'community_resource' => array(
+                'singular' => 'Community Resource',
+                'plural'   => 'Community Resources',
+                'slug'     => 'community-resources',
+                'icon'     => 'dashicons-groups',
+                'description' => 'General civic/community resources not covered by a more specific post type — libraries, health & wellness, senior resources, government services, public safety.',
+                'supports' => array('title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'),
+                'card_template' => 'template-parts/components/directory-card',
             ),
         );
     }
