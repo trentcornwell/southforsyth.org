@@ -37,7 +37,12 @@ if (! function_exists('southforsyth_render_card_section')) {
             set_query_var('eyebrow', $card['eyebrow'] ?? '');
             set_query_var('title', $card['title'] ?? '');
             set_query_var('description', $card['description'] ?? '');
-            set_query_var('link', $card['link'] ?? '#');
+            // No '#' fallback here on purpose: most card templates (event,
+            // restaurant, etc.) supply their own '#' default for direct/
+            // standalone use, but coming-soon-card.php deliberately treats
+            // an empty link as "no link" — forcing '#' here would give every
+            // coming-soon card a dead link even when no real page exists.
+            set_query_var('link', $card['link'] ?? '');
             set_query_var('date', $card['date'] ?? '');
             set_query_var('icon', $card['icon'] ?? '');
             get_template_part($template_part);

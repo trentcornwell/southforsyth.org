@@ -24,11 +24,14 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 - inc/queries.php — query helpers that fetch live content per post type with realistic placeholder fallback
 - inc/schema.php — SEO and schema helpers
 - inc/helpers.php — reusable rendering helpers, including the card-section renderer used by the homepage
+- inc/hub-content.php — hub page content (intro copy, FAQ, sample cards, related links) shared by every post type archive and the three standalone hub pages, keyed by `southforsyth_get_hub_content()`; also provides `southforsyth_get_hub_url()`, the single place every nav/link/card resolves a section's URL from
+- inc/page-provisioning.php — auto-creates the Things To Do, New Resident Guide, and Weekend Guide pages (assigned to page-templates/hub.php) if they don't already exist, so those URLs work without manual wp-admin setup
 - inc/performance.php — lean asset delivery (lazy-loaded images, no emoji script, JPEG quality)
 - inc/template-functions.php — small presentation helpers (SVG icons, excerpts)
 - inc/architecture.php / inc/evergreen-content.php / inc/community-platform.php — editorial strategy and content-planning data. Not required by `functions.php` (nothing at runtime reads them) — require the specific file directly if you need to read it programmatically; see docs below
-- template-parts/header/site-header.php — header partial
-- template-parts/footer/site-footer.php — footer partial
+- page-templates/hub.php — reusable "Template Name: South Forsyth Hub Page" template for the three hub sections with no custom post type of their own (Things To Do, New Resident Guide, Weekend Guide)
+- template-parts/header/site-header.php — header partial; primary nav falls back to `southforsyth_primary_nav_fallback()` (inc/menus.php) until an admin builds a real menu in Appearance > Menus
+- template-parts/footer/site-footer.php — footer partial with a fallback quick-links list and copyright bar when no footer widgets are active
 - template-parts/components/hero.php — homepage hero
 - template-parts/components/search.php — search form component
 - template-parts/components/cta.php — call-to-action component
@@ -47,11 +50,13 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 - template-parts/components/guide-card.php — guide card
 - template-parts/components/weather-placeholder.php / traffic-placeholder.php — local-conditions placeholders
 - template-parts/components/community-spotlight.php — resident/organization spotlight
-- template-parts/components/coming-soon-card.php — icon + title + description + "Coming Soon" badge, used by the preview homepage's "What We're Building" and "Preview Content" sections
+- template-parts/components/coming-soon-card.php — icon + title + description + "Coming Soon" badge, with an optional link to a real hub page; used by the homepage's "What We're Building" and "Preview Content" sections and by every hub page's empty-state sample cards
 - template-parts/components/sidebar-callout.php — editorial sidebar component
 - template-parts/components/feature-banner.php — feature banner component
 - template-parts/components/quote-block.php — pull quote or testimonial block
 - template-parts/components/statistics.php — stats/metrics section
+- template-parts/components/local-definition-block.php — "what is South Forsyth" explainer: the area grid (Halcyon, Big Creek, Denmark, Vickery, Windermere, Polo Fields, McFarland/Union Hill/Shiloh, etc.) plus the "not an official city" note, used on the homepage
+- template-parts/components/faq-block.php — accessible `<details>`/`<summary>` FAQ list, used by every hub page (archive.php and page-templates/hub.php) via `southforsyth_render_hub_faq()`
 - assets/css/main.css — design-system stylesheet
 - assets/js/main.js — small interactive enhancements
 
@@ -100,7 +105,10 @@ The structure is centered on topical authority, internal linking, and long-term 
 The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).
 
 ## Data integration roadmap
-Planning for how South Forsyth.org will eventually pull in outside data — official government/school sources, calendar/ICS feeds, GIS/open data, local news RSS, and community submissions — without compromising accuracy or attribution. Documentation only today; no importers exist yet. See [wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md).
+Planning for how South Forsyth.org will eventually pull in outside data — official government/school sources (including the Chamber of Commerce events calendar), calendar/ICS feeds, GIS/open data, local news RSS, and community submissions — without compromising accuracy or attribution. Documentation only today; no importers exist yet. See [wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md).
+
+## Editorial roadmap
+The first 25 pages to publish, in priority order, plus the highest-SEO-value pages, directory/event/newsletter sequencing, and how this roadmap relates to the evergreen guide list. See [wordpress/wp-content/themes/southforsyth/docs/editorial-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/editorial-roadmap.md).
 
 ### Priority guides
 1. Best Parks
@@ -191,11 +199,17 @@ Each component is built as a reusable template partial and should be used as a f
 - Feature banner: use for premium editorial highlights
 - Quote block: use for testimonials or editorial pull quotes
 - Statistics section: use for metrics, community milestones, and numbers
+- Local definition block: use to explain what "South Forsyth" means (community identity, not a city) and list its constituent areas
+- FAQ block: use for a hub page's frequently-asked-questions section
 
-## Homepage status: preview / launching soon
-The current homepage (`front-page.php`) is intentionally a **static preview**, not the live content-driven portal. It doesn't query any custom post type yet — every section ("What We're Building", "Preview Content," etc.) is static "Coming Soon" copy, on purpose, so the site is honest about how much content actually exists today. The full content-model architecture described below (custom post types, taxonomies, query helpers) is built and untouched; it's just not wired into the homepage output yet. Each place in `front-page.php` where a live query should eventually replace a static array has a `TODO` comment pointing at the exact `inc/queries.php` function to use — see "Homepage: preview vs. live" in the architecture doc for the full explanation and how to switch it over once real content exists.
+## Homepage status: preview, now with real hub pages behind it
+The homepage (`front-page.php`) is still intentionally a **static preview** rather than a live, post-type-driven portal — it doesn't query any custom post type directly, and every "Coming Soon" section is still static copy, on purpose, so the site stays honest about how much content actually exists today. What changed: every one of those "Coming Soon" cards, and the primary navigation, now link to a real, working hub page instead of nowhere.
 
-Placeholder wording throughout (hero, "What We're Building," "Preview Content") is deliberately generic where it describes future content, and factual where it describes the area itself — see "Placeholder content policy" in the architecture doc before adding more.
+Every section — Things To Do, Events, Restaurants & Coffee, Parks & Trails, Schools, Churches, Neighborhoods, Business Directory, New Resident Guide, and Weekend Guide — has a real URL today. The seven with a custom post type (Events, Restaurants, Parks, Schools, Churches, Neighborhoods, Business Directory) use the enhanced `archive.php`, which shows live posts the moment any exist and falls back to intro copy, a clearly-labeled "Coming soon" notice, and sample category cards when a post type has zero posts. The three without a post type of their own (Things To Do, New Resident Guide, Weekend Guide) are real WordPress Pages, auto-created by `inc/page-provisioning.php` on `page-templates/hub.php`. All ten pull their copy from `inc/hub-content.php` — see that file and `docs/content-platform-architecture.md`'s "Hub pages" section for the full explanation.
+
+Each place in `front-page.php` where a live query should eventually replace a static array still has a `TODO` comment pointing at the exact `inc/queries.php` function to use — see "Homepage: preview vs. live" in the architecture doc for the full explanation and how to switch it over once real content exists.
+
+Placeholder wording throughout (hero, "What We're Building," "Preview Content," and every hub page's sample cards) is deliberately generic where it describes future content, and factual where it describes the area itself — see "Placeholder content policy" in the architecture doc before adding more.
 
 ## DreamHost deployment workflow
 
@@ -258,11 +272,13 @@ This keeps local development first, uses GitHub as the source of truth, and only
 - Review SEO metadata and schema output regularly as content expands.
 
 ## Current status
-- The homepage is a static "preview / launching soon" page (see above) — an honest, polished front door while real content is authored.
-- Nine custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above), fully built but not yet surfaced on the homepage.
+- The homepage is a static "preview / launching soon" page (see above) — an honest, polished front door while real content is authored, now linking every section through to a real hub page instead of nowhere.
+- Nine custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above). Seven of them (Events, Restaurants, Parks, Schools, Churches, Neighborhoods, Business Directory) already have a real, polished hub page live at their archive URL via the enhanced `archive.php` — intro copy, FAQ, and a newsletter CTA today; live post grids the moment content is published.
+- Things To Do, New Resident Guide, and Weekend Guide are real WordPress Pages (auto-created by `inc/page-provisioning.php`) on the reusable `page-templates/hub.php` template, giving all ten IA sections a working URL.
 - `archive.php`, `search.php`, and `single.php` are post-type aware, rendering the right card component and meta fields for whatever type is being displayed, and work today for any post type that gets published.
-- Navigation, widgets, footer, and reusable components are wired up.
+- Navigation now has a real fallback menu (`southforsyth_primary_nav_fallback()` in `inc/menus.php`) pointing at all nine sections, so the header works before an admin ever builds a menu in Appearance > Menus — building one there still takes over automatically.
+- Widgets, footer (now with a fallback quick-links list and copyright bar), and reusable components are wired up.
 - SEO-ready metadata and schema output are included.
 
 ## Next steps
-See "Future roadmap" in [docs/content-platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md) for the full, prioritized list. In short: author real content first (the archive/single templates are ready and waiting even though the homepage isn't querying them yet), tag it with `sf_area` as it's published, switch the homepage's "Coming Soon" sections over to live queries one at a time as each post type gets real content, then build out search/filtering, maps, and submission workflows as content volume justifies them.
+See "Future roadmap" in [docs/content-platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/content-platform-architecture.md) for the full, prioritized list, and [docs/editorial-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/editorial-roadmap.md) for the specific first 25 pages to publish. In short: author real content first (the archive/single templates and every hub page are ready and waiting), tag it with `sf_area` as it's published, then build out search/filtering, maps, and submission workflows as content volume justifies them.

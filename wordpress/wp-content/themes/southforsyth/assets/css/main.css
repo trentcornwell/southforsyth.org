@@ -169,6 +169,9 @@ input, button, textarea, select { font: inherit; }
 .pill-link { display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; border-radius: var(--radius-pill); background: var(--color-bg-soft); border: 1px solid var(--color-border); font-size: 0.9rem; font-weight: 600; color: var(--color-primary-dark); }
 .pill-link:hover { background: var(--color-primary); border-color: var(--color-primary); color: white; }
 .pill-row { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: var(--space-6); }
+/* Used on hub pages (archive.php, page-templates/hub.php) where the related-
+   links row follows left-aligned intro copy rather than a centered header. */
+.pill-row--start { justify-content: flex-start; }
 
 /* =============================================================
    Cards
@@ -177,7 +180,11 @@ input, button, textarea, select { font: inherit; }
    must stay after .card: same specificity, source order decides
    which wins when both classes are on the same element.
    ============================================================= */
-.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: transform var(--transition-medium), box-shadow var(--transition-medium); }
+/* A small, consistent "this is clickable" cue across every card type
+   (event, restaurant, directory, coming-soon, etc.) instead of the flat,
+   static look a plain bordered box reads as. */
+.card-grid .card:hover, .hub-samples .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .card-feature { background: linear-gradient(135deg, #fffef8 0%, #fff8e3 100%); }
 .card-directory { border-left: 4px solid var(--color-primary); }
 .card-event { border-top: 4px solid var(--color-accent); }
@@ -222,6 +229,10 @@ input, button, textarea, select { font: inherit; }
 .coming-soon-card:nth-child(3n+2) .coming-soon-card__icon { background: var(--color-secondary); }
 .coming-soon-card:nth-child(3n+3) .coming-soon-card__icon { background: var(--color-accent); color: var(--color-primary-dark); }
 .coming-soon-card .badge-soon { margin-top: 0.25rem; }
+/* Only present when a real hub page exists behind the card (see the `link`
+   query var in coming-soon-card.php) — sits below the badge so "Coming
+   soon" always reads first. */
+.coming-soon-card .text-link { margin-top: 0.15rem; }
 
 /* =============================================================
    Audience grid
@@ -232,6 +243,40 @@ input, button, textarea, select { font: inherit; }
 .audience-item { padding: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .audience-item h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
 .audience-item p { margin: 0; color: var(--color-muted); font-size: 0.92rem; }
+
+/* =============================================================
+   Local definition block
+   "What is South Forsyth?" homepage section (and reusable anywhere else
+   that needs the same explanation, e.g. a future New Resident Guide body).
+   See template-parts/components/local-definition-block.php.
+   ============================================================= */
+.local-definition-block { margin-top: var(--space-8); }
+.area-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.area-card { padding: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.area-card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+.area-card p { margin: 0; color: var(--color-muted); font-size: 0.92rem; }
+.area-note { margin-top: var(--space-6); padding: var(--space-5); border-left: 4px solid var(--color-accent); background: var(--color-bg-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.area-note p:not(.eyebrow) { margin: 0; color: var(--color-muted); }
+
+/* =============================================================
+   FAQ block
+   Native <details>/<summary> disclosures — accessible and keyboard
+   operable with no JS. See template-parts/components/faq-block.php.
+   ============================================================= */
+.faq-block { display: grid; gap: var(--space-4); max-width: 48rem; }
+.faq-item { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.35rem; }
+.faq-item summary { cursor: pointer; font-weight: 700; }
+.faq-item summary::marker { color: var(--color-accent); }
+.faq-item p { margin: 0.65rem 0 0; color: var(--color-muted); }
+
+/* =============================================================
+   Hub pages
+   Shared by every post type archive (archive.php) and the standalone hub
+   pages (page-templates/hub.php) — see inc/hub-content.php.
+   ============================================================= */
+.hub-intro p + p { margin-top: 0.5rem; }
+.hub-empty-notice { margin-bottom: var(--space-6); }
+.hub-samples { margin-bottom: var(--space-6); }
 
 /* =============================================================
    Sections & headings
@@ -332,12 +377,18 @@ form select {
 /* =============================================================
    Site footer
    ============================================================= */
-.site-footer { background: var(--color-primary-dark); color: white; padding: var(--space-10) 0; }
+.site-footer { background: var(--color-primary-dark); color: white; padding: var(--space-10) 0 var(--space-6); }
 .site-footer__inner { display: grid; gap: var(--space-6); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .site-footer a { color: white; }
+.footer-brand p { color: rgba(255, 255, 255, 0.78); max-width: 28rem; }
+.footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.footer-links a { font-weight: 600; }
+.footer-links a:hover { color: var(--color-accent); }
 .widget { margin-bottom: 1rem; }
 .widget__title { margin-bottom: 0.4rem; font-size: 1rem; }
 .widget--footer { margin-bottom: var(--space-5); }
+.site-footer__bottom { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.site-footer__bottom p { margin: 0; color: rgba(255, 255, 255, 0.65); font-size: var(--font-size-sm); }
 
 /* =============================================================
    Responsive

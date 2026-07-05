@@ -47,6 +47,18 @@ southforsyth_require_theme_files(array(
     'queries.php',
 ));
 
+// Hub pages: the intro/FAQ/sample-card content shared by every post type
+// archive (archive.php) and the three standalone hub pages that have no
+// custom post type of their own (page-templates/hub.php), plus the
+// provisioning that creates those three pages automatically. Unlike
+// inc/architecture.php and friends below, this content IS read by templates
+// on every relevant request, so it's required eagerly like the rest of the
+// content model.
+southforsyth_require_theme_files(array(
+    'hub-content.php',
+    'page-provisioning.php',
+));
+
 // Presentation: rendering helpers shared by template parts (breadcrumbs,
 // excerpts, the card-section renderer), plus performance and SEO/schema
 // output hooks.

@@ -51,6 +51,12 @@ first.
 - **City of Cumming / neighboring municipalities** — South Forsyth borders
   Cumming; relevant civic content there (events, notices) may be worth
   including with clear attribution that it's outside South Forsyth proper.
+- **Greater Forsyth County Chamber of Commerce** — business networking
+  events, ribbon cuttings, and community programming. Maps to `event`, and
+  its member business list is a candidate (not a source of truth) for
+  cross-checking new `business` submissions — never imported wholesale as
+  business listings, since Chamber membership isn't the same thing as a
+  verified, complete directory profile.
 - **Georgia DOT (GDOT)** — road closures, construction, traffic incidents
   relevant to the "Traffic" homepage placeholder. Likely a GIS/open-data
   feed rather than a page scrape — see GIS section below.
@@ -80,7 +86,7 @@ realistically the primary feed for the `event` post type.
   CPT is already structured (one post per occurrence).
 - **Sources to target first:** church service/event calendars (with
   permission), school district calendar, county parks program calendar,
-  library event calendar.
+  library event calendar, and the Chamber of Commerce events calendar.
 - **Taxonomy mapping:** `sf_event_category` assigned based on source (e.g.
   a library-sourced event defaults to a "Community" category), refined by a
   human reviewer.

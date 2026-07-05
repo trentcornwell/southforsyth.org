@@ -18,7 +18,7 @@
         </button>
 
         <nav id="site-navigation" class="site-navigation" data-nav aria-label="Primary navigation">
-            <?php wp_nav_menu(array('theme_location' => 'primary', 'menu_class' => 'site-navigation__list', 'container' => false, 'fallback_cb' => false)); ?>
+            <?php wp_nav_menu(array('theme_location' => 'primary', 'menu_class' => 'site-navigation__list', 'container' => false, 'fallback_cb' => 'southforsyth_primary_nav_fallback')); ?>
         </nav>
     </div>
 </header>

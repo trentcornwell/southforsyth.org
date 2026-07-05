@@ -34,6 +34,14 @@ document. That's an intentional, temporary state, not an architecture gap:
   `southforsyth_get_latest_items('event', 3, $fallback)` once Event posts
   exist. Convert sections one at a time as each post type gets real content;
   there's no need to flip the whole homepage over at once.
+- Unlike before, the "What We're Building" cards (and the primary nav, and
+  the homepage's "Jump to a section" row) are no longer dead-end links —
+  each `coming-soon-card` now points at a real hub page (see "Hub pages"
+  below) via `southforsyth_get_hub_url()`. The "Preview Content" guide
+  cards deliberately still have no link, since no Guide post or hub page
+  exists behind an invented guide title like "Best Playgrounds in South
+  Forsyth" yet — see `coming-soon-card.php`'s doc comment for the rule
+  (only pass a `link` when a real page exists behind the card).
 
 ## Custom post types
 
@@ -129,6 +137,54 @@ type-specific meta list (`template-parts/components/post-meta.php`) — event
 date/time/venue, or directory address/phone/hours/website — above the normal
 content. This keeps the template layer lightweight and DRY as more post
 types are added.
+
+## Hub pages
+
+Every top-level IA section — the seven post type archives above, plus
+Things To Do, New Resident Guide, and Weekend Guide, which have no post
+type of their own — now works as a real "hub page" with intro copy, an
+honest empty-state notice, sample category cards, related-section links, an
+FAQ, and a newsletter CTA, instead of either a bare card grid or a 404.
+
+**Why one more layer instead of ten near-duplicate templates:** the same
+reasoning as "one `archive.php`, not eighteen" above. `inc/hub-content.php`
+holds the copy for all ten sections as data (`southforsyth_get_hub_content($key)`,
+keyed by post type slug for the seven CPTs or by page slug for the three
+static pages), and two templates render it:
+
+- `archive.php` — unchanged in its live-post behavior (the card grid still
+  takes over automatically the instant a post type has published content).
+  What's new: it now renders hub copy around that grid — an intro above it,
+  and, only when the post type has zero published posts, a `card-placeholder`
+  "Coming soon" notice plus sample `coming-soon-card` category cards below
+  it (see the placeholder content policy below — samples describe
+  categories, never real businesses/events). Related-section links, an FAQ,
+  and the newsletter block render regardless of post count.
+- `page-templates/hub.php` — a `Template Name: South Forsyth Hub Page` page
+  template for the three sections with no CPT. Same rendering pattern minus
+  the live-post grid, plus a normal `the_content()` loop so an editor can
+  add real body copy in wp-admin without touching the template.
+
+**Why the three extra pages are auto-created, not manually built:**
+`inc/page-provisioning.php` runs on `after_switch_theme` and `admin_init`
+and creates each of the three pages (checking by slug via
+`get_page_by_path()`) only if it doesn't already exist, assigning it the
+hub template. Without this, the template would exist but
+`/things-to-do/`, `/new-resident-guide/`, and `/weekend-guide/` would 404
+until someone manually created each page in wp-admin — a rough edge for a
+site meant to demo as a working foundation immediately. It's intentionally
+idempotent (never edits or recreates a page that already exists, so
+hand-edited content is never touched) and short-circuits via a
+`southforsyth_hub_pages_provisioned` option once all three exist, so it
+doesn't run its lookup queries on every future admin request forever.
+
+**`southforsyth_get_hub_url($key)`** (also in `inc/hub-content.php`) is the
+one place a hub key resolves to a URL — `get_post_type_archive_link()` for
+a CPT key, `get_permalink()` via `get_page_by_path()` for a static page key.
+The primary nav fallback (`inc/menus.php`), the footer's fallback quick
+links, the homepage's "What We're Building" cards and "Jump to a section"
+row, and every hub page's related-links row all call this instead of
+hardcoding `/events/`-style URLs in more than one place.
 
 ## Cleanup notes
 

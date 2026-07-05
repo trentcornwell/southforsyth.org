@@ -24,15 +24,22 @@ get_header();
 // TODO: once Event posts exist, replace with
 // southforsyth_get_latest_items('event', 3, $fallback) and an
 // event-card-based southforsyth_render_card_section() call.
+//
+// Each card below links to its real hub page (a live CPT archive via
+// archive.php, or a standalone page via page-templates/hub.php) rather than
+// nowhere — every one of these is a real, working URL today, even before
+// any post type has published content, because the hub page itself
+// explains what's coming and shows sample categories. See
+// inc/hub-content.php.
 $what_were_building = array(
-    array('icon' => 'W', 'title' => 'Weekend Events', 'description' => 'Markets, festivals, and things to do around South Forsyth, organized by weekend.'),
-    array('icon' => 'R', 'title' => 'Restaurants & Coffee', 'description' => 'A guide to local dining, coffee shops, and weekend brunch spots.'),
-    array('icon' => 'P', 'title' => 'Parks & Trails', 'description' => 'Parks, greenways, and outdoor spaces worth the drive.'),
-    array('icon' => 'S', 'title' => 'Schools & Family Resources', 'description' => 'A clear, practical overview of schools and family-focused resources.'),
-    array('icon' => 'C', 'title' => 'Churches & Community', 'description' => 'A respectful directory of local congregations and community groups.'),
-    array('icon' => 'N', 'title' => 'Neighborhood Guides', 'description' => 'What it\'s like to live in Halcyon, Vickery, Windermere, and more.'),
-    array('icon' => 'B', 'title' => 'Local Business Directory', 'description' => 'A trusted place to find and support South Forsyth businesses.'),
-    array('icon' => 'N', 'title' => 'New Resident Guide', 'description' => 'Everything you need to know if you just moved here — or are thinking about it.'),
+    array('icon' => 'W', 'title' => 'Weekend Events', 'description' => 'Markets, festivals, and things to do around South Forsyth, organized by weekend.', 'link' => southforsyth_get_hub_url('event')),
+    array('icon' => 'R', 'title' => 'Restaurants & Coffee', 'description' => 'A guide to local dining, coffee shops, and weekend brunch spots.', 'link' => southforsyth_get_hub_url('restaurant')),
+    array('icon' => 'P', 'title' => 'Parks & Trails', 'description' => 'Parks, greenways, and outdoor spaces worth the drive.', 'link' => southforsyth_get_hub_url('park')),
+    array('icon' => 'S', 'title' => 'Schools & Family Resources', 'description' => 'A clear, practical overview of schools and family-focused resources.', 'link' => southforsyth_get_hub_url('school')),
+    array('icon' => 'C', 'title' => 'Churches & Community', 'description' => 'A respectful directory of local congregations and community groups.', 'link' => southforsyth_get_hub_url('church')),
+    array('icon' => 'N', 'title' => 'Neighborhood Guides', 'description' => 'What it\'s like to live in Halcyon, Vickery, Windermere, and more.', 'link' => southforsyth_get_hub_url('neighborhood')),
+    array('icon' => 'B', 'title' => 'Local Business Directory', 'description' => 'A trusted place to find and support South Forsyth businesses.', 'link' => southforsyth_get_hub_url('business')),
+    array('icon' => 'N', 'title' => 'New Resident Guide', 'description' => 'Everything you need to know if you just moved here — or are thinking about it.', 'link' => southforsyth_get_hub_url('new-resident-guide')),
 );
 
 // TODO: once Guide posts exist, replace with
@@ -62,7 +69,7 @@ $preview_content = array(
             ?>
             <div class="split-panel">
                 <div class="stack">
-                    <p>South Forsyth isn&rsquo;t an incorporated city &mdash; there&rsquo;s no city hall, mayor, or official municipal boundary. It&rsquo;s the name residents use for the southern part of Forsyth County, Georgia: the community around Halcyon, Big Creek, Denmark, Vickery, Windermere, Polo Fields, and the neighborhoods along the Alpharetta and Cumming border.</p>
+                    <p>South Forsyth isn&rsquo;t an incorporated city &mdash; there&rsquo;s no city hall, mayor, or official municipal boundary. It&rsquo;s the name residents use for the southern part of Forsyth County, Georgia, stretching from the Big Creek area down to the Cumming and Alpharetta border.</p>
                     <p>SouthForsyth.org exists because even without a city limit sign, this is a real, connected community &mdash; and it deserves a single, trustworthy place to keep up with it.</p>
                 </div>
                 <?php
@@ -74,6 +81,7 @@ $preview_content = array(
                 get_template_part('template-parts/components/sidebar-callout');
                 ?>
             </div>
+            <?php get_template_part('template-parts/components/local-definition-block'); ?>
         </div>
     </section>
 
@@ -155,6 +163,28 @@ $preview_content = array(
                     <h3>Community Organizations</h3>
                     <p>Reach residents who want to get involved.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section--soft" id="explore">
+        <div class="container">
+            <?php
+            set_query_var('eyebrow', 'Start exploring');
+            set_query_var('title', 'Jump to a section');
+            set_query_var('subtitle', 'Every section below is live today — most are still filling in with real content, but none of them are dead ends.');
+            set_query_var('align', 'center');
+            get_template_part('template-parts/components/section-header');
+            ?>
+            <div class="pill-row">
+                <?php foreach (southforsyth_get_primary_nav_items() as $item) :
+                    $url = southforsyth_get_hub_url($item['key']);
+                    if (! $url) {
+                        continue;
+                    }
+                    ?>
+                    <a class="pill-link" href="<?php echo esc_url($url); ?>"><?php echo esc_html($item['label']); ?></a>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
