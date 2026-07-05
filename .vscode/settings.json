@@ -48,5 +48,8 @@
     "**/node_modules": true,
     "**/vendor": true,
     "**/.DS_Store": true
-  }
+  },
+
+  "php.validate.executablePath": "/opt/homebrew/bin/php",
+  "php.suggest.basic": false
 }
