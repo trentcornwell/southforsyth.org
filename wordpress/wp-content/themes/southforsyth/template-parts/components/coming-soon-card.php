@@ -26,13 +26,14 @@ $icon = get_query_var('icon') ?: '•';
 $title = get_query_var('title') ?: 'Coming soon';
 $description = get_query_var('description') ?: 'This section is being built.';
 $link = get_query_var('link') ?: '';
+$status = get_query_var('status') ?: 'Coming soon';
 ?>
 <article class="card coming-soon-card">
     <div class="card__body">
         <div class="coming-soon-card__icon" aria-hidden="true"><?php echo esc_html($icon); ?></div>
         <h3><?php echo esc_html($title); ?></h3>
         <p><?php echo esc_html($description); ?></p>
-        <span class="badge-soon">Coming soon</span>
+        <span class="badge-soon"><?php echo esc_html($status); ?></span>
         <?php if ($link) : ?>
             <a class="text-link" href="<?php echo esc_url($link); ?>">Learn more</a>
         <?php endif; ?>

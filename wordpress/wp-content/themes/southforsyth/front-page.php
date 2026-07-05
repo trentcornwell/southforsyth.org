@@ -32,50 +32,26 @@ get_header();
 // explains what's coming and shows sample categories. See
 // inc/hub-content.php.
 $what_were_building = array(
-    array('icon' => 'W', 'title' => 'Weekend Events', 'description' => 'Markets, festivals, and things to do around South Forsyth, organized by weekend.', 'link' => southforsyth_get_hub_url('event')),
-    array('icon' => 'R', 'title' => 'Restaurants & Coffee', 'description' => 'A guide to local dining, coffee shops, and weekend brunch spots.', 'link' => southforsyth_get_hub_url('restaurant')),
-    array('icon' => 'P', 'title' => 'Parks', 'description' => 'Playgrounds, picnic spots, and outdoor spaces worth the drive.', 'link' => southforsyth_get_hub_url('park')),
-    array('icon' => 'T', 'title' => 'Trails', 'description' => 'Walking, biking, and greenway routes across South Forsyth.', 'link' => southforsyth_get_hub_url('trail')),
-    array('icon' => 'S', 'title' => 'Schools & Family Resources', 'description' => 'A clear, practical overview of schools and family-focused resources.', 'link' => southforsyth_get_hub_url('school')),
-    array('icon' => 'C', 'title' => 'Churches & Community', 'description' => 'A respectful directory of local congregations and community groups.', 'link' => southforsyth_get_hub_url('church')),
-    array('icon' => 'N', 'title' => 'Neighborhood Guides', 'description' => 'What it\'s like to live in Halcyon, Vickery, Windermere, and more.', 'link' => southforsyth_get_hub_url('neighborhood')),
-    array('icon' => 'B', 'title' => 'Local Business Directory', 'description' => 'A trusted place to find and support South Forsyth businesses.', 'link' => southforsyth_get_hub_url('business')),
-    array('icon' => 'N', 'title' => 'New Resident Guide', 'description' => 'Everything you need to know if you just moved here — or are thinking about it.', 'link' => southforsyth_get_hub_url('new-resident-guide')),
-);
-
-// Platform-feature previews (Phase 7 of the data-platform work — see
-// docs/platform-architecture.md). Distinct from $what_were_building above:
-// those are content categories ("here's what will be published"); these are
-// the smart tools the provider/import/search architecture (inc/providers/,
-// inc/import/, inc/search/) will eventually power on top of that content.
-// Each links to its real hub page where one exists; Traffic and Weather
-// have no destination page yet (matching weather-placeholder.php and
-// traffic-placeholder.php, which also have no link).
-$platform_preview = array(
-    array('icon' => 'N', 'title' => 'Neighborhood Explorer', 'description' => 'Compare South Forsyth neighborhoods side by side by schools, amenities, and commute.', 'link' => southforsyth_get_hub_url('neighborhood')),
-    array('icon' => 'R', 'title' => 'Restaurant Finder', 'description' => 'Search and filter local restaurants and coffee shops by cuisine, price, and neighborhood.', 'link' => southforsyth_get_hub_url('restaurant')),
-    array('icon' => 'C', 'title' => 'Church Directory', 'description' => 'Find a congregation by denomination, service times, and programs.', 'link' => southforsyth_get_hub_url('church')),
-    array('icon' => 'S', 'title' => 'School Guide', 'description' => 'Compare local schools by type, level, and programs.', 'link' => southforsyth_get_hub_url('school')),
-    array('icon' => 'P', 'title' => 'Park Explorer', 'description' => 'Discover parks and trails by amenities, distance, and accessibility.', 'link' => southforsyth_get_hub_url('park')),
-    array('icon' => 'T', 'title' => 'Traffic', 'description' => 'Live commute and road-condition alerts for South Forsyth.', 'link' => ''),
-    array('icon' => 'W', 'title' => 'Weather', 'description' => 'Local forecast and conditions, pulled from the National Weather Service.', 'link' => ''),
-    array('icon' => 'L', 'title' => 'Local News', 'description' => 'Community news and updates, sourced and framed by local editors.', 'link' => southforsyth_get_hub_url('article')),
-    array('icon' => 'C', 'title' => 'Community Calendar', 'description' => 'A living calendar of events pulled from schools, churches, and county sources.', 'link' => southforsyth_get_hub_url('event')),
-    array('icon' => 'B', 'title' => 'Business Directory', 'description' => 'A searchable, filterable directory of local businesses and services.', 'link' => southforsyth_get_hub_url('business')),
-    array('icon' => 'W', 'title' => 'Weekend Planner', 'description' => 'A personalized plan for making the most of a weekend here.', 'link' => southforsyth_get_hub_url('weekend-guide')),
-    array('icon' => 'M', 'title' => 'Moving to South Forsyth', 'description' => 'Everything a new resident needs to get oriented, in one place.', 'link' => southforsyth_get_hub_url('new-resident-guide')),
+    array('icon' => 'E', 'title' => 'Weekend Events', 'description' => 'Markets, festivals, school happenings, and things to do, organized around how families plan weekends.', 'link' => southforsyth_get_hub_url('event'), 'status' => 'Building'),
+    array('icon' => 'R', 'title' => 'Restaurants & Coffee', 'description' => 'Local dining, coffee shops, brunch spots, and openings, presented as useful guides instead of hype.', 'link' => southforsyth_get_hub_url('restaurant'), 'status' => 'Building'),
+    array('icon' => 'P', 'title' => 'Parks & Trails', 'description' => 'Greenway access points, playgrounds, parks, and outdoor routes for everyday use.', 'link' => southforsyth_get_hub_url('park'), 'status' => 'Building'),
+    array('icon' => 'S', 'title' => 'Schools & Family Resources', 'description' => 'Practical orientation for school zones, family routines, and kid-friendly local resources.', 'link' => southforsyth_get_hub_url('school'), 'status' => 'Building'),
+    array('icon' => 'N', 'title' => 'Neighborhood Guides', 'description' => 'Clear area-by-area context for Halcyon, Vickery, Windermere, Denmark, and nearby communities.', 'link' => southforsyth_get_hub_url('neighborhood'), 'status' => 'Building'),
+    array('icon' => 'C', 'title' => 'Churches & Community', 'description' => 'A respectful local directory for congregations, nonprofits, service groups, and gathering places.', 'link' => southforsyth_get_hub_url('church'), 'status' => 'Building'),
+    array('icon' => 'B', 'title' => 'Local Business Directory', 'description' => 'A trusted discovery layer for nearby businesses once real listings are ready to review.', 'link' => southforsyth_get_hub_url('business'), 'status' => 'Building'),
+    array('icon' => 'W', 'title' => 'Weekly Local Briefing', 'description' => 'A future weekly roundup of new guides, weekend ideas, local openings, and community updates.', 'link' => '#newsletter', 'status' => 'Planned'),
 );
 
 // TODO: once Guide posts exist, replace with
 // southforsyth_get_latest_items('guide', 6, $fallback) and a
 // guide-card-based southforsyth_render_card_section() call.
-$preview_content = array(
-    array('icon' => 'B', 'title' => 'Best Playgrounds in South Forsyth', 'description' => 'A parent-tested roundup of the best play spaces in the area.'),
-    array('icon' => 'M', 'title' => 'Moving to South Forsyth', 'description' => 'A practical starting point for anyone relocating to the area.'),
-    array('icon' => 'W', 'title' => 'Weekend Guide', 'description' => 'A curated plan for making the most of a South Forsyth weekend.'),
-    array('icon' => 'C', 'title' => 'South Forsyth Church Guide', 'description' => 'A directory of local congregations, service times, and programs.'),
-    array('icon' => 'P', 'title' => 'Parks and Trails Guide', 'description' => 'Where to walk, ride, and spend time outside.'),
-    array('icon' => 'L', 'title' => 'Local Business Directory', 'description' => 'A directory of trusted local businesses and services.'),
+$early_guides = array(
+    array('icon' => 'S', 'title' => 'What Is South Forsyth?', 'description' => 'A plain-English starter guide to the area name, geography, and community identity.', 'status' => 'Starter guide'),
+    array('icon' => 'G', 'title' => 'Big Creek Greenway', 'description' => 'An in-progress guide to access points, trail etiquette, parking, and family-friendly ways to use it.', 'status' => 'In progress'),
+    array('icon' => 'H', 'title' => 'Halcyon Area Guide', 'description' => 'A starter overview for the shopping, dining, neighborhoods, and daily routines around Halcyon.', 'status' => 'Starter guide'),
+    array('icon' => 'D', 'title' => 'Denmark High School Area', 'description' => 'An in-progress area guide for families orienting around Denmark High and nearby neighborhoods.', 'status' => 'In progress'),
+    array('icon' => 'V', 'title' => 'Vickery Village Area', 'description' => 'A starter guide for the village center, nearby neighborhoods, restaurants, and walkable errands.', 'status' => 'Starter guide'),
+    array('icon' => 'M', 'title' => 'Moving to South Forsyth', 'description' => 'An in-progress newcomer guide for getting oriented before and after a move.', 'status' => 'In progress'),
 );
 ?>
 
@@ -114,15 +90,7 @@ $preview_content = array(
         'id' => 'building',
         'eyebrow' => 'What we\'re building',
         'title' => 'What We\'re Building',
-        'intro' => 'SouthForsyth.org is being built section by section. Here\'s what\'s coming.',
-    ));
-
-    southforsyth_render_card_section('template-parts/components/coming-soon-card', $platform_preview, array(
-        'id' => 'platform',
-        'eyebrow' => 'Powered by data',
-        'title' => 'A Growing Data Platform',
-        'intro' => 'Behind the scenes, SouthForsyth.org is built on a real data platform — providers, an import pipeline, and search — designed to power tools like these as content grows.',
-        'soft' => true,
+        'intro' => 'A focused preview of the local guide sections being built first. These are not finished directories yet, but they show the shape of the site.',
     ));
     ?>
 
@@ -138,7 +106,7 @@ $preview_content = array(
             <div class="split-panel">
                 <div class="stack">
                     <p>South Forsyth is growing fast, but there has never been one place to keep up with all of it &mdash; the restaurant that just opened, which park has the best playground, what&rsquo;s happening this weekend, or which neighborhood might be the right fit for your family.</p>
-                    <p>SouthForsyth.org is being built as that place: a helpful, independent local guide for residents, newcomers, families, churches, schools, and small businesses. It isn&rsquo;t a government portal, and it isn&rsquo;t run by or for any single church or organization &mdash; just a community-minded guide, built by and for the people who live here.</p>
+                    <p>An independent, community-minded guide to life in South Forsyth, created and maintained by Vision Baptist Church as a service to the community we love.</p>
                 </div>
                 <?php
                 set_query_var('quote', 'A single, trustworthy place to answer the question: what\'s happening in South Forsyth, and where should we go?');
@@ -150,11 +118,11 @@ $preview_content = array(
     </section>
 
     <?php
-    southforsyth_render_card_section('template-parts/components/coming-soon-card', $preview_content, array(
-        'id' => 'preview',
-        'eyebrow' => 'Sneak peek',
-        'title' => 'Preview Content',
-        'intro' => 'A sample of the guides we\'re working on. None of these are published yet — this is what\'s in progress.',
+    southforsyth_render_card_section('template-parts/components/coming-soon-card', $early_guides, array(
+        'id' => 'early-guides',
+        'eyebrow' => 'Starter guides',
+        'title' => 'Early Local Guides',
+        'intro' => 'These guide concepts are in progress. They are listed here as the first editorial priorities, not as completed guides.',
         'soft' => true,
     ));
 

@@ -26,6 +26,7 @@
   --color-sky: #cfe3ee;
   --color-sky-soft: #e7f1f6;
   --color-gold: #c9973e;
+  --color-gold-readable: #84601a;
   --color-gold-soft: #f3e3c2;
 
   /* Semantic aliases — existing rules below reference these names */
@@ -150,7 +151,7 @@ input, button, textarea, select { font: inherit; }
 .center { display: grid; place-items: center; }
 .flow > * + * { margin-top: var(--space-4); }
 .split-panel { display: grid; gap: var(--space-6); grid-template-columns: 1.15fr 0.85fr; }
-.card-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 .layout-content { display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
 .sidebar { display: grid; gap: var(--space-5); align-content: start; }
 .list { margin: 0; padding-left: 1.2rem; color: var(--color-muted); display: grid; gap: 0.65rem; }
@@ -183,7 +184,7 @@ input, button, textarea, select { font: inherit; }
 .badge, .tag { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.7rem; border-radius: var(--radius-pill); background: var(--color-accent-soft); color: var(--color-primary-dark); font-size: var(--font-size-sm); font-weight: 600; }
 /* "Coming soon" chip used by coming-soon-card.php — deliberately quieter
    than .badge-launch since it repeats many times per page. */
-.badge-soon { display: inline-flex; align-items: center; padding: 0.3rem 0.7rem; border-radius: var(--radius-pill); background: var(--color-bg-soft); border: 1px solid var(--color-border); color: var(--color-primary-dark); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--letter-spacing-sm); justify-self: start; }
+.badge-soon { display: inline-flex; align-items: center; padding: 0.34rem 0.72rem; border-radius: var(--radius-pill); background: #fff8e8; border: 1px solid #dfc27a; color: #5f430e; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: var(--letter-spacing-sm); justify-self: start; box-shadow: inset 0 1px 0 rgba(255,255,255,0.75); }
 /* "Preview Mode / Launching Soon" hero badge — the one loud announcement
    on the page, used exactly once. */
 .badge-launch { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.5rem 1rem 0.5rem 0.8rem; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-primary-dark); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--letter-spacing-sm); }
@@ -207,7 +208,7 @@ input, button, textarea, select { font: inherit; }
    must stay after .card: same specificity, source order decides
    which wins when both classes are on the same element.
    ============================================================= */
-.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); transition: transform var(--transition-medium), box-shadow var(--transition-medium); }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: transform var(--transition-medium), box-shadow var(--transition-medium); }
 /* A small, consistent "this is clickable" cue across every card type
    (event, restaurant, directory, coming-soon, etc.) instead of the flat,
    static look a plain bordered box reads as. */
@@ -240,10 +241,11 @@ input, button, textarea, select { font: inherit; }
    The icon is a single letter in a colored badge — no icon library. Colors
    cycle across the grid via nth-child so a row of cards reads as a set
    rather than a flat list. */
-.coming-soon-card .card__body { gap: 0.65rem; }
+.coming-soon-card { overflow: hidden; }
+.coming-soon-card .card__body { gap: 0.7rem; min-height: 100%; }
 .coming-soon-card__icon {
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
   /* Circular, not rounded-square — echoes the circular badge motif of the
@@ -251,7 +253,7 @@ input, button, textarea, select { font: inherit; }
   border-radius: 50%;
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   color: white;
   background: var(--color-primary);
 }
@@ -314,7 +316,7 @@ input, button, textarea, select { font: inherit; }
    .section--accent must stay after .section (same specificity,
    source order decides).
    ============================================================= */
-.section { padding: var(--space-10) 0; }
+.section { padding: var(--space-9) 0; }
 .section--soft { background: rgba(255,255,255,0.64); }
 .section--accent { background: linear-gradient(180deg, var(--color-sky-soft) 0%, var(--color-cream-soft) 100%); }
 .section-title { margin: 0 0 0.4rem; font-size: clamp(1.45rem, 2.4vw, 2rem); line-height: var(--line-height-tight); }
@@ -322,7 +324,11 @@ input, button, textarea, select { font: inherit; }
 .section-header { display: grid; gap: var(--space-3); margin-bottom: var(--space-6); }
 /* Must stay after .section-header for the same source-order reason. */
 .section-header--center { text-align: center; justify-items: center; }
-.eyebrow { text-transform: uppercase; letter-spacing: var(--letter-spacing-md); font-size: 0.78rem; font-weight: 700; color: var(--color-accent); }
+.eyebrow { text-transform: uppercase; letter-spacing: var(--letter-spacing-md); font-size: 0.78rem; font-weight: 800; color: var(--color-gold-readable); }
+.hero .eyebrow,
+.feature-banner .eyebrow,
+.card-editorial .eyebrow,
+.site-footer .eyebrow { color: var(--color-gold-soft); }
 .text-link { font-weight: 700; }
 .stats-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stat-card { background: var(--color-surface); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
@@ -342,17 +348,16 @@ input, button, textarea, select { font: inherit; }
 .feature-banner__content { max-width: 42rem; display: grid; gap: var(--space-5); }
 .feature-banner .section-title,
 .feature-banner .section-subtitle { color: white; }
-.cta { display: flex; justify-content: space-between; align-items: center; gap: var(--space-6); padding: var(--space-8); background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--color-border); }
-.newsletter { display: grid; gap: var(--space-5); grid-template-columns: 1.2fr 0.8fr; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-md); }
-.newsletter__form { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-.newsletter__form input:disabled,
-.newsletter__form button:disabled { opacity: 0.55; cursor: not-allowed; }
-.newsletter__note { margin: 0.6rem 0 0; color: var(--color-muted); font-size: var(--font-size-sm); }
+.cta { display: flex; justify-content: space-between; align-items: center; gap: var(--space-6); padding: var(--space-8); background: var(--color-surface); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); border: 1px solid var(--color-border); }
+.newsletter { display: grid; gap: var(--space-6); grid-template-columns: 1.25fr 0.75fr; align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-7); box-shadow: var(--shadow-md); }
+.newsletter h2 { margin: 0; font-size: clamp(1.5rem, 2.4vw, 2.15rem); line-height: var(--line-height-tight); }
+.newsletter p { margin: 0; color: var(--color-muted); }
+.newsletter__status { display: grid; gap: var(--space-3); justify-items: start; padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-neutral-100); }
+.newsletter__status p { font-size: var(--font-size-sm); }
 
 /* =============================================================
    Forms & search
    ============================================================= */
-.newsletter__form input,
 .search__field,
 form input,
 form textarea,
@@ -378,15 +383,16 @@ form select {
    Site header & navigation
    ============================================================= */
 .site-header { position: sticky; top: 0; z-index: 20; background: rgba(250, 246, 236, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); }
-.site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); padding: 1rem 0; }
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0.78rem 0; }
 .brand { display: flex; align-items: center; gap: 0.75rem; color: var(--color-text); font-weight: 700; }
 .brand__link { display: flex; align-items: center; color: inherit; }
+.brand__link--image { flex: 0 0 auto; }
 /* Circular crop on any logo — the bundled mark is already drawn as a
    circular badge, and this also guarantees the "circular community badge
    feel" holds even if a future custom logo upload (Appearance > Customize
    > Site Identity) isn't circular to begin with. */
 .brand img,
-.brand .custom-logo { width: 48px; height: 48px; border-radius: 50%; }
+.brand .custom-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: contain; }
 .brand__text { display: flex; flex-direction: column; line-height: 1.2; }
 .brand__text span { color: var(--color-muted); font-size: 0.9rem; font-weight: 500; }
 /* More specific than ".brand__text span" above on purpose, so the tagline's
@@ -404,11 +410,14 @@ form select {
 .site-navigation__list { display: flex; gap: var(--space-4); list-style: none; padding: 0; margin: 0; }
 .site-navigation__list a { color: var(--color-text); font-weight: 600; }
 .site-navigation__list a:hover { color: var(--color-primary); }
+.header-search { display: inline-flex; align-items: center; gap: 0.48rem; flex: 0 0 auto; min-height: 2.35rem; padding: 0.45rem 0.78rem; border: 1px solid var(--color-border); border-radius: var(--radius-pill); background: rgba(255,255,255,0.72); color: var(--color-muted); font-size: 0.84rem; font-weight: 700; white-space: nowrap; }
+.header-search__icon { width: 0.86rem; height: 0.86rem; border: 2px solid currentColor; border-radius: 50%; position: relative; opacity: 0.82; }
+.header-search__icon::after { content: ""; position: absolute; width: 0.42rem; height: 2px; right: -0.34rem; bottom: -0.18rem; background: currentColor; transform: rotate(45deg); transform-origin: left center; border-radius: var(--radius-pill); }
 
 /* =============================================================
    Hero
    ============================================================= */
-.hero { padding: var(--space-10) 0; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; position: relative; overflow: hidden; }
+.hero { padding: var(--space-9) 0; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); color: white; position: relative; overflow: hidden; }
 .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 34%); pointer-events: none; }
 /* A single faint ring, echoing the logo's circular badge shape — subtle
    enough to read as texture, not a literal graphic, so it doesn't compete
@@ -424,7 +433,7 @@ form select {
   border-radius: 50%;
   pointer-events: none;
 }
-.hero__inner { min-height: 430px; display: grid; align-items: center; position: relative; z-index: 1; }
+.hero__inner { min-height: 390px; display: grid; align-items: center; position: relative; z-index: 1; }
 .hero h1 { font-size: var(--font-size-4xl); margin: 0; color: white; line-height: var(--line-height-tight); max-width: 46rem; }
 .hero__lede { max-width: 44rem; font-size: var(--font-size-lg); color: rgba(255,255,255,0.94); margin-top: 0.5rem; }
 .hero__actions { margin-top: var(--space-6); }
@@ -450,7 +459,7 @@ form select {
 .widget__title { margin-bottom: 0.4rem; font-size: 1rem; }
 .widget--footer { margin-bottom: var(--space-5); }
 .site-footer__bottom { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid rgba(255, 255, 255, 0.18); }
-.site-footer__bottom p { margin: 0; color: rgba(255, 255, 255, 0.65); font-size: var(--font-size-sm); }
+.site-footer__bottom p { margin: 0; color: rgba(255, 255, 255, 0.65); font-size: var(--font-size-sm); line-height: 1.6; max-width: 62rem; }
 
 /* =============================================================
    Responsive
@@ -482,18 +491,44 @@ form select {
   .split-panel { grid-template-columns: 1fr; }
   .newsletter { grid-template-columns: 1fr; }
   .site-footer__inner { grid-template-columns: 1fr; }
+  .site-header__inner { flex-wrap: wrap; }
+  .site-navigation { order: 4; }
+  .header-search { margin-left: auto; }
 }
 
 @media (max-width: 700px) {
+  .container,
+  .container-wide { width: min(100% - 1rem, var(--container)); }
+  .section { padding: var(--space-8) 0; }
   .nav-toggle { display: inline-block; }
   .site-navigation { display: none; width: 100%; }
   .site-navigation.is-open { display: block; }
-  .site-navigation__list { flex-direction: column; padding: 1rem 0; }
+  .site-navigation__list { flex-direction: column; gap: 0; padding: 0.75rem 0 0; }
+  .site-navigation__list a { display: block; padding: 0.72rem 0; border-top: 1px solid var(--color-border); }
+  .header-search { order: 3; width: 100%; justify-content: center; margin-left: 0; }
   .hero__actions { display: flex; flex-direction: column; align-items: stretch; }
   .cta { flex-direction: column; align-items: flex-start; }
+  .card__body,
+  .audience-item,
+  .area-card { padding: 1.1rem; }
+  .newsletter,
+  .cta,
+  .quote-block { padding: var(--space-5); }
+  .hero { padding: var(--space-8) 0; }
+  .hero__inner { min-height: auto; }
+  .badge-launch { align-self: start; }
   /* Keeps the compact mobile header from feeling crowded — the site name
      alone is enough at this width. */
   .brand__tagline { display: none; }
+}
+
+@media (max-width: 420px) {
+  .brand img,
+  .brand .custom-logo { width: 46px; height: 46px; }
+  .card-grid,
+  .audience-grid,
+  .area-grid { grid-template-columns: 1fr; }
+  .badge-launch { font-size: 0.76rem; }
 }
 
 @media (min-width: 1280px) {

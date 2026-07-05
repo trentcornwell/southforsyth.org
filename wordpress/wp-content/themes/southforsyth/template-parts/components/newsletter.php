@@ -1,28 +1,23 @@
 <?php
 
 /**
- * Newsletter signup component.
- * Visual only for now — no email provider is connected yet, so the
- * fields are marked disabled rather than pretending to submit anywhere.
- * TODO: once a provider (e.g. Mailchimp, Buttondown) is chosen, replace
- * the disabled attributes and add a real form action/handler here.
+ * Newsletter preview component.
+ *
+ * No email provider is connected yet, so this is intentionally not a form.
+ * TODO: once a provider is chosen, add a real signup flow here.
  */
 ?>
 <section class="section section--accent" id="newsletter">
     <div class="container">
         <div class="newsletter">
-            <div>
+            <div class="stack">
                 <p class="eyebrow">Stay connected</p>
-                <h2>Get the South Forsyth Weekly</h2>
+                <h2>South Forsyth Weekly coming soon</h2>
                 <p>Weekend events, local guides, new restaurants, family activities, and community updates.</p>
             </div>
-            <div>
-                <form class="newsletter__form" aria-describedby="newsletter-note">
-                    <label class="visually-hidden" for="newsletter-email">Email address</label>
-                    <input id="newsletter-email" type="email" placeholder="Enter your email" disabled>
-                    <button class="btn btn-primary" type="submit" disabled>Subscribe</button>
-                </form>
-                <p id="newsletter-note" class="newsletter__note">Signup coming soon.</p>
+            <div class="newsletter__status">
+                <span class="badge-soon">In progress</span>
+                <p>We are setting up the newsletter before collecting addresses, so the first version launches cleanly and honestly.</p>
             </div>
         </div>
     </div>

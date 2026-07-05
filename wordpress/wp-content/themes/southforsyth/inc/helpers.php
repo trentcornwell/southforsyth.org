@@ -45,6 +45,7 @@ if (! function_exists('southforsyth_render_card_section')) {
             set_query_var('link', $card['link'] ?? '');
             set_query_var('date', $card['date'] ?? '');
             set_query_var('icon', $card['icon'] ?? '');
+            set_query_var('status', $card['status'] ?? '');
             get_template_part($template_part);
         }
         echo '</div>' . PHP_EOL;
