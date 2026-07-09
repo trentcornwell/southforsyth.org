@@ -44,6 +44,10 @@ if (! function_exists('southforsyth_render_card_section')) {
             // coming-soon card a dead link even when no real page exists.
             set_query_var('link', $card['link'] ?? '');
             set_query_var('date', $card['date'] ?? '');
+            set_query_var('address', $card['address'] ?? '');
+            set_query_var('area', $card['area'] ?? '');
+            set_query_var('city', $card['city'] ?? '');
+            set_query_var('location', $card['location'] ?? '');
             set_query_var('icon', $card['icon'] ?? '');
             set_query_var('status', $card['status'] ?? '');
             get_template_part($template_part);

@@ -235,6 +235,107 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                     array('question' => 'How are businesses categorized?', 'answer' => 'By category and neighborhood/area, so residents can browse by what they need or what\'s nearby.'),
                 ),
             ),
+            'community_resource' => array(
+                'title' => 'Family Resources',
+                'intro' => array(
+                    'Practical community resources for families, parents, students, seniors, and neighbors across South Forsyth.',
+                    'This section is for helpful local resources that do not fit cleanly into Events, Schools, Churches, Parks, Restaurants, or Businesses.',
+                ),
+                'empty_title' => 'No family resources published yet',
+                'empty_description' => 'We haven\'t published any Family Resources yet. Libraries, civic services, parent resources, nonprofit programs, health and wellness resources, and senior resources will appear here as they are added.',
+                'samples' => array(
+                    array('icon' => 'P', 'title' => 'Parent Resources', 'description' => 'Helpful local information for parents, kids, students, and school-year routines.'),
+                    array('icon' => 'L', 'title' => 'Libraries & Learning', 'description' => 'Library services, tutoring, enrichment, and lifelong-learning resources.'),
+                    array('icon' => 'H', 'title' => 'Health & Wellness', 'description' => 'Community health, wellness, counseling, and support resources.'),
+                    array('icon' => 'S', 'title' => 'Senior Resources', 'description' => 'Programs and services for seniors, caregivers, and multigenerational families.'),
+                ),
+                'links' => array(
+                    array('label' => 'Schools', 'key' => 'school'),
+                    array('label' => 'Churches', 'key' => 'church'),
+                    array('label' => 'Events', 'key' => 'event'),
+                    array('label' => 'New Resident Guide', 'key' => 'new-resident-guide'),
+                ),
+                'faq' => array(
+                    array('question' => 'What belongs in Family Resources?', 'answer' => 'Resources that help families and neighbors navigate life locally — parent support, libraries, civic services, senior resources, wellness resources, and nonprofit programs.'),
+                    array('question' => 'Is this only for parents with young children?', 'answer' => 'No. Family Resources is broad enough for students, parents, caregivers, seniors, and neighbors looking for practical help.'),
+                    array('question' => 'Can I suggest a resource?', 'answer' => 'Yes. Use the homepage resource suggestion call-to-action to send events, organizations, ministries, and helpful local resources for review.'),
+                ),
+            ),
+            'guide' => array(
+                'title' => 'Guides',
+                'intro' => array(
+                    'Evergreen local guides for common South Forsyth questions, weekend planning, moving, family activities, and seasonal ideas.',
+                    'Guides are meant to be useful after the week they are published, with clear internal links to related sections.',
+                ),
+                'empty_title' => 'No guides published yet',
+                'empty_description' => 'We haven\'t published any Guides yet. Once evergreen local guides are added, they will appear here automatically.',
+                'samples' => array(
+                    array('icon' => 'M', 'title' => 'Moving Guides', 'description' => 'Practical orientation for new residents and families comparing neighborhoods.'),
+                    array('icon' => 'F', 'title' => 'Family Activity Guides', 'description' => 'Roundups for parks, playgrounds, rainy days, and seasonal outings.'),
+                    array('icon' => 'D', 'title' => 'Dining Guides', 'description' => 'Coffee, brunch, family dining, date night, and neighborhood restaurant guides.'),
+                    array('icon' => 'S', 'title' => 'Seasonal Guides', 'description' => 'Holiday lights, fall events, farmers markets, summer camps, and local traditions.'),
+                ),
+                'links' => array(
+                    array('label' => 'Things To Do', 'key' => 'things-to-do'),
+                    array('label' => 'Weekend Guide', 'key' => 'weekend-guide'),
+                    array('label' => 'Events', 'key' => 'event'),
+                    array('label' => 'Family Resources', 'key' => 'community_resource'),
+                ),
+                'faq' => array(
+                    array('question' => 'How are Guides different from listings?', 'answer' => 'Listings describe one place, organization, or event. Guides connect several listings and answer a broader local question.'),
+                    array('question' => 'Will guides stay updated?', 'answer' => 'That is the intent. Evergreen guides should be refreshed as listings, events, and local information change.'),
+                ),
+            ),
+            'article' => array(
+                'title' => 'Articles',
+                'intro' => array(
+                    'Editorial stories, local updates, and source-attributed articles related to South Forsyth community life.',
+                    'Articles are separate from evergreen Guides so timely stories and durable resources can be managed differently.',
+                ),
+                'empty_title' => 'No articles published yet',
+                'empty_description' => 'We haven\'t published any Articles yet. Local stories and source-attributed updates will appear here as they are added.',
+                'samples' => array(
+                    array('icon' => 'N', 'title' => 'Local Updates', 'description' => 'Short, timely updates tied to community life and local organizations.'),
+                    array('icon' => 'S', 'title' => 'School & Family Stories', 'description' => 'Stories related to education, families, students, and neighborhood routines.'),
+                    array('icon' => 'C', 'title' => 'Community Spotlights', 'description' => 'Features on people, organizations, ministries, and local service efforts.'),
+                    array('icon' => 'P', 'title' => 'Public Information', 'description' => 'Source-attributed civic, county, weather, traffic, and safety updates.'),
+                ),
+                'links' => array(
+                    array('label' => 'Guides', 'key' => 'guide'),
+                    array('label' => 'Events', 'key' => 'event'),
+                    array('label' => 'Family Resources', 'key' => 'community_resource'),
+                    array('label' => 'Business Directory', 'key' => 'business'),
+                ),
+                'faq' => array(
+                    array('question' => 'Are imported articles republished in full?', 'answer' => 'No. Source-attributed imported articles should use excerpts and links, not full reproduction.'),
+                    array('question' => 'How are Articles different from Guides?', 'answer' => 'Articles are timely or story-driven. Guides are evergreen resources designed to stay useful over time.'),
+                ),
+            ),
+            'topic' => array(
+                'title' => 'Topics',
+                'intro' => array(
+                    'Topic pages organize related Guides and Articles around larger themes like moving, family activities, dining, volunteering, and local schools.',
+                    'This section is the structure for future topic clusters rather than a separate directory of places.',
+                ),
+                'empty_title' => 'No topics published yet',
+                'empty_description' => 'We haven\'t published any Topic pages yet. Once topic clusters are added, they will appear here automatically.',
+                'samples' => array(
+                    array('icon' => 'M', 'title' => 'Moving to South Forsyth', 'description' => 'Guides and articles for new residents getting oriented.'),
+                    array('icon' => 'F', 'title' => 'Family Activities', 'description' => 'Parks, events, seasonal guides, and family-friendly local ideas.'),
+                    array('icon' => 'S', 'title' => 'Schools & Learning', 'description' => 'School guides, education resources, and family support content.'),
+                    array('icon' => 'V', 'title' => 'Volunteering & Service', 'description' => 'Churches, nonprofits, ministries, and ways to get involved.'),
+                ),
+                'links' => array(
+                    array('label' => 'Guides', 'key' => 'guide'),
+                    array('label' => 'Articles', 'key' => 'article'),
+                    array('label' => 'Family Resources', 'key' => 'community_resource'),
+                    array('label' => 'New Resident Guide', 'key' => 'new-resident-guide'),
+                ),
+                'faq' => array(
+                    array('question' => 'What is a Topic page?', 'answer' => 'A Topic page groups related guides and articles around one broader local subject so readers can keep exploring without dead ends.'),
+                    array('question' => 'Do Topics replace categories?', 'answer' => 'No. Topics are editorial landing pages; taxonomies still handle filtering and organization behind the scenes.'),
+                ),
+            ),
             'things-to-do' => array(
                 'title' => 'Things To Do',
                 'intro' => array(

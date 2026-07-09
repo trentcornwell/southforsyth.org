@@ -12,12 +12,16 @@ $eyebrow = get_query_var('eyebrow') ?: 'Trail';
 $title = get_query_var('title') ?: 'Local trail';
 $description = get_query_var('description') ?: 'Highlight distance, surface, and difficulty here.';
 $link = get_query_var('link') ?: '#';
+$location = get_query_var('location') ?: '';
 ?>
 <article class="card">
     <div class="card__body">
         <p class="eyebrow"><?php echo esc_html($eyebrow); ?></p>
         <h3><?php echo esc_html($title); ?></h3>
         <p><?php echo esc_html($description); ?></p>
+        <?php if ($location) : ?>
+            <p class="card-location"><?php echo esc_html($location); ?></p>
+        <?php endif; ?>
         <a class="text-link" href="<?php echo esc_url($link); ?>">View trail</a>
     </div>
 </article>

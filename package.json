@@ -1,0 +1,24 @@
+{
+  "name": "southforsyth.org",
+  "version": "1.0.0",
+  "description": "SouthForsyth.org is a long-term community content platform for South Forsyth, Georgia — not a business website. The goal is to become the definitive local resource for residents, visitors, and families, covering events, restaurants, parks, neighborhoods, schools, churches, the business directory, evergreen guides, and local news as real, queryable WordPress content.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trentcornwell/southforsyth.org.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/trentcornwell/southforsyth.org/issues"
+  },
+  "homepage": "https://github.com/trentcornwell/southforsyth.org#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}

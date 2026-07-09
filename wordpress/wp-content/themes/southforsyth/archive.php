@@ -56,6 +56,11 @@ $hub = southforsyth_get_hub_content($post_type_key);
                             set_query_var('title', $card['title']);
                             set_query_var('description', $card['description']);
                             set_query_var('link', $card['link']);
+                            set_query_var('date', $card['date'] ?? '');
+                            set_query_var('address', $card['address'] ?? '');
+                            set_query_var('area', $card['area'] ?? '');
+                            set_query_var('city', $card['city'] ?? '');
+                            set_query_var('location', $card['location'] ?? '');
                             get_template_part($card_template);
                         else :
                             get_template_part('template-parts/content', 'card');

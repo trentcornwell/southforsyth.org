@@ -2,26 +2,17 @@
 
 /**
  * Homepage hero.
- *
- * This is the "preview / launching soon" version of the hero: a badge,
- * headline, subhead, and two anchor-link CTAs into the on-page preview
- * sections below. No search form or category pills here on purpose — see
- * the note in front-page.php for why, and how to bring the full portal
- * hero back once there's real content to search.
  */
 ?>
 <section class="hero">
     <div class="container hero__inner">
         <div class="hero__content stack">
-            <span class="badge-launch">
-                <span class="badge-launch__dot" aria-hidden="true"></span>
-                Preview Mode &mdash; Launching Soon
-            </span>
-            <h1>Your Guide to Life in South Forsyth</h1>
-            <p class="hero__lede">SouthForsyth.org is being built as a local guide to weekend events, restaurants, parks, schools, churches, neighborhoods, and community resources &mdash; all in one place.</p>
+            <p class="eyebrow">Community guide</p>
+            <h1>South Forsyth Guide</h1>
+            <p class="hero__lede">A community-minded guide to life in South Forsyth created and maintained as a service to the community we love by Vision Baptist Church.</p>
             <div class="hero__actions cluster">
-                <a class="btn btn-primary" href="#building">Explore the Preview</a>
-                <a class="btn btn-outline" href="#newsletter">Get Updates</a>
+                <a class="btn btn-secondary" href="#guide">Explore the Guide</a>
+                <a class="btn btn-outline" href="#suggest-resource">Submit a Local Resource</a>
             </div>
         </div>
     </div>

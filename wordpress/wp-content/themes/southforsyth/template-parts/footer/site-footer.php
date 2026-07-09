@@ -3,7 +3,7 @@
         <div class="footer-brand">
             <h2>South Forsyth</h2>
             <span class="footer-tagline">Discover &bull; Connect &bull; Volunteer</span>
-            <p>An independent, community-minded guide to life in South Forsyth, created and maintained by Vision Baptist Church as a service to the community we love.</p>
+            <p>An independent, community-minded guide to life in South Forsyth created and maintained as a service to the community we love by Vision Baptist Church.</p>
         </div>
         <div>
             <h2 class="widget__title">Explore</h2>
@@ -33,6 +33,6 @@
         </div>
     </div>
     <div class="container site-footer__bottom">
-        <p>&copy; <?php echo esc_html(date('Y')); ?> South Forsyth.org. An independent, community-minded guide to life in South Forsyth, created and maintained by Vision Baptist Church as a service to the community we love.</p>
+        <p>&copy; <?php echo esc_html(date('Y')); ?> South Forsyth.org. An independent, community-minded guide to life in South Forsyth created and maintained as a service to the community we love by Vision Baptist Church.</p>
     </div>
 </footer>

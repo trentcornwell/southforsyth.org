@@ -12,6 +12,7 @@ $title = get_query_var('title') ?: 'Upcoming event';
 $description = get_query_var('description') ?: 'Use this component for community programming, markets, and happenings.';
 $link = get_query_var('link') ?: '#';
 $date = get_query_var('date') ?: 'Coming soon';
+$location = get_query_var('location') ?: '';
 ?>
 <article class="card card-event">
     <div class="card__body">
@@ -19,6 +20,9 @@ $date = get_query_var('date') ?: 'Coming soon';
         <p class="card-event__date"><?php echo esc_html($date); ?></p>
         <h3><?php echo esc_html($title); ?></h3>
         <p><?php echo esc_html($description); ?></p>
+        <?php if ($location) : ?>
+            <p class="card-location"><?php echo esc_html($location); ?></p>
+        <?php endif; ?>
         <a class="text-link" href="<?php echo esc_url($link); ?>">Reserve spot</a>
     </div>
 </article>

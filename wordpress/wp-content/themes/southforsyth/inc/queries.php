@@ -29,11 +29,23 @@ if (! function_exists('southforsyth_post_to_card')) {
             }
         }
 
+        $address = get_post_meta($post->ID, 'sf_address', true);
+        $area_terms = get_the_terms($post, 'sf_area');
+        $city_terms = get_the_terms($post, 'sf_city');
+        $area = (! empty($area_terms) && ! is_wp_error($area_terms)) ? $area_terms[0]->name : '';
+        $city = (! empty($city_terms) && ! is_wp_error($city_terms)) ? $city_terms[0]->name : '';
+        $location_parts = array_filter(array($address, $area, $city));
+
         return array(
             'eyebrow'     => $eyebrow,
             'title'       => get_the_title($post),
             'description' => southforsyth_get_excerpt($post->ID, 20),
             'link'        => get_permalink($post),
+            'date'        => ('event' === $post->post_type) ? get_post_meta($post->ID, 'sf_event_date', true) : '',
+            'address'     => $address,
+            'area'        => $area,
+            'city'        => $city,
+            'location'    => implode(' · ', $location_parts),
         );
     }
 }
