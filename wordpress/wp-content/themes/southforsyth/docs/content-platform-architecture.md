@@ -92,11 +92,32 @@ plugin or core taxonomies later.
 
 Registered in `inc/meta.php`, kept deliberately small:
 
-- **Directory fields** (`sf_address`, `sf_phone`, `sf_website`, `sf_hours`) —
-  shared across `restaurant`, `park`, `school`, `church`, `business` rather
-  than duplicating near-identical fields per post type.
+- **Directory fields** (`sf_address`, `sf_phone`, `sf_website`, `sf_hours`,
+  `sf_lat`, `sf_lng`, `sf_source_url`, `sf_last_verified`) — shared across
+  `restaurant`, `park`, `school`, `church`, `business`, `trail`, and
+  `community_resource` rather than duplicating near-identical fields per post
+  type. `sf_source_url`/`sf_last_verified` were added for the Schools
+  data-model work as a trust signal ("where did this come from," "how
+  current is this") that applies identically to every directory-style
+  listing, not just schools — the same reasoning `sf_lat`/`sf_lng` were
+  added to the whole group rather than one post type. `sf_source_url` is the
+  same key `article` already used for RSS-imported source attribution
+  (below); this just extends its registration to the directory group too.
+- **School fields** (`sf_grades_served`, `sf_principal_name`,
+  `sf_boundary_url`, `sf_feeder_pattern`, `sf_notable_programs`) — specific
+  to `school`. `sf_grades_served` is a precise range (e.g. "PK-5"); the more
+  categorical level/sector facets (Elementary/Middle/High,
+  Public/Private/Charter/Homeschool Resource) live in the `sf_school_type`
+  taxonomy instead of meta, since a hierarchical taxonomy already supports
+  tagging a post with more than one term (see "Taxonomies" above and
+  `inc/school-provisioning.php`) — no second taxonomy needed to separate the
+  two facets. `sf_boundary_url` links out to the district's own official
+  attendance-zone page rather than republishing boundary data on this site.
 - **Event fields** (`sf_event_date`, `sf_event_time`, `sf_event_venue`) —
   specific to `event`.
+- **Article source-attribution fields** (`sf_source_url`,
+  `sf_source_published`) — specific to `article`, for RSS-imported content
+  (see `Southforsyth_Rss_Provider`).
 - **`sf_featured`** — a single boolean reused across `event`, `restaurant`,
   `park`, `neighborhood`, `business`. Checking it is what makes a post
   eligible for the homepage's "Popular Places" section, which deliberately

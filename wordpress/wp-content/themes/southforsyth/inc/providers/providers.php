@@ -15,6 +15,7 @@ require_once __DIR__ . '/class-provider-abstract.php';
 require_once __DIR__ . '/class-google-places-provider.php';
 require_once __DIR__ . '/class-openstreetmap-provider.php';
 require_once __DIR__ . '/class-forsyth-county-provider.php';
+require_once __DIR__ . '/class-nces-provider.php';
 require_once __DIR__ . '/class-weather-provider.php';
 require_once __DIR__ . '/class-traffic-provider.php';
 require_once __DIR__ . '/class-rss-provider.php';

@@ -46,6 +46,7 @@ class Southforsyth_Admin_Menu
             'google_places'  => 'Businesses & restaurants via the Google Places API. Requires a billing-enabled API key.',
             'openstreetmap'  => 'Geocoding via OpenStreetMap Nominatim. Keyless, rate-limited to ~1 req/sec.',
             'forsyth_county' => 'Forsyth County government/schools/parks/library. Reads a configurable feed URL — no confirmed public API yet.',
+            'nces'           => 'NCES public school data (grade span, address, lat/lng) for enrichment/verification, not narrative content. Reads a configurable feed URL — no confirmed keyless API yet.',
             'weather'        => 'Forecasts via the free, keyless National Weather Service API (api.weather.gov).',
             'traffic'        => 'Road conditions via GDOT/511 Georgia. Reads a configurable feed URL + optional API key.',
             'rss'            => 'News/article excerpts via WordPress core\'s built-in feed parser. Excerpt + link only, per policy.',
@@ -268,6 +269,7 @@ class Southforsyth_Admin_Menu
         $settings = array(
             'southforsyth_google_places_api_key',
             'southforsyth_forsyth_county_feed_url',
+            'southforsyth_nces_feed_url',
             'southforsyth_traffic_feed_url',
             'southforsyth_traffic_api_key',
         );
@@ -287,6 +289,7 @@ class Southforsyth_Admin_Menu
             echo '<table class="form-table"><tbody>';
             self::render_settings_field('southforsyth_google_places_api_key', 'Google Places API key');
             self::render_settings_field('southforsyth_forsyth_county_feed_url', 'Forsyth County feed URL');
+            self::render_settings_field('southforsyth_nces_feed_url', 'NCES public school data feed URL');
             self::render_settings_field('southforsyth_traffic_feed_url', 'Traffic (GDOT/511 Georgia) feed URL');
             self::render_settings_field('southforsyth_traffic_api_key', 'Traffic API key');
             echo '</tbody></table>';

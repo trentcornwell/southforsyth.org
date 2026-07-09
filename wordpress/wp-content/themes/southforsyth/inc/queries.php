@@ -46,6 +46,7 @@ if (! function_exists('southforsyth_post_to_card')) {
             'area'        => $area,
             'city'        => $city,
             'location'    => implode(' · ', $location_parts),
+            'grades'      => ('school' === $post->post_type) ? get_post_meta($post->ID, 'sf_grades_served', true) : '',
         );
     }
 }

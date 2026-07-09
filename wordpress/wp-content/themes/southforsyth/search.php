@@ -29,6 +29,7 @@ get_header(); ?>
                         set_query_var('area', $card['area'] ?? '');
                         set_query_var('city', $card['city'] ?? '');
                         set_query_var('location', $card['location'] ?? '');
+                        set_query_var('grades', $card['grades'] ?? '');
                         get_template_part($card_template);
                     else :
                         get_template_part('template-parts/content', 'card');

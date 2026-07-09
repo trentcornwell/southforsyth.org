@@ -41,7 +41,25 @@ first.
   an open data or RSS endpoint is confirmed.
 - **Forsyth County Schools (district)** — school info, calendars, news.
   Maps to the `school` post type and to `event` for district calendar
-  items.
+  items. Handled by `Southforsyth_Forsyth_County_Provider`
+  (`inc/providers/`), which is already scoped to "government/schools/parks/
+  library" — no separate schools-specific provider class, matching the
+  "don't create duplicate systems" rule. Reads a configurable feed URL and
+  returns nothing until an admin sets one; Phase 0 is manual entry, exactly
+  as described below.
+- **NCES (National Center for Education Statistics)** and **Georgia DOE /
+  GOSA** — federal and state public school data (grade span, address,
+  lat/lng, public/private status). Use for *enrichment and verification* of
+  a school profile's factual fields, not for writing its description — NCES
+  data is administrative, not narrative. `Southforsyth_Nces_Provider`
+  follows the same configurable-endpoint, inert-until-configured pattern as
+  the county provider above (no hardcoded or guessed API — NCES publishes
+  its Common Core of Data as downloadable files, not a simple keyless REST
+  API, and this project doesn't wire up to unvetted third-party wrappers).
+  Georgia DOE/GOSA doesn't get its own provider class for the same reason
+  the Chamber of Commerce's member list doesn't (see below): treated as a
+  secondary manual cross-check source until it's actually needed, not an
+  automated feed.
 - **Forsyth County Parks & Recreation** — park facilities, programs,
   reservations info. Maps to `park` and `event`.
 - **Forsyth County Public Library** — branch info and programming. Likely
@@ -221,7 +239,7 @@ today):
 
 | Source category | Post type(s) | Taxonomies | Meta fields |
 |---|---|---|---|
-| Official — schools | `school` | `sf_school_type`, `sf_area` | `sf_address`, `sf_phone`, `sf_website`, `sf_hours` |
+| Official — schools (FCS, NCES, GA DOE) | `school` | `sf_school_type` (level + sector), `sf_school_district`, `sf_area` | `sf_address`, `sf_phone`, `sf_website`, `sf_hours`, `sf_grades_served`, `sf_principal_name`, `sf_boundary_url`, `sf_feeder_pattern`, `sf_notable_programs`, `sf_source_url`, `sf_last_verified` |
 | Official — parks & rec | `park`, `event` | `sf_park_amenity`, `sf_event_category`, `sf_area` | `sf_address`, `sf_hours`; `sf_event_date/time/venue` |
 | Official — library/civic | `event` | `sf_event_category`, `sf_area` | `sf_event_date/time/venue` |
 | Calendar/ICS | `event` | `sf_event_category`, `sf_area` | `sf_event_date`, `sf_event_time`, `sf_event_venue` |

@@ -93,6 +93,7 @@ southforsyth_require_theme_files(array(
 southforsyth_require_theme_files(array(
     'hub-content.php',
     'page-provisioning.php',
+    'school-provisioning.php',
 ));
 
 // Presentation: rendering helpers shared by template parts (breadcrumbs,

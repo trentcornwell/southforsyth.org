@@ -20,6 +20,7 @@ class Southforsyth_Provider_Registry
             'google_places'  => 'Southforsyth_Google_Places_Provider',
             'openstreetmap'  => 'Southforsyth_Openstreetmap_Provider',
             'forsyth_county' => 'Southforsyth_Forsyth_County_Provider',
+            'nces'           => 'Southforsyth_Nces_Provider',
             'weather'        => 'Southforsyth_Weather_Provider',
             'traffic'        => 'Southforsyth_Traffic_Provider',
             'rss'            => 'Southforsyth_Rss_Provider',
