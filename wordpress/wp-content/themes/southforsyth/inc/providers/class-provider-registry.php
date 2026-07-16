@@ -18,6 +18,7 @@ class Southforsyth_Provider_Registry
     {
         return array(
             'google_places'  => 'Southforsyth_Google_Places_Provider',
+            'census'         => 'Southforsyth_Census_Provider',
             'openstreetmap'  => 'Southforsyth_Openstreetmap_Provider',
             'forsyth_county' => 'Southforsyth_Forsyth_County_Provider',
             'nces'           => 'Southforsyth_Nces_Provider',

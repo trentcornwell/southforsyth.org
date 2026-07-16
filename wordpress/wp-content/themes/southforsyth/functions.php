@@ -94,6 +94,7 @@ southforsyth_require_theme_files(array(
     'hub-content.php',
     'page-provisioning.php',
     'school-provisioning.php',
+    'resource-provisioning.php',
 ));
 
 // Presentation: rendering helpers shared by template parts (breadcrumbs,
@@ -131,13 +132,39 @@ southforsyth_require_optional_theme_files(array(
     'automation.php',
 ));
 
+// Community suggestion system (this project's first public write-path) —
+// the sf_suggestion post type must register on every request (front-end
+// submissions and admin moderation both need it), so it's loaded here
+// alongside the rest of the data platform, not gated behind is_admin() or
+// WP_CLI. See docs/data-integration-roadmap.md, "South Forsyth
+// classification policy," for how this interacts with editorial workflow.
+southforsyth_require_optional_theme_files(array(
+    'community/community.php',
+));
+
 // Admin-only tooling (the "Community Platform" wp-admin menu) — gated
 // behind is_admin() so none of it parses on a front-end page request,
 // matching this theme's existing performance philosophy (see
 // inc/performance.php). Also optional-loaded, same reasoning as above.
 if (is_admin()) {
     southforsyth_require_optional_theme_files(array(
+        'import/class-geocode-match-evaluator.php',
+        'import/class-geocode-command.php',
         'admin/admin.php',
+        'admin/class-school-list-columns.php',
+    ));
+}
+
+// WP-CLI-only commands — gated behind WP_CLI so nothing here parses on a
+// normal web request. This theme's first WP-CLI command; see
+// docs/platform-architecture.md, "How to add a new data source" for the
+// research this command's provider is built from.
+if (defined('WP_CLI') && WP_CLI) {
+    southforsyth_require_optional_theme_files(array(
+        'import/class-geocode-match-evaluator.php',
+        'import/class-forsyth-county-import-command.php',
+        'import/class-geocode-command.php',
+        'import/class-schools-pilot-command.php',
     ));
 }
 

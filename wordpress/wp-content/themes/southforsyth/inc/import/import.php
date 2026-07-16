@@ -15,6 +15,7 @@ require_once __DIR__ . '/class-normalizer.php';
 require_once __DIR__ . '/class-slug-generator.php';
 require_once __DIR__ . '/class-data-validator.php';
 require_once __DIR__ . '/class-duplicate-detector.php';
+require_once __DIR__ . '/class-school-import-safety.php';
 require_once __DIR__ . '/class-image-downloader.php';
 require_once __DIR__ . '/class-import-queue.php';
 require_once __DIR__ . '/class-import-logger.php';

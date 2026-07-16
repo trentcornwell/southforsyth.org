@@ -4,7 +4,7 @@
   "description": "SouthForsyth.org is a long-term community content platform for South Forsyth, Georgia — not a business website. The goal is to become the definitive local resource for residents, visitors, and families, covering events, restaurants, parks, neighborhoods, schools, churches, the business directory, evergreen guides, and local news as real, queryable WordPress content.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "php tests/school-pipeline-test.php"
   },
   "repository": {
     "type": "git",

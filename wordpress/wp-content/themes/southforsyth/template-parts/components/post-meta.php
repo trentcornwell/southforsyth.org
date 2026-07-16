@@ -53,6 +53,9 @@ if ('school' === $post_type) {
     $principal = get_post_meta($post_id, 'sf_principal_name', true);
     $boundary_url = get_post_meta($post_id, 'sf_boundary_url', true);
     $programs = get_post_meta($post_id, 'sf_notable_programs', true);
+    $feeder = get_post_meta($post_id, 'sf_feeder_pattern', true);
+    $mascot = get_post_meta($post_id, 'sf_mascot', true);
+    $colors = get_post_meta($post_id, 'sf_school_colors', true);
 
     if ($grades) {
         $items[] = array('label' => 'Grades served', 'value' => $grades);
@@ -60,8 +63,17 @@ if ('school' === $post_type) {
     if ($principal) {
         $items[] = array('label' => 'Principal', 'value' => $principal);
     }
+    if ($mascot) {
+        $items[] = array('label' => 'Mascot', 'value' => $mascot);
+    }
+    if ($colors) {
+        $items[] = array('label' => 'School colors', 'value' => $colors);
+    }
     if ($programs) {
         $items[] = array('label' => 'Notable programs', 'value' => $programs);
+    }
+    if ($feeder) {
+        $items[] = array('label' => 'Feeder pattern', 'value' => $feeder);
     }
     if ($boundary_url) {
         $items[] = array(

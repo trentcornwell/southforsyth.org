@@ -151,6 +151,21 @@ if (! function_exists('southforsyth_get_taxonomy_definitions')) {
                 'hierarchical' => false,
                 'slug'        => 'topic',
             ),
+            // Added for the ingestion-framework work: community_resource is
+            // deliberately reused for sports organizations, government
+            // facilities, libraries, etc. rather than splitting each into
+            // its own post type (see docs/platform-architecture.md, "How a
+            // new content type plugs in") — this taxonomy is what makes
+            // that reuse actually distinguishable, the same role
+            // sf_school_type plays for schools. Terms are seeded by
+            // inc/resource-provisioning.php.
+            'sf_resource_type' => array(
+                'label'       => 'Resource Types',
+                'singular'    => 'Resource Type',
+                'post_types'  => array('community_resource'),
+                'hierarchical' => true,
+                'slug'        => 'resource-type',
+            ),
         );
     }
 }

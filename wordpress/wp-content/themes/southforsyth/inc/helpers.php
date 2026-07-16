@@ -62,3 +62,49 @@ if (! function_exists('southforsyth_render_card_section')) {
         echo '</section>' . PHP_EOL;
     }
 }
+
+if (! function_exists('southforsyth_render_mixed_card_grid')) {
+    /**
+     * Like southforsyth_render_card_section(), but for a list of WP_Post
+     * objects that may span more than one post type (e.g. related/nearby
+     * entities — see template-parts/components/related-entities.php) —
+     * each post routes through its own post type's card component via
+     * southforsyth_get_card_template_for_post_type(), the same lookup
+     * archive.php and search.php already use, so a related school still
+     * renders as a school-card and a nearby restaurant still renders as a
+     * restaurant-card instead of collapsing to one generic card.
+     */
+    function southforsyth_render_mixed_card_grid($title, array $posts)
+    {
+        if (empty($posts)) {
+            return;
+        }
+
+        echo '<div class="related-entities__group">' . PHP_EOL;
+        echo '<h3 class="related-entities__title">' . esc_html($title) . '</h3>' . PHP_EOL;
+        echo '<div class="card-grid">' . PHP_EOL;
+
+        foreach ($posts as $post) {
+            $card_template = southforsyth_get_card_template_for_post_type($post->post_type);
+            if (! $card_template) {
+                continue;
+            }
+
+            $card = southforsyth_post_to_card($post);
+            set_query_var('eyebrow', $card['eyebrow']);
+            set_query_var('title', $card['title']);
+            set_query_var('description', $card['description']);
+            set_query_var('link', $card['link']);
+            set_query_var('date', $card['date'] ?? '');
+            set_query_var('address', $card['address'] ?? '');
+            set_query_var('area', $card['area'] ?? '');
+            set_query_var('city', $card['city'] ?? '');
+            set_query_var('location', $card['location'] ?? '');
+            set_query_var('grades', $card['grades'] ?? '');
+            get_template_part($card_template);
+        }
+
+        echo '</div>' . PHP_EOL;
+        echo '</div>' . PHP_EOL;
+    }
+}

@@ -1,0 +1,293 @@
+<?php
+
+define('ABSPATH', __DIR__ . '/../wordpress/');
+define('DAY_IN_SECONDS', 86400);
+define('OBJECT', 'OBJECT');
+
+$GLOBALS['sf_test_posts'] = array();
+$GLOBALS['sf_test_meta'] = array();
+$GLOBALS['sf_test_terms'] = array();
+$GLOBALS['sf_test_updates'] = array();
+$GLOBALS['sf_test_deletes'] = array();
+
+class WP_Error
+{
+    private $code;
+    private $message;
+
+    public function __construct($code, $message)
+    {
+        $this->code = $code;
+        $this->message = $message;
+    }
+
+    public function get_error_message()
+    {
+        return $this->message;
+    }
+}
+
+function sf_assert($condition, $message)
+{
+    if (! $condition) {
+        fwrite(STDERR, "FAIL: {$message}\n");
+        exit(1);
+    }
+    echo "PASS: {$message}\n";
+}
+
+function wp_strip_all_tags($value)
+{
+    return strip_tags($value);
+}
+
+function esc_url_raw($url)
+{
+    return filter_var($url, FILTER_SANITIZE_URL);
+}
+
+function sanitize_title($title)
+{
+    $slug = strtolower(trim($title));
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    return trim($slug, '-');
+}
+
+function get_posts($args)
+{
+    $posts = array_values($GLOBALS['sf_test_posts']);
+
+    if (! empty($args['post_type'])) {
+        $posts = array_filter($posts, function ($post) use ($args) {
+            return $post->post_type === $args['post_type'];
+        });
+    }
+
+    if (! empty($args['post_status']) && 'any' !== $args['post_status']) {
+        $posts = array_filter($posts, function ($post) use ($args) {
+            return $post->post_status === $args['post_status'];
+        });
+    }
+
+    if (! empty($args['post__not_in'])) {
+        $posts = array_filter($posts, function ($post) use ($args) {
+            return ! in_array($post->ID, $args['post__not_in'], true);
+        });
+    }
+
+    if (! empty($args['s'])) {
+        $needle = strtolower($args['s']);
+        $posts = array_filter($posts, function ($post) use ($needle) {
+            return false !== strpos(strtolower($post->post_title), $needle);
+        });
+    }
+
+    if (! empty($args['meta_key'])) {
+        $posts = array_filter($posts, function ($post) use ($args) {
+            $value = $GLOBALS['sf_test_meta'][$post->ID][$args['meta_key']] ?? '';
+            if (array_key_exists('meta_value', $args)) {
+                return $value === $args['meta_value'];
+            }
+            return '' !== $value;
+        });
+    }
+
+    if (! empty($args['fields']) && 'ids' === $args['fields']) {
+        return array_map(function ($post) {
+            return $post->ID;
+        }, $posts);
+    }
+
+    return array_slice($posts, 0, $args['posts_per_page'] ?? count($posts));
+}
+
+function get_page_by_path($slug, $output = OBJECT, $post_type = 'page')
+{
+    foreach ($GLOBALS['sf_test_posts'] as $post) {
+        if ($post->post_type === $post_type && $post->post_name === $slug) {
+            return $post;
+        }
+    }
+    return null;
+}
+
+function get_post($id)
+{
+    return $GLOBALS['sf_test_posts'][$id] ?? null;
+}
+
+function get_post_meta($post_id, $key, $single = true)
+{
+    return $GLOBALS['sf_test_meta'][$post_id][$key] ?? '';
+}
+
+function update_post_meta($post_id, $key, $value)
+{
+    $GLOBALS['sf_test_updates'][] = array($post_id, $key, $value);
+    $GLOBALS['sf_test_meta'][$post_id][$key] = $value;
+}
+
+function delete_post_meta($post_id, $key)
+{
+    $GLOBALS['sf_test_deletes'][] = array($post_id, $key);
+    unset($GLOBALS['sf_test_meta'][$post_id][$key]);
+}
+
+function get_the_title($post_id)
+{
+    return $GLOBALS['sf_test_posts'][$post_id]->post_title ?? '';
+}
+
+function wp_get_post_terms($post_id, $taxonomy, $args = array())
+{
+    return $GLOBALS['sf_test_terms'][$post_id][$taxonomy] ?? array();
+}
+
+function is_wp_error($value)
+{
+    return $value instanceof WP_Error;
+}
+
+function current_time($format)
+{
+    return 'timestamp' === $format ? time() : gmdate('Y-m-d');
+}
+
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-normalizer.php';
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-data-validator.php';
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-school-import-safety.php';
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-geocode-match-evaluator.php';
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-geocode-command.php';
+
+$functions = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/functions.php');
+$import_loader = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/import.php');
+sf_assert(false !== strpos($functions, 'import/class-geocode-match-evaluator.php') && false !== strpos($functions, 'import/class-schools-pilot-command.php'), 'missing school class load no longer occurs');
+sf_assert(false !== strpos($import_loader, 'class-school-import-safety.php'), 'school safety helper is loaded with import pipeline');
+sf_assert('South Forsyth Middle School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth', 'Middle Schools'), 'middle school display name gets official suffix');
+sf_assert('South Forsyth High School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth High School', 'High Schools'), 'display name suffix is not duplicated');
+sf_assert('Alliance Academy for Innovation' === Southforsyth_School_Import_Safety::official_display_name('Alliance Academy for Innovation', 'Academies of Creative Education'), 'academy display name is not forced into a normal level suffix');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'South Forsyth High School', 'meta' => array('sf_address' => '585 Peachtree Pkwy', 'sf_zip' => '30041')));
+sf_assert('Confirmed South Forsyth' === $coverage['status'], 'South Forsyth high-school community is confirmed by coverage classifier');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Middle School', 'meta' => array('sf_address' => '6240 Post Rd', 'sf_zip' => '30040')));
+sf_assert('Needs Review' === $coverage['status'], 'possible feeder/community schools remain needs review without documented evidence');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array('sf_address' => '3635 Coal Mountain Dr', 'sf_zip' => '30028')));
+sf_assert('Outside Coverage' === $coverage['status'], 'outside county school is marked outside coverage');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Alliance Academy for Innovation', 'meta' => array('sf_address' => '1100 Lanier 400 Pkwy', 'sf_zip' => '30040')));
+sf_assert('Needs Review' === $coverage['status'], 'countywide/special schools remain needs review without a strong South Forsyth signal');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array('sf_coverage_decision_type' => 'manual')), 'Confirmed South Forsyth');
+sf_assert('Confirmed South Forsyth' === $coverage['status'], 'manual confirmed coverage status is preserved over weaker automatic classification');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array()), 'Confirmed South Forsyth');
+sf_assert('Outside Coverage' === $coverage['status'], 'unproven legacy confirmed status is re-evaluated conservatively');
+sf_assert(3 === count(Southforsyth_School_Import_Safety::coverage_allowlist()), 'conservative confirmed allowlist starts with three high-school anchors');
+sf_assert('Outside Coverage' === Southforsyth_School_Import_Safety::normalize_coverage_status('Outside South Forsyth'), 'legacy outside status normalizes to Outside Coverage');
+
+$provider = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/providers/class-forsyth-county-provider.php');
+sf_assert(false !== strpos($provider, 'official_display_name'), 'Forsyth County provider preserves complete official display names');
+
+$record = array(
+    'source' => 'forsyth_county',
+    'source_id' => 'https://www.forsyth.k12.ga.us/fs/pages/1',
+    'post_type' => 'school',
+    'title' => 'Example High School',
+    'meta' => array(
+        'sf_address' => '123 Peachtree Pkwy',
+        'sf_city' => 'Cumming',
+        'sf_zip' => '30041',
+        'sf_website' => 'example.forsyth.k12.ga.us',
+        'sf_source_url' => 'https://www.forsyth.k12.ga.us/fs/pages/1',
+    ),
+);
+
+$analysis = Southforsyth_School_Import_Safety::analyze_record($record);
+sf_assert('create' === $analysis['action'], 'new official school creates a draft');
+
+$GLOBALS['sf_test_posts'][10] = (object) array('ID' => 10, 'post_type' => 'school', 'post_status' => 'draft', 'post_title' => 'Example High School', 'post_name' => 'example-high-school');
+$GLOBALS['sf_test_meta'][10]['_sf_import_source_id'] = 'https://www.forsyth.k12.ga.us/fs/pages/1';
+$analysis = Southforsyth_School_Import_Safety::analyze_record($record);
+sf_assert('update' === $analysis['action'] && 10 === $analysis['post_id'], 'confident duplicate updates a draft');
+
+$GLOBALS['sf_test_posts'][10]->post_status = 'publish';
+$analysis = Southforsyth_School_Import_Safety::analyze_record($record);
+sf_assert('skip' === $analysis['action'] && false !== strpos($analysis['reason'], 'Published'), 'published school is protected');
+
+$GLOBALS['sf_test_posts'][10]->post_status = 'draft';
+$GLOBALS['sf_test_posts'][11] = (object) array('ID' => 11, 'post_type' => 'school', 'post_status' => 'draft', 'post_title' => 'Example High School', 'post_name' => 'example-high-school-2');
+$GLOBALS['sf_test_meta'][11]['sf_source_url'] = 'https://www.forsyth.k12.ga.us/fs/pages/1';
+$analysis = Southforsyth_School_Import_Safety::analyze_record($record);
+sf_assert('skip' === $analysis['action'] && false !== strpos($analysis['reason'], 'Ambiguous'), 'ambiguous duplicate is skipped');
+
+$GLOBALS['sf_test_posts'] = array();
+$GLOBALS['sf_test_meta'] = array();
+$GLOBALS['sf_test_posts'][20] = (object) array('ID' => 20, 'post_type' => 'school', 'post_status' => 'draft', 'post_title' => 'South Forsyth', 'post_name' => 'south-forsyth');
+$GLOBALS['sf_test_meta'][20]['_sf_import_source_id'] = 'https://www.forsyth.k12.ga.us/fs/pages/high';
+$south_middle = $record;
+$south_middle['source_id'] = 'https://www.forsyth.k12.ga.us/fs/pages/middle';
+$south_middle['title'] = 'South Forsyth';
+$south_middle['meta']['sf_source_url'] = 'https://www.forsyth.k12.ga.us/fs/pages/middle';
+$south_middle['meta']['sf_address'] = '4670 Windermere Pkwy';
+$analysis = Southforsyth_School_Import_Safety::analyze_record($south_middle);
+sf_assert('create' === $analysis['action'], 'shortened title collision with different source identity creates a separate draft');
+
+$GLOBALS['sf_test_posts'] = array();
+$GLOBALS['sf_test_meta'] = array();
+$GLOBALS['sf_test_terms'] = array();
+$GLOBALS['sf_test_updates'] = array();
+$GLOBALS['sf_test_deletes'] = array();
+$GLOBALS['sf_test_posts'][10] = (object) array('ID' => 10, 'post_type' => 'school', 'post_status' => 'draft', 'post_title' => 'Example High School', 'post_name' => 'example-high-school');
+
+$bad = $record;
+$bad['meta']['sf_address'] = '';
+$analysis = Southforsyth_School_Import_Safety::analyze_record($bad);
+sf_assert('skip' === $analysis['action'] && false !== strpos($analysis['reason'], 'missing an address'), 'missing required data is reported');
+
+$match = Southforsyth_Geocode_Match_Evaluator::evaluate(
+    array('title' => 'Example High School', 'address' => '123 Peachtree Parkway', 'city' => 'Cumming', 'zip' => '30041'),
+    array('lat' => '34.2', 'lon' => '-84.1', 'display_name' => '123 Peachtree Parkway, Cumming, GA', 'address' => array('amenity' => 'Example High School', 'house_number' => '123', 'road' => 'Peachtree Parkway', 'city' => 'Cumming', 'county' => 'Forsyth County', 'state' => 'Georgia', 'postcode' => '30041'))
+);
+Southforsyth_Geocode_Command::apply_match(10, array('place_id' => 'abc', 'lat' => '34.2', 'lon' => '-84.1'), $match);
+sf_assert('34.2' === get_post_meta(10, 'sf_lat', true), 'valid geocode candidate is accepted when no coordinates exist');
+
+$weak = Southforsyth_Geocode_Match_Evaluator::evaluate(
+    array('title' => 'Example High School', 'address' => '123 Peachtree Parkway', 'city' => 'Cumming', 'zip' => '30041'),
+    array('lat' => '34.2', 'lon' => '-84.1', 'display_name' => 'Cumming, GA', 'address' => array('amenity' => 'Example High School', 'city' => 'Cumming', 'county' => 'Forsyth County', 'state' => 'Georgia'))
+);
+sf_assert('review' === $weak['class'], 'weak geocode candidate is flagged');
+
+$GLOBALS['sf_test_terms'][10]['sf_school_type'] = array('High', 'Public');
+$GLOBALS['sf_test_meta'][10]['_sf_import_source'] = 'forsyth_county';
+$GLOBALS['sf_test_meta'][10]['_sf_import_source_id'] = 'https://www.forsyth.k12.ga.us/fs/pages/1';
+$GLOBALS['sf_test_meta'][10]['sf_source_url'] = 'https://www.forsyth.k12.ga.us/fs/pages/1';
+$GLOBALS['sf_test_meta'][10]['sf_website'] = 'https://example.forsyth.k12.ga.us';
+$GLOBALS['sf_test_meta'][10]['sf_address'] = '123 Peachtree Pkwy';
+$GLOBALS['sf_test_meta'][10]['sf_city'] = 'Cumming';
+$GLOBALS['sf_test_meta'][10]['sf_state'] = 'GA';
+$GLOBALS['sf_test_meta'][10]['sf_zip'] = '30041';
+$GLOBALS['sf_test_meta'][10]['sf_phone'] = '(770) 555-1212';
+$GLOBALS['sf_test_meta'][10]['sf_district'] = 'Forsyth County Schools';
+$GLOBALS['sf_test_meta'][10]['sf_last_verified'] = gmdate('Y-m-d');
+unset($GLOBALS['sf_test_meta'][10]['sf_lat'], $GLOBALS['sf_test_meta'][10]['sf_lng'], $GLOBALS['sf_test_meta'][10]['sf_geocode_confidence']);
+$readiness = Southforsyth_School_Import_Safety::readiness(10);
+sf_assert($readiness['ready'], 'basic publication readiness does not require enrichment fields');
+sf_assert(in_array('grades served', $readiness['warnings'], true) && in_array('latitude/longitude', $readiness['warnings'], true), 'missing enrichment fields are readiness warnings');
+
+$command = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-forsyth-county-import-command.php');
+$dry_run_position = strpos($command, 'if ($dry_run)');
+$dry_run_continue = strpos($command, "continue;\n            }\n\n            \$result", $dry_run_position);
+$live_import_position = strpos($command, 'Southforsyth_Importer::import', $dry_run_position);
+sf_assert(false !== $dry_run_position && false !== $dry_run_continue && false !== $live_import_position && $dry_run_continue < $live_import_position, 'dry-run performs no writes before live import call');
+sf_assert(false !== strpos($command, 'audit_schools') && false !== strpos($command, 'correct_school_titles'), 'school audit and safe title correction commands are registered');
+sf_assert(false !== strpos($command, "'publish' === \$post->post_status") && false !== strpos($command, 'wp_update_post'), 'title correction protects published posts and only writes through explicit correction');
+sf_assert(false !== strpos($command, 'south-forsyth-only') && false !== strpos($command, 'school_coverage_report') && false !== strpos($command, 'classify_schools'), 'South Forsyth coverage import/report/classification commands are registered');
+
+$meta = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/meta.php');
+sf_assert(false !== strpos($meta, "array('Confirmed South Forsyth', 'Needs Review', 'Outside Coverage')"), 'coverage status options use the three-value editorial workflow');
+sf_assert(false !== strpos($meta, 'sf_coverage_decision_source') && false !== strpos($meta, 'sf_coverage_decision_type'), 'coverage decision provenance meta is registered');
+
+$queries = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/queries.php');
+sf_assert(false !== strpos($queries, 'southforsyth_limit_public_school_queries_to_confirmed') && false !== strpos($queries, "'value' => 'Confirmed South Forsyth'"), 'public school queries are limited to confirmed South Forsyth schools');
+
+$admin_columns = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/admin/class-school-list-columns.php');
+sf_assert(false !== strpos($admin_columns, 'COVERAGE_CONFIRMED') && false !== strpos($admin_columns, 'readiness($post_id)'), 'admin school publish action requires confirmed coverage and readiness');
+sf_assert(false !== strpos($admin_columns, "COVERAGE_DECISION_TYPE_META_KEY, 'manual'"), 'admin coverage bulk actions record manual decision provenance');
+
+echo "School pipeline tests complete.\n";

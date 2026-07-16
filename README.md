@@ -13,6 +13,9 @@ SouthForsyth.org is a long-term community content platform for South Forsyth, Ge
 3. Activate the South Forsyth theme from the WordPress admin.
 4. Create menus and widgets in Appearance > Menus and Appearance > Widgets to populate the header, footer, and sidebars.
 
+## Overnight development workflow
+Long-running AI coding sessions should use the staging-only overnight workflow documented in [docs/overnight-workflow.md](docs/overnight-workflow.md). The workflow uses numbered task specs in `tasks/overnight/`, external logs/backups under `/private/tmp/southforsyth-overnight/` by default, a lock to prevent concurrent runs, verification after each task, and checkpoint commits after successful verified tasks. It never deploys to production, publishes content, resets WordPress, deletes imported content, or invents factual data.
+
 ## Theme structure
 - inc/setup.php — core theme supports and setup
 - inc/enqueue.php — CSS and JS asset loading
@@ -146,13 +149,13 @@ The structure is centered on topical authority, internal linking, and long-term 
 The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).
 
 ## Data integration roadmap
-Planning for how South Forsyth.org will eventually pull in outside data — official government/school sources (including the Chamber of Commerce events calendar), calendar/ICS feeds, GIS/open data, local news RSS, and community submissions — without compromising accuracy or attribution. Documentation only today; no importers exist yet. See [wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md).
+Planning for how South Forsyth.org pulls in outside data — official government/school sources (including the Chamber of Commerce events calendar), calendar/ICS feeds, GIS/open data, local news RSS, and community submissions — without compromising accuracy or attribution. The Forsyth County Schools importer now exists as the first real source-to-draft vertical; most other sources remain planned. See [wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/data-integration-roadmap.md) plus [docs/data-import-system.md](docs/data-import-system.md).
 
 ## Editorial roadmap
 The first 25 pages to publish, in priority order, plus the highest-SEO-value pages, directory/event/newsletter sequencing, and how this roadmap relates to the evergreen guide list. See [wordpress/wp-content/themes/southforsyth/docs/editorial-roadmap.md](wordpress/wp-content/themes/southforsyth/docs/editorial-roadmap.md).
 
 ## Platform architecture
-The provider system, import pipeline, cache layer, admin tooling, search architecture, and automation-ready hooks that make it possible to pull content in from outside sources at scale instead of authoring everything by hand — infrastructure only today, no data has been imported yet. Includes the theme-vs-plugin tradeoff and the concrete trigger for when this should move into its own plugin. See [wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md).
+The provider system, import pipeline, cache layer, admin tooling, search architecture, and automation-ready hooks make it possible to pull content in from outside sources at scale instead of authoring everything by hand. Schools are the first completed ingestion vertical through review-ready drafts; scheduled automation is still off. Includes the theme-vs-plugin tradeoff and the concrete trigger for when this should move into its own plugin. See [wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md).
 
 ### Priority guides
 1. Best Parks
@@ -246,12 +249,10 @@ Each component is built as a reusable template partial and should be used as a f
 - Local definition block: use to explain what "South Forsyth" means (community identity, not a city) and list its constituent areas
 - FAQ block: use for a hub page's frequently-asked-questions section
 
-## Homepage status: preview, now with real hub pages behind it
-The homepage (`front-page.php`) is still intentionally a **static preview** rather than a live, post-type-driven portal — it doesn't query any custom post type directly, and every "Coming Soon" section is still static copy, on purpose, so the site stays honest about how much content actually exists today. What changed: every one of those "Coming Soon" cards, and the primary navigation, now link to a real, working hub page instead of nowhere.
+## Homepage status: preview plus live sections
+The homepage (`front-page.php`) is still partly a polished preview, but it now calls live query helpers for featured places, recent events, and recent guides. If no matching posts exist, those live sections simply render empty. The guide/category cards remain preview-style cards that link to real hub pages.
 
 Every section — Things To Do, Events, Restaurants & Coffee, Parks & Trails, Schools, Churches, Neighborhoods, Business Directory, New Resident Guide, and Weekend Guide — has a real URL today. The seven with a custom post type (Events, Restaurants, Parks, Schools, Churches, Neighborhoods, Business Directory) use the enhanced `archive.php`, which shows live posts the moment any exist and falls back to intro copy, a clearly-labeled "Coming soon" notice, and sample category cards when a post type has zero posts. The three without a post type of their own (Things To Do, New Resident Guide, Weekend Guide) are real WordPress Pages, auto-created by `inc/page-provisioning.php` on `page-templates/hub.php`. All ten pull their copy from `inc/hub-content.php` — see that file and `docs/content-platform-architecture.md`'s "Hub pages" section for the full explanation.
-
-Each place in `front-page.php` where a live query should eventually replace a static array still has a `TODO` comment pointing at the exact `inc/queries.php` function to use — see "Homepage: preview vs. live" in the architecture doc for the full explanation and how to switch it over once real content exists.
 
 Placeholder wording throughout (hero, "What We're Building," "Preview Content," and every hub page's sample cards) is deliberately generic where it describes future content, and factual where it describes the area itself — see "Placeholder content policy" in the architecture doc before adding more.
 
@@ -316,10 +317,10 @@ This keeps local development first, uses GitHub as the source of truth, and only
 - Review SEO metadata and schema output regularly as content expands.
 
 ## Current status
-- The homepage is a static "preview / launching soon" page (see above) — an honest, polished front door while real content is authored, now linking every section through to a real hub page instead of nowhere, plus a "Powered by Data" platform-feature preview section (Neighborhood Explorer, Restaurant Finder, Traffic, Weather, etc.) so the homepage reads as a growing technology platform, not just a content site.
+- The homepage is a preview plus live-query front door (see above): guide cards link to real hub pages, while featured places/events/guides pull from published content when it exists.
 - Twelve custom post types and their taxonomies are registered and REST-enabled (see the architecture doc linked above): the original nine, plus Trails (split out of Parks), Topics (pillar/cluster pages), and Community Resources, added alongside the data-platform work. Eight of them (Events, Restaurants, Parks, Trails, Schools, Churches, Neighborhoods, Business Directory) already have a real, polished hub page live at their archive URL via the enhanced `archive.php` — intro copy, FAQ, and a newsletter CTA today; live post grids the moment content is published.
 - Things To Do, New Resident Guide, and Weekend Guide are real WordPress Pages (auto-created by `inc/page-provisioning.php`) on the reusable `page-templates/hub.php` template, giving all ten IA sections a working URL.
-- A full external-data platform is now in place but not yet turned on: providers (`inc/providers/`), an import pipeline with a queue and log (`inc/import/`), a cache layer (`inc/cache/`), normalized cross-post-type search (`inc/search/`), a "Community Platform" wp-admin menu (`inc/admin/`), and wireable-but-unscheduled automation hooks (`inc/automation.php`). See [docs/platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md).
+- A full external-data platform is now in place: providers (`inc/providers/`), an import pipeline with a queue and log (`inc/import/`), a cache layer (`inc/cache/`), normalized cross-post-type search (`inc/search/`), a "Community Platform" wp-admin menu (`inc/admin/`), and wireable-but-unscheduled automation hooks (`inc/automation.php`). Forsyth County Schools is the first real importer; other verticals remain planned. See [docs/platform-architecture.md](wordpress/wp-content/themes/southforsyth/docs/platform-architecture.md).
 - `archive.php`, `search.php`, and `single.php` are post-type aware, rendering the right card component and meta fields for whatever type is being displayed, and work today for any post type that gets published.
 - Navigation now has a real fallback menu (`southforsyth_primary_nav_fallback()` in `inc/menus.php`) pointing at all ten sections, so the header works before an admin ever builds a menu in Appearance > Menus — building one there still takes over automatically.
 - Widgets, footer (now with a fallback quick-links list and copyright bar), and reusable components are wired up.

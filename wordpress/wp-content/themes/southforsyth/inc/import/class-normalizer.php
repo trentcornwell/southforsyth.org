@@ -32,6 +32,7 @@ class Southforsyth_Normalizer
             'image_url'   => '',        // source image to download, if rights-confirmed (see Image_Downloader)
             'license'     => '',        // attribution/license note for GIS/RSS-derived content
             'recurring'   => false,
+            'raw'         => array(),   // the provider's original, unmodified payload for this record — see Southforsyth_Importer::import(), which stores this as _sf_import_raw for attribution/debugging/re-processing
         ), $fields);
     }
 

@@ -13,6 +13,7 @@ if (! defined('ABSPATH')) {
 require_once __DIR__ . '/interface-data-provider.php';
 require_once __DIR__ . '/class-provider-abstract.php';
 require_once __DIR__ . '/class-google-places-provider.php';
+require_once __DIR__ . '/class-census-provider.php';
 require_once __DIR__ . '/class-openstreetmap-provider.php';
 require_once __DIR__ . '/class-forsyth-county-provider.php';
 require_once __DIR__ . '/class-nces-provider.php';

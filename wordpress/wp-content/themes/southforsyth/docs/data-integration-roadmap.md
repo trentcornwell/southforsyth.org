@@ -1,12 +1,17 @@
 # Data integration roadmap
 
-**Status: planning only.** Nothing described in this document is built yet —
-there are no importers, cron jobs, feed parsers, or submission forms in the
-theme today. This is the design for how South Forsyth.org will eventually
-pull in outside data (official sources, calendars, open data, news, and
-community submissions) without compromising accuracy, attribution, or the
-"real content, not filler" standard set in
-[content-platform-architecture.md](content-platform-architecture.md).
+**Status: mostly planning, with real ingestion infrastructure built and one
+source (Forsyth County Schools) actually working.** There are still no cron
+jobs or submission forms in the theme today, and most sources below remain
+unbuilt — but the import pipeline, several feed parsers (ICS, RSS), and now
+a real Forsyth County Schools scraper (`Southforsyth_Forsyth_County_Provider`,
+driven by `wp southforsyth import-schools`) all exist and run. This document
+is still the design for how South Forsyth.org pulls in outside data (official
+sources, calendars, open data, news, and community submissions) without
+compromising accuracy, attribution, or the "real content, not filler"
+standard set in
+[content-platform-architecture.md](content-platform-architecture.md) — treat
+each source below as built only where explicitly marked so.
 
 It builds directly on the not-yet-built systems already sketched in
 `inc/community-platform.php` (`event-submission`, `business-submission`,
@@ -39,14 +44,31 @@ first.
 - **Forsyth County Government** (departments, meeting notices, public
   safety announcements) — likely page-scrape or manual entry until/unless
   an open data or RSS endpoint is confirmed.
-- **Forsyth County Schools (district)** — school info, calendars, news.
-  Maps to the `school` post type and to `event` for district calendar
-  items. Handled by `Southforsyth_Forsyth_County_Provider`
-  (`inc/providers/`), which is already scoped to "government/schools/parks/
-  library" — no separate schools-specific provider class, matching the
-  "don't create duplicate systems" rule. Reads a configurable feed URL and
-  returns nothing until an admin sets one; Phase 0 is manual entry, exactly
-  as described below.
+- **Forsyth County Schools (district) — Working, school info only.**
+  `Southforsyth_Forsyth_County_Provider` (`inc/providers/`) is a real
+  scraper against `www.forsyth.k12.ga.us`, run via
+  `wp southforsyth import-schools`. Confirmed live (not assumed) before
+  building it: the district's `robots.txt` declares `Crawl-delay: 5` for
+  every user agent (the provider sleeps 5s before each request) and
+  explicitly disallows the staff directory
+  (`/schools/directions-contact-information/staff-directory-for-schools`),
+  which is why principal names are never captured by this source. The
+  district overview page and each school's own page are real,
+  server-rendered HTML — no JS execution needed — parsed with PHP's
+  built-in `DOMDocument`/`DOMXPath`. Captured per school: complete official
+  display name (directory name plus Elementary/Middle/High suffix when the
+  directory section provides that level), stable `/fs/pages/NNNNN` source ID,
+  level,
+  sector (`Public`), address/city/state/zip, phone, website, and (for the
+  three "Academies of Creative Education" programs only) grades served,
+  directly from the overview page's own stated range. **Not captured, by
+  design, not oversight:** principal (source is disallowed), mission
+  (lives on a separate per-school subpage — a deliberate follow-up pass,
+  not skipped forever), mascot/colors/feeder pattern/attendance-boundary
+  URL (no structured source found on the pages this provider reads — see
+  "Content quality rules" below on why guessing at unstructured text isn't
+  an acceptable substitute). District calendar items (→ `event`) are not
+  yet built — this provider only handles `school`.
 - **NCES (National Center for Education Statistics)** and **Georgia DOE /
   GOSA** — federal and state public school data (grade span, address,
   lat/lng, public/private status). Use for *enrichment and verification* of
@@ -115,24 +137,37 @@ Structured, often geographic, open data — high trust, but typically a
 one-time or infrequent pull rather than a live feed, and prone to going
 stale silently (no "last updated" signal from most county GIS portals).
 
+- **U.S. Census / American Community Survey (ACS)** — demographic context
+  for `neighborhood` profiles (population, median income, median age).
+  `Southforsyth_Census_Provider` (`inc/providers/`) is built and ready —
+  it requires a free Census API key (Settings admin page) and is inert
+  until one is configured. Normalizes into `sf_census_population`/
+  `sf_census_median_income`/`sf_census_median_age`/`sf_census_source_year`
+  (`inc/meta.php`) — numbers only, never prose; the surrounding descriptive
+  text on a neighborhood page stays human-written.
 - **Forsyth County GIS** (parcels, parks boundaries, zoning) — candidate
   source for `park` post details and for `neighborhood` boundary
   descriptions. Likely delivered as shapefiles or a GeoJSON export, not a
-  live API.
+  live API. **Named but not built**: no confirmed public endpoint exists
+  yet, so this stays documentation only — no inert provider class has been
+  scaffolded for it, matching the same caution already applied to Georgia
+  DOE/GOSA below.
 - **Georgia DOT open data** — traffic and road condition data for the
   "Traffic" homepage placeholder. Would need a genuinely live feed (not a
   one-time pull) to be worth showing; until then, that section stays a
   static placeholder as documented in `docs/content-platform-architecture.md`.
-- **U.S. Census / American Community Survey (ACS)** — demographic context
-  for `neighborhood` profiles (school-age population, commute times,
-  housing age). Useful as descriptive background text, not as the primary
-  content of a neighborhood page.
-- **Geo meta fields don't exist yet.** `inc/meta.php` has no latitude/
-  longitude fields today. Adding `sf_lat`/`sf_lng` (shared across `park`,
-  `restaurant`, `business`, `church`, `school`, matching the existing
-  `sf_address`/`sf_phone`/`sf_hours` pattern) is a prerequisite for any GIS
-  ingestion and for the "Interactive Maps" system already sketched in
-  `inc/community-platform.php`.
+  **Named but not built**, same reasoning as Forsyth County GIS above.
+- **Other government datasets** (state/county open-data portals not listed
+  above) — a real category this project expects to draw from eventually,
+  but with no specific source identified yet. Treat any addition here the
+  same way: only scaffold a provider class once a concrete, confirmed
+  endpoint exists — see "How to add a new data source" in
+  `docs/platform-architecture.md`.
+- **Geo meta fields** (`sf_lat`/`sf_lng`) exist today, shared across every
+  directory-type post type (`inc/meta.php`) — the prerequisite this section
+  used to flag as missing is done, and they're already consumed by
+  `Southforsyth_Openstreetmap_Provider`, `Southforsyth_Google_Places_Provider`,
+  and `southforsyth_get_nearby_places()` (`inc/queries.php`).
 
 **Caution:** open data licenses vary by source (some require attribution,
 some are public domain, some are share-alike). Record the source and its
@@ -230,6 +265,65 @@ above.
   Reviewers can work directly from the Posts list (filtered by status and
   post type) using only what WordPress already provides until there's
   enough import volume to justify a dedicated dashboard.
+
+## South Forsyth classification policy
+
+`sf_south_forsyth_status` (`inc/meta.php`, shared directory group — see
+"Post meta" in `content-platform-architecture.md`) exists because "South
+Forsyth" is not an incorporated place with a fixed legal boundary — the
+homepage's own `local-definition-block.php` says as much already
+("There is no city hall, mayor, or municipal boundary for South Forsyth").
+This document does not claim there is a single permanent, official
+definition, and neither should any future code or copy that touches this
+field. What counts as "in South Forsyth" is a judgment call, informed by
+whatever mix of the following is actually available and relevant for a
+given entity — no single one of these is authoritative on its own, and
+none is required:
+
+- School attendance zones (where applicable)
+- Physical location and address
+- Feeder-pattern or service-area relationships to other confirmed entities
+- Commonly recognized local community names (Halcyon, Big Creek, Denmark,
+  Vickery, Windermere, Polo Fields, the McFarland/Union Hill/Shiloh
+  corridors — the same list `local-definition-block.php` already uses)
+- Authoritative county or school-district sources, when they say something
+  directly relevant
+- Editorial judgment, applied openly rather than hidden behind a
+  false-precision label
+
+**The three statuses stay exactly as defined for the Schools import**
+(`Southforsyth_Forsyth_County_Provider`) and apply the same way to any
+future directory-type content that needs this same judgment call:
+
+| Status | Meaning |
+|---|---|
+| `Confirmed South Forsyth` | A human or strong automatic signal has affirmatively placed this entity in the South Forsyth coverage area. |
+| `Needs Review` | Default for anything not yet classified or not confidently classifiable. |
+| `Outside Coverage` | Affirmatively placed outside the South Forsyth editorial coverage area. |
+
+Automatic confirmation is limited to the central allowlist in
+`Southforsyth_School_Import_Safety::coverage_allowlist()`: South Forsyth High
+School, Denmark High School, and Lambert High School. Middle and elementary
+schools stay `Needs Review` unless an editor records official boundary,
+attendance-map, feeder/serving-area, address-with-boundary, or manual
+editorial evidence. The classifier must not confirm solely by city name,
+corridor keyword, ZIP, or fabricated feeder pattern. Clearly outside county
+signals include North Forsyth, East Forsyth, West Forsyth, Forsyth Central,
+Coal Mountain, Chestatee, Cumming, Matt, Sawnee, Kelly Mill, Otwell, Liberty,
+Little Mill, Lakeside, Silver City, Poole's Mill, Mashburn, and Chattahoochee.
+
+Every coverage decision should carry provenance in `sf_coverage_decision_*`
+meta: decision source, note, date, and `manual`/`automatic` type.
+
+**Classification is stored separately from factual metadata on purpose.**
+`sf_south_forsyth_status` is never bundled into `sf_address`,
+`sf_district`, or any other factual field, specifically so that changing a
+school's classification is never mistaken for — or accidentally applied
+as — a correction to a verified fact, and so a status can be revisited
+later without touching the record's sourced data at all. This is also why
+the community-suggestion system (see below) treats a classification change
+and a factual correction as different kinds of suggestions with different
+review weight, not the same "edit a field" action.
 
 ## Custom post type mapping
 
@@ -335,9 +429,9 @@ This is a staged rollout, not a single project — each phase should be
 justified by actual content volume and reviewer capacity, not built ahead
 of need.
 
-1. **Phase 0 (current state):** manual entry only, via wp-admin. No
-   importers exist. This document is the plan, not a description of
-   anything running today.
+1. **Phase 0 (current state):** manual entry plus one staff-run school
+   importer. Forsyth County Schools can be imported as review-ready drafts;
+   parks, churches, restaurants, and most event sources remain planned.
 2. **Phase 1 — semi-automated, staff-run.** A small number of WP-CLI
    commands (one per source, e.g. `wp southforsyth import:ics <url>`) that
    a site maintainer runs manually and reviews the resulting drafts

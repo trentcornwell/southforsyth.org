@@ -54,29 +54,51 @@ if (! function_exists('southforsyth_provision_school_type_terms')) {
 
 if (! function_exists('southforsyth_get_seed_schools')) {
     /**
-     * Two draft-only seed posts by name — see docs/content-platform-architecture.md's
-     * placeholder-content policy and the plan behind this file for why every
-     * fact field below is deliberately left blank rather than guessed:
-     * address, phone, principal, grades, and boundary link all need
-     * confirming against the official Forsyth County Schools site before
-     * anything here is publish-ready. A feeder middle/elementary pair is
-     * deliberately NOT seeded here — Forsyth County redraws attendance
-     * boundaries frequently, and naming a specific current feeder chain
-     * needs the same verification these two names already call for, not a
-     * guess. See docs/editorial-roadmap.md items #7-8 for that next step.
+     * Originally seeded South Forsyth High School and Denmark High School
+     * as blank-facts drafts, before a real importer existed. Both are now
+     * superseded by real, fully-sourced records from
+     * Southforsyth_Forsyth_County_Provider (see docs/data-integration-roadmap.md)
+     * — the blank originals were deleted once that was confirmed, and both
+     * names are removed here so this function can never recreate them.
+     * This list stays empty on purpose rather than being deleted outright:
+     * it's the one place a genuinely new seed school would go if a future
+     * IA section ever needs one before a real importer exists for it, the
+     * same reasoning this file originally existed for. Whatever's ever
+     * added here is protected by southforsyth_school_already_imported()
+     * below regardless.
      */
     function southforsyth_get_seed_schools()
     {
-        return array(
-            array(
-                'slug'  => 'south-forsyth-high-school',
-                'title' => 'South Forsyth High School',
+        return array();
+    }
+}
+
+if (! function_exists('southforsyth_school_already_imported')) {
+    /**
+     * True if a real, source-attributed school post already covers this
+     * name — the general safeguard behind "never recreate a legacy
+     * placeholder once an authoritative imported version exists." Matches
+     * on a real import source being set (not just any post with a similar
+     * title, which could be a coincidence) and the seed name appearing in
+     * the imported post's title, since imported titles come from the
+     * district's own directory (e.g. "South Forsyth") and won't always be
+     * the longer, more formal name a hand-written seed might use (e.g.
+     * "South Forsyth High School").
+     */
+    function southforsyth_school_already_imported($name_fragment)
+    {
+        $matches = get_posts(array(
+            'post_type'   => 'school',
+            'post_status' => 'any',
+            'numberposts' => 1,
+            'fields'      => 'ids',
+            's'           => $name_fragment,
+            'meta_query'  => array(
+                array('key' => '_sf_import_source', 'compare' => 'EXISTS'),
             ),
-            array(
-                'slug'  => 'denmark-high-school',
-                'title' => 'Denmark High School',
-            ),
-        );
+        ));
+
+        return ! empty($matches);
     }
 }
 
@@ -96,6 +118,10 @@ if (! function_exists('southforsyth_provision_seed_schools')) {
 
         foreach (southforsyth_get_seed_schools() as $school) {
             if (get_page_by_path($school['slug'], OBJECT, 'school')) {
+                continue;
+            }
+
+            if (southforsyth_school_already_imported($school['title'])) {
                 continue;
             }
 

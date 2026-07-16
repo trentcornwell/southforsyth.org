@@ -4,36 +4,29 @@ South Forsyth.org is a community content platform, not a business or brochure
 site. The theme models its content as real WordPress custom post types and
 taxonomies instead of static placeholder markup, so the archive/single
 templates automatically show live content the moment it is published — no
-template changes required later. The homepage is a deliberate exception right
-now; see below.
+template changes required later. The homepage now mixes live sections with
+preview navigation while the content inventory grows; see below.
 
 ## Homepage: preview vs. live
 
-The homepage (`front-page.php`) is currently a **static "preview / launching
-soon" page**, not a live query against the content model described in this
-document. That's an intentional, temporary state, not an architecture gap:
+The homepage (`front-page.php`) is currently a **preview plus live-query
+front door**. It still uses preview-style guide cards, but it now queries
+published featured places, events, and guides through `inc/queries.php`:
 
-- It doesn't call `southforsyth_get_latest_items()` or
-  `southforsyth_render_card_section()` with real post-type data anywhere.
-  Every section is a plain PHP array of "Coming Soon" copy.
+- It calls `southforsyth_get_featured_places()` and
+  `southforsyth_get_latest_items()` for live sections.
 - The reason: with zero published posts in most of the nine post types, a
   live-query homepage would either show nothing or show the same generic
   fallback placeholders everywhere — which reads as broken or unfinished
   rather than as a real site. A static, polished "here's what's coming" page
   is more honest and more impressive for a pre-launch site than a live page
   with empty sections.
-- Nothing about the content model changed to support this — `inc/post-types.php`,
-  `inc/taxonomies.php`, `inc/meta.php`, and `inc/queries.php` are untouched.
-  `archive.php`, `search.php`, and `single.php` still work today against any
-  post type the moment it has published content; only the homepage is
-  deliberately static.
-- Every static section in `front-page.php` that should eventually become a
-  live query has a `TODO` comment immediately above it naming the exact
-  `inc/queries.php` function and post type to swap in — e.g. the "What We're
-  Building" section's comment says to replace it with
-  `southforsyth_get_latest_items('event', 3, $fallback)` once Event posts
-  exist. Convert sections one at a time as each post type gets real content;
-  there's no need to flip the whole homepage over at once.
+- Nothing about the content model changed to support this. `archive.php`,
+  `search.php`, and `single.php` still work today against any post type the
+  moment it has published content; the homepage simply chooses which sections
+  are live and which remain preview/navigation.
+- The remaining preview cards are intentionally navigational: they point to
+  real hub/archive URLs while the content inventory grows.
 - Unlike before, the "What We're Building" cards (and the primary nav, and
   the homepage's "Jump to a section" row) are no longer dead-end links —
   each `coming-soon-card` now points at a real hub page (see "Hub pages"
@@ -69,6 +62,16 @@ and any future headless use.
 over-weighted relative to the others, since this is a community platform
 first, not a business directory.
 
+**`sf_suggestion` is deliberately not in this table.** It's a real custom
+post type (`inc/community/community.php`), but `public => false`, no
+archive, no rewrite — moderation-queue data, not content, the same
+distinction `platform-architecture.md` already draws for the import
+queue/log ("Why custom tables, not custom post types") applied the other
+direction: a suggestion *is* post/postmeta shaped (it benefits from the
+native edit screen and revision-free simple storage a real DB table
+wouldn't give it for free), it just isn't public. See "Community
+suggestions" below.
+
 ## Taxonomies
 
 Registered in `inc/taxonomies.php`, prefixed `sf_` to avoid colliding with
@@ -83,7 +86,13 @@ plugin or core taxonomies later.
   without a redesign.
 - Every other taxonomy is scoped to a single post type: `sf_event_category`,
   `sf_cuisine`, `sf_business_category`, `sf_denomination`, `sf_school_type`,
-  `sf_park_amenity`, `sf_lifestyle_tag` (neighborhoods), `sf_guide_topic`.
+  `sf_park_amenity`, `sf_lifestyle_tag` (neighborhoods), `sf_guide_topic`,
+  `sf_resource_type` (`community_resource`). `sf_resource_type` is what makes
+  reusing `community_resource` for sports organizations, government
+  facilities, libraries, senior resources, and public safety actually
+  distinguishable — the same role `sf_school_type` plays for schools —
+  rather than adding a new post type per category; terms are seeded by
+  `inc/resource-provisioning.php`.
 - `article` uses WordPress's built-in `category` and `post_tag` instead of a
   custom taxonomy, since editorial/news content maps directly onto the
   standard WordPress blogging model — no reason to reinvent it.
@@ -93,26 +102,56 @@ plugin or core taxonomies later.
 Registered in `inc/meta.php`, kept deliberately small:
 
 - **Directory fields** (`sf_address`, `sf_phone`, `sf_website`, `sf_hours`,
-  `sf_lat`, `sf_lng`, `sf_source_url`, `sf_last_verified`) — shared across
-  `restaurant`, `park`, `school`, `church`, `business`, `trail`, and
-  `community_resource` rather than duplicating near-identical fields per post
-  type. `sf_source_url`/`sf_last_verified` were added for the Schools
-  data-model work as a trust signal ("where did this come from," "how
-  current is this") that applies identically to every directory-style
-  listing, not just schools — the same reasoning `sf_lat`/`sf_lng` were
-  added to the whole group rather than one post type. `sf_source_url` is the
-  same key `article` already used for RSS-imported source attribution
-  (below); this just extends its registration to the directory group too.
+  `sf_lat`, `sf_lng`, `sf_source_url`, `sf_last_verified`, `sf_faqs`,
+  `sf_city`, `sf_state`, `sf_zip`, `sf_district`, `sf_south_forsyth_status`) —
+  shared across `restaurant`, `park`, `school`, `church`, `business`,
+  `trail`, and `community_resource` rather than duplicating near-identical
+  fields per post type. `sf_source_url`/`sf_last_verified` were added for
+  the Schools data-model work as a trust signal ("where did this come
+  from," "how current is this") that applies identically to every
+  directory-style listing, not just schools — the same reasoning
+  `sf_lat`/`sf_lng` were added to the whole group rather than one post
+  type. `sf_source_url` is the same key `article` already used for
+  RSS-imported source attribution (below); this just extends its
+  registration to the directory group too. `sf_faqs` (added for the
+  ingestion-framework work) is a JSON-encoded array of `{question, answer}`
+  pairs, empty by default — rendered through the existing
+  `template-parts/components/faq-block.php` (see "Hub pages" below) via
+  `southforsyth_get_post_faqs()` in `inc/queries.php`, so per-entity FAQs
+  reuse the same component the hub pages already use rather than a second
+  FAQ system. `sf_city`/`sf_state`/`sf_zip`/`sf_district` (added for the
+  Forsyth County Schools import) are structured geo alongside the existing
+  single-string `sf_address`. `sf_south_forsyth_status` is a 3-value
+  editorial workflow field (Confirmed South Forsyth / Needs Review /
+  Outside Coverage) — meta rather than a
+  taxonomy since it's a single mutually-exclusive status, not a browsable
+  multi-tag facet, the same reasoning `sf_featured` is meta, not a
+  taxonomy. Public school queries show only Confirmed South Forsyth schools;
+  countywide records can remain in drafts for dedupe/reference without being
+  prepared for publication (see `docs/data-integration-roadmap.md`).
+- **Census fields** (`sf_census_population`, `sf_census_median_income`,
+  `sf_census_median_age`, `sf_census_source_year`) — scoped to
+  `neighborhood` only, fed by `Southforsyth_Census_Provider`. Numbers only,
+  never descriptive prose — see `docs/data-integration-roadmap.md`'s GIS/
+  open-data section.
 - **School fields** (`sf_grades_served`, `sf_principal_name`,
-  `sf_boundary_url`, `sf_feeder_pattern`, `sf_notable_programs`) — specific
-  to `school`. `sf_grades_served` is a precise range (e.g. "PK-5"); the more
-  categorical level/sector facets (Elementary/Middle/High,
+  `sf_boundary_url`, `sf_feeder_pattern`, `sf_notable_programs`,
+  `sf_mascot`, `sf_school_colors`, `sf_mission`) — specific to `school`.
+  `sf_grades_served` is a precise range (e.g. "PK-5"); the more categorical
+  level/sector facets (Elementary/Middle/High,
   Public/Private/Charter/Homeschool Resource) live in the `sf_school_type`
   taxonomy instead of meta, since a hierarchical taxonomy already supports
   tagging a post with more than one term (see "Taxonomies" above and
   `inc/school-provisioning.php`) — no second taxonomy needed to separate the
   two facets. `sf_boundary_url` links out to the district's own official
   attendance-zone page rather than republishing boundary data on this site.
+  `sf_mascot`/`sf_school_colors`/`sf_mission` were added for the Forsyth
+  County Schools import; none of the three are populated by that provider
+  today (no clean structured source was found for them on the pages it
+  reads — see `docs/data-integration-roadmap.md`) but the fields exist for
+  manual entry or a future, more targeted pass. `sf_mission`, when
+  populated, is an official statement carried with `sf_source_url`
+  attribution — a sourced fact, not generated prose.
 - **Event fields** (`sf_event_date`, `sf_event_time`, `sf_event_venue`) —
   specific to `event`.
 - **Article source-attribution fields** (`sf_source_url`,
@@ -123,9 +162,62 @@ Registered in `inc/meta.php`, kept deliberately small:
   eligible for the homepage's "Popular Places" section, which deliberately
   mixes post types instead of requiring a dedicated CPT or taxonomy just for
   "things that are popular."
+- **Geocoding provenance** (`sf_geocode_provider`, `sf_geocode_place_id`,
+  `sf_geocode_date`, `sf_geocode_confidence`) — shared directory group.
+  Kept separate from `sf_lat`/`sf_lng` themselves so "where the coordinates
+  came from" survives independently — see `Southforsyth_Geocode_Command`
+  (`inc/import/class-geocode-command.php`), a deliberately separate pass
+  from the Forsyth County scraper, using the existing
+  `Southforsyth_Openstreetmap_Provider` unchanged.
+- **Community trust signals** (`sf_community_updated`, `sf_contributor_credit`)
+  — shared directory group, written only by
+  `Southforsyth_Suggestion_Moderation::apply_approval()` when a community
+  suggestion is approved. See "Community suggestions" below.
+- **`sf_suggestion` fields** — its own group (`inc/meta.php`), not part of
+  the shared directory group, `show_in_rest => false`: `sf_target_post_id`,
+  `sf_target_post_type`, `sf_requested_field`, `sf_current_value_snapshot`,
+  `sf_suggested_value`, `sf_explanation`, `sf_source_url` (reused key),
+  `sf_submitter_name`, `sf_submitter_email`, `sf_ip_hash`,
+  `sf_moderator_notes`, `sf_approving_moderator`, `sf_resolution_date`,
+  `sf_credit_consent`.
 
 All fields are edited through WordPress's native Custom Fields metabox — no
 plugin (e.g. ACF) required, matching the "no plugins" constraint.
+
+## Community suggestions
+
+This project's first public write-path: an "Improve this page" form
+(`template-parts/components/suggestion-form.php`) on every directory-type
+single page, submitting to `Southforsyth_Suggestion_Handler`
+(`inc/community/class-suggestion-handler.php`) via `admin_post`/
+`admin_post_nopriv` — never a REST endpoint, no JS framework, matching the
+theme's existing "no plugins/frameworks" pattern and the FAQ block's own
+no-JS `<details>` disclosure.
+
+**Nothing a visitor submits changes anything directly.** Every submission
+becomes a `sf_suggestion` post at `pending` status — pure moderation-queue
+data (see "Custom post types" above for why this is a real post type but
+not a public one). A moderator reviews it on that post's own native edit
+screen (a custom meta box, not a new page — see
+`Southforsyth_Suggestion_Moderation`), attached under the existing
+"Community Platform" admin menu. Only **Approve** ever writes to the
+target post, and only the exact field the moderator was shown (or, for a
+freeform "other" suggestion, nothing structured at all — the moderator
+applies freeform feedback manually in the normal editor). The moderator's
+possibly-edited final text is what gets applied, not necessarily the
+original submission.
+
+**Abuse prevention**: a nonce, a visually-hidden (not `type="hidden"`)
+honeypot field, and a 60-second per-IP-hash rate limit (the IP itself is
+never stored — only a salted hash). No file uploads in this first version.
+`sf_submitter_email` is registered but never read by any public-facing
+template — the privacy boundary is structural, not a convention someone
+could forget.
+
+See `docs/data-integration-roadmap.md`'s "South Forsyth classification
+policy" for why a classification change and a factual suggestion are
+treated as different kinds of review, and `docs/platform-architecture.md`
+for the moderation screen's exact hooks.
 
 ## Query helpers and the homepage
 
@@ -138,6 +230,16 @@ plugin (e.g. ACF) required, matching the "no plugins" constraint.
   yet.
 - `southforsyth_get_featured_places($count, $fallback)` — same idea, but
   queries across every `sf_featured`-eligible post type at once.
+- `southforsyth_get_related_entities($post, $count)` /
+  `southforsyth_get_nearby_places($post, $radius_miles, $count)` — added for
+  the ingestion-framework work. Related = other directory-type posts (any
+  type, not just the same one) sharing an `sf_area` term; nearby = other
+  directory-type posts within a radius via `sf_lat`/`sf_lng` (plain-PHP
+  haversine, no spatial SQL or external geo library). Both return an empty
+  array — never a guess — when the post has no `sf_area`/lat-lng set.
+  Rendered on `single.php` via `template-parts/components/related-entities.php`
+  and `southforsyth_render_mixed_card_grid()` (`inc/helpers.php`), which
+  routes each result through its own post type's card component.
 
 `front-page.php` calls these for every section (events, guides, popular
 places, restaurants, parks, neighborhoods, schools, churches, business
