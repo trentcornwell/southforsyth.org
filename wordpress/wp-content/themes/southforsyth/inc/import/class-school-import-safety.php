@@ -83,6 +83,10 @@ class Southforsyth_School_Import_Safety
             return $name;
         }
 
+        if (preg_match('/\bacademy\b/i', $name)) {
+            return $name;
+        }
+
         if (preg_match('/\b' . preg_quote($suffix, '/') . '$/i', $name)) {
             return $name;
         }

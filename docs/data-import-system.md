@@ -33,9 +33,11 @@ provider stores complete display names for regular schools:
 - `Middle Schools` -> `[Name] Middle School`
 - `High Schools` -> `[Name] High School`
 
-The suffix is not duplicated when the source already includes it. Special
-school groups, such as `Academies of Creative Education`, keep their source
-name instead of being forced into a normal elementary/middle/high suffix.
+The post title should match the official published school name whenever
+possible. The suffix is not duplicated when the source already includes it,
+and complete official branding such as `Alliance Academy for Innovation`,
+`Forsyth Academy`, or `Forsyth Virtual Academy` is preserved instead of being
+forced into a normal elementary/middle/high suffix.
 
 Stable identity comes from the official `/fs/pages/NNNNN` URL, stored both as
 `source_id`/`_sf_import_source_id` and `sf_source_url`. Shortened matching
@@ -136,15 +138,44 @@ wp southforsyth import-schools --south-forsyth-only --dry-run --verbose
 wp southforsyth import-schools --south-forsyth-only --verbose
 wp southforsyth geocode-schools --dry-run --verbose
 wp southforsyth geocode-schools --verbose
+wp southforsyth publish-confirmed-schools --dry-run --verbose
 wp southforsyth schools-pilot
 ```
 
-Publishing remains manual. The guarded CLI publish helper exists, but should
-only be used after human review:
+Publishing remains staff-controlled. To publish every eligible Confirmed South
+Forsyth draft school, dry-run first:
 
 ```bash
-wp southforsyth schools-pilot --publish=<id,id> --reviewer="Reviewer Name"
+wp southforsyth publish-confirmed-schools --dry-run --verbose
+wp southforsyth publish-confirmed-schools
 ```
+
+The command only considers `school` posts marked `Confirmed South Forsyth`,
+only publishes drafts, skips already published posts, refuses Needs Review and
+Outside Coverage posts, and refuses unresolved duplicate conflicts. Its report
+also compares the official countywide source directory to existing school posts
+and lists source records that do not yet have a WordPress school post; those
+records are reported only, never created by the publish command. Roll back a
+mistaken school publish with `wp post update <id> --post_status=draft`, then fix
+the school status/metadata in wp-admin and rerun the dry-run.
+
+The older guarded ID-list helper still exists for one-off reviewed publishes:
+`wp southforsyth schools-pilot --publish=<id,id> --reviewer="Reviewer Name"`.
+
+## Homepage and Coverage Page
+
+The homepage includes a "What Is South Forsyth?" section that defines South
+Forsyth as a community identity, not a legal municipality. The reusable full
+coverage template is `page-templates/coverage.php`; the project intentionally
+does not auto-create the page.
+
+Admin steps:
+
+1. Pages > Add New.
+2. Title: `What Is South Forsyth?`.
+3. Slug: `what-is-south-forsyth`.
+4. Template: `What Is South Forsyth?`.
+5. Publish when editorial review is complete.
 
 ## Known Data Gaps
 

@@ -75,6 +75,21 @@ class Southforsyth_Forsyth_County_Provider extends Southforsyth_Abstract_Provide
     }
 
     /**
+     * Read-only directory listing for audits/reports that must not write
+     * transients in dry-run mode. This fetches only the overview page; it
+     * does not create posts and does not fetch individual school pages.
+     */
+    public function search_uncached()
+    {
+        list($html, ) = $this->fetch_url(self::OVERVIEW_URL);
+        if (! $html) {
+            return array();
+        }
+
+        return $this->parse_overview($html);
+    }
+
+    /**
      * $id is a stub's 'page_url' (from search()). Sleeps for the declared
      * crawl-delay, follows the redirect to the school's own subdomain, and
      * parses that page's structured location component.

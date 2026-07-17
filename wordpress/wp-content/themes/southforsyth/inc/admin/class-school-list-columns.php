@@ -164,6 +164,9 @@ class Southforsyth_School_List_Columns
         if (! empty($readiness['missing'])) {
             echo '<br><span title="' . esc_attr(implode(', ', $readiness['missing'])) . '">' . esc_html(count($readiness['missing']) . ' readiness issue(s)') . '</span>';
         }
+        if (! empty($readiness['warnings'])) {
+            echo '<br><span title="' . esc_attr(implode(', ', $readiness['warnings'])) . '">' . esc_html(count($readiness['warnings']) . ' enrichment warning(s)') . '</span>';
+        }
     }
 
     private static function render_details_column($post_id)
@@ -246,6 +249,10 @@ class Southforsyth_School_List_Columns
             'stale' => 'Stale (365+ days)',
             'fresh' => 'Fresh (<365 days)',
         ));
+        self::render_select('sf_filter_readiness', 'Any readiness', array(
+            'ready' => 'Publish-ready',
+            'missing_required' => 'Missing required fields',
+        ));
         self::render_select('sf_filter_source', 'All sources', self::get_distinct_sources());
     }
 
@@ -321,6 +328,32 @@ class Southforsyth_School_List_Columns
         $source = $_GET['sf_filter_source'] ?? ''; // phpcs:ignore
         if ($source) {
             $meta_query[] = array('key' => '_sf_import_source', 'value' => $source);
+        }
+
+        $readiness = $_GET['sf_filter_readiness'] ?? ''; // phpcs:ignore
+        if ('ready' === $readiness) {
+            $meta_query[] = array('key' => Southforsyth_School_Import_Safety::READY_META_KEY, 'value' => 'Ready to publish');
+        } elseif ('missing_required' === $readiness) {
+            $meta_query[] = array(
+                'relation' => 'OR',
+                array('key' => 'sf_website', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_website', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_address', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_address', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_city', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_city', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_state', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_state', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_zip', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_zip', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_district', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_district', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_source_url', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_source_url', 'value' => '', 'compare' => '='),
+                array('key' => 'sf_last_verified', 'compare' => 'NOT EXISTS'),
+                array('key' => 'sf_last_verified', 'value' => '', 'compare' => '='),
+                array('key' => Southforsyth_School_Import_Safety::DUPLICATE_WARNING_META_KEY, 'compare' => 'EXISTS'),
+            );
         }
 
         if (count($meta_query) > 1 && empty($meta_query['relation'])) {

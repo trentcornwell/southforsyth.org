@@ -76,6 +76,23 @@ $guide_sections = array(
 <main id="main-content" class="site-main">
     <?php get_template_part('template-parts/components/hero'); ?>
 
+    <section class="section section--accent" id="what-is-south-forsyth">
+        <div class="container">
+            <?php
+            set_query_var('eyebrow', 'Community definition');
+            set_query_var('title', 'What Is South Forsyth?');
+            set_query_var('subtitle', 'A clear working definition for what this guide covers - and what it does not claim to be.');
+            set_query_var('align', 'center');
+            get_template_part('template-parts/components/section-header');
+            set_query_var('variant', 'compact');
+            get_template_part('template-parts/components/coverage-definition');
+            ?>
+            <p class="coverage-definition__cta">
+                <a class="btn btn-primary" href="<?php echo esc_url(home_url('/what-is-south-forsyth/')); ?>">Read the Full Coverage Guide</a>
+            </p>
+        </div>
+    </section>
+
     <?php
     southforsyth_render_card_section('template-parts/components/coming-soon-card', $guide_sections, array(
         'id' => 'guide',

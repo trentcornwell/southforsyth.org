@@ -42,6 +42,7 @@ Long-running AI coding sessions should use the staging-only overnight workflow d
 - template-parts/header/site-header.php — header partial; primary nav falls back to `southforsyth_primary_nav_fallback()` (inc/menus.php) until an admin builds a real menu in Appearance > Menus
 - template-parts/footer/site-footer.php — footer partial with a fallback quick-links list and copyright bar when no footer widgets are active
 - template-parts/components/hero.php — homepage hero
+- template-parts/components/coverage-definition.php — reusable "What Is South Forsyth?" editorial definition used by the homepage and coverage page template
 - template-parts/components/search.php — search form component
 - template-parts/components/cta.php — call-to-action component
 - template-parts/components/newsletter.php — newsletter signup block
@@ -66,7 +67,7 @@ Long-running AI coding sessions should use the staging-only overnight workflow d
 - template-parts/components/feature-banner.php — feature banner component
 - template-parts/components/quote-block.php — pull quote or testimonial block
 - template-parts/components/statistics.php — stats/metrics section
-- template-parts/components/local-definition-block.php — "what is South Forsyth" explainer: the area grid (Halcyon, Big Creek, Denmark, Vickery, Windermere, Polo Fields, McFarland/Union Hill/Shiloh, etc.) plus the "not an official city" note, used on the homepage
+- template-parts/components/local-definition-block.php — legacy "what is South Forsyth" explainer component retained for reuse in guide copy
 - template-parts/components/faq-block.php — accessible `<details>`/`<summary>` FAQ list, used by every hub page (archive.php and page-templates/hub.php) via `southforsyth_render_hub_faq()`
 - assets/css/main.css — design-system stylesheet
 - assets/js/main.js — small interactive enhancements
@@ -144,6 +145,46 @@ The theme now includes a planning layer for a large-scale local publishing site.
 - Holiday Guides
 
 The structure is centered on topical authority, internal linking, and long-term scalability for thousands of pages.
+
+## South Forsyth coverage definition
+The homepage includes a prominent but compact **What Is South Forsyth?** section. The full editorial coverage template lives at `page-templates/coverage.php` and should be assigned manually to a WordPress page with slug `what-is-south-forsyth`; the theme does not auto-create or publish that page.
+
+Admin steps for the full coverage page:
+1. In wp-admin, go to Pages > Add New.
+2. Title the page `What Is South Forsyth?`.
+3. Set the slug/permalink to `what-is-south-forsyth`.
+4. In Template, choose `What Is South Forsyth?`.
+5. Publish when the editor is ready.
+
+Coverage copy must not describe South Forsyth as a municipality, official city, or postal area. ZIP codes and city names are treated as clues, not hard boundaries.
+
+## Confirmed school publishing
+Confirmed school publishing is staff-run through WP-CLI only. Dry run first:
+
+```bash
+wp southforsyth publish-confirmed-schools --dry-run --verbose
+```
+
+Live publish command:
+
+```bash
+wp southforsyth publish-confirmed-schools
+```
+
+The command only publishes draft `school` posts marked `Confirmed South Forsyth` and never modifies already published, Needs Review, or Outside Coverage schools. Required fields are complete official school name, official website, address, city, state, ZIP code, school type, district, official source URL, last verified date, and no unresolved duplicate conflict. Principal, grades served, latitude/longitude, boundary URL, feeder pattern, mascot, school colors, mission, and notable programs are warning-only enrichment fields.
+
+Dry-run output lists schools that would publish, blocked/protected schools
+with exact reasons, official source records without an existing WordPress
+school post, and totals. Source records are reported only; this command never
+creates school posts.
+
+Rollback if a school is published by mistake:
+
+```bash
+wp post update <id> --post_status=draft
+```
+
+Then review the school in wp-admin, correct its `sf_south_forsyth_status` or required metadata, and rerun the dry-run command.
 
 ## Evergreen content strategy
 The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).

@@ -56,6 +56,106 @@ class Southforsyth_Schools_Pilot_Command
         $this->report(! empty($assoc_args['confirmed-only']));
     }
 
+    /**
+     * Publish every eligible draft school marked Confirmed South Forsyth.
+     *
+     * ## OPTIONS
+     *
+     * [--dry-run]
+     * : Print what would publish and what would be skipped. Writes nothing.
+     *
+     * [--verbose]
+     * : Include warning-only enrichment gaps for schools that pass the
+     * required publication checks.
+     *
+     * ## EXAMPLES
+     *
+     *     wp southforsyth publish-confirmed-schools --dry-run
+     *     wp southforsyth publish-confirmed-schools --dry-run --verbose
+     *     wp southforsyth publish-confirmed-schools
+     *
+     * @when after_wp_load
+     */
+    public function publish_confirmed_schools($args, $assoc_args)
+    {
+        $dry_run = ! empty($assoc_args['dry-run']);
+        $verbose = ! empty($assoc_args['verbose']);
+        $schools = get_posts(array(
+            'post_type' => 'school',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC',
+        ));
+
+        $would_publish = array();
+        $published = array();
+        $skipped = array();
+        $missing_source_records = $this->get_source_records_without_existing_post();
+
+        foreach ($schools as $school) {
+            $evaluation = $this->evaluate_publish_confirmed_school($school);
+            if (empty($evaluation['blockers'])) {
+                $line = $this->publish_report_line($school, $evaluation);
+                if ($dry_run) {
+                    $would_publish[] = $line;
+                } else {
+                    $result = wp_update_post(array('ID' => $school->ID, 'post_status' => 'publish'), true);
+                    if (is_wp_error($result)) {
+                        $evaluation['blockers'][] = 'publish failed: ' . $result->get_error_message();
+                        $skipped[] = $this->publish_report_line($school, $evaluation);
+                        continue;
+                    }
+                    update_post_meta($school->ID, 'sf_published_by', 'WP-CLI publish-confirmed-schools');
+                    update_post_meta($school->ID, 'sf_published_date', current_time('Y-m-d'));
+                    $published[] = $line;
+                }
+            } else {
+                $skipped[] = $this->publish_report_line($school, $evaluation);
+            }
+        }
+
+        WP_CLI::log('===== Confirmed South Forsyth school publish report =====');
+        WP_CLI::log($dry_run ? 'Mode: dry run - no writes performed.' : 'Mode: live publish.');
+        WP_CLI::log('');
+
+        $ready_label = $dry_run ? 'Schools that would publish' : 'Schools published';
+        $ready_rows = $dry_run ? $would_publish : $published;
+        WP_CLI::log($ready_label . ': ' . count($ready_rows));
+        foreach ($ready_rows as $line) {
+            WP_CLI::log('  ' . $line['title']);
+            if ($verbose && ! empty($line['warnings'])) {
+                WP_CLI::log('    Warnings: ' . implode(', ', $line['warnings']));
+            }
+        }
+
+        WP_CLI::log('');
+        WP_CLI::log('Schools skipped: ' . count($skipped));
+        foreach ($skipped as $line) {
+            WP_CLI::warning('  ' . $line['title'] . ' - ' . implode('; ', $line['blockers']));
+        }
+
+        WP_CLI::log('');
+        WP_CLI::log('Source records without an existing school post: ' . count($missing_source_records));
+        foreach ($missing_source_records as $record) {
+            WP_CLI::warning(sprintf(
+                '  %s - %s (%s)',
+                $record['title'],
+                $record['level_label'] ?: 'no level',
+                $record['source_url']
+            ));
+        }
+
+        WP_CLI::log('');
+        WP_CLI::log('Totals: ' . count($schools) . ' existing school post(s), ' . count($ready_rows) . ($dry_run ? ' would publish, ' : ' published, ') . count($skipped) . ' blocked/protected, ' . count($missing_source_records) . ' source record(s) missing posts.');
+
+        if ($dry_run) {
+            WP_CLI::success('Dry run complete - nothing was written.');
+        } else {
+            WP_CLI::success('Publish complete. Already published, Needs Review, and Outside Coverage schools were not modified.');
+        }
+    }
+
     private function get_review_schools($confirmed_only = false)
     {
         $args = array(
@@ -251,6 +351,127 @@ class Southforsyth_Schools_Pilot_Command
         return empty($candidates) ? 'No likely duplicate found' : 'Possible duplicate of #' . $candidates[0];
     }
 
+    private function evaluate_publish_confirmed_school($school)
+    {
+        $blockers = array();
+        $warnings = array();
+        $id = $school->ID;
+        $coverage = Southforsyth_School_Import_Safety::normalize_coverage_status($this->meta($id, 'sf_south_forsyth_status'));
+
+        if (Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED !== $coverage) {
+            $blockers[] = 'coverage status is ' . $coverage;
+        }
+
+        if ('draft' !== $school->post_status) {
+            $blockers[] = 'post status is ' . $school->post_status . ' (only drafts are eligible)';
+        }
+
+        $website = $this->meta($id, 'sf_website');
+        $required = array(
+            'complete official school name' => (bool) $school->post_title,
+            'official website' => $website && (bool) filter_var($website, FILTER_VALIDATE_URL),
+            'address' => (bool) $this->meta($id, 'sf_address'),
+            'city' => (bool) $this->meta($id, 'sf_city'),
+            'state' => (bool) $this->meta($id, 'sf_state'),
+            'ZIP code' => (bool) $this->meta($id, 'sf_zip'),
+            'district' => (bool) $this->meta($id, 'sf_district'),
+            'official source URL' => (bool) $this->meta($id, 'sf_source_url'),
+            'last verified date' => (bool) $this->meta($id, 'sf_last_verified'),
+            'no unresolved duplicate conflict' => ! $this->meta($id, Southforsyth_School_Import_Safety::DUPLICATE_WARNING_META_KEY) && false === strpos($this->duplicate_status($id), 'Possible duplicate'),
+        );
+
+        $terms = wp_get_post_terms($id, 'sf_school_type', array('fields' => 'names'));
+        $required['school type'] = ! empty($terms) && ! is_wp_error($terms);
+
+        foreach ($required as $label => $passed) {
+            if (! $passed) {
+                $blockers[] = 'missing/invalid required field: ' . $label;
+            }
+        }
+
+        $warning_fields = array(
+            'principal' => 'sf_principal_name',
+            'grades served' => 'sf_grades_served',
+            'boundary URL' => 'sf_boundary_url',
+            'feeder pattern' => 'sf_feeder_pattern',
+            'mascot' => 'sf_mascot',
+            'school colors' => 'sf_school_colors',
+            'mission' => 'sf_mission',
+            'notable programs' => 'sf_notable_programs',
+        );
+
+        foreach ($warning_fields as $label => $field) {
+            if (! $this->meta($id, $field)) {
+                $warnings[] = $label;
+            }
+        }
+
+        if (! $this->meta($id, 'sf_lat') || ! $this->meta($id, 'sf_lng')) {
+            $warnings[] = 'latitude/longitude';
+        }
+
+        return array('blockers' => $blockers, 'warnings' => $warnings);
+    }
+
+    private function publish_report_line($school, array $evaluation)
+    {
+        return array(
+            'title' => '#' . $school->ID . ' [' . $school->post_status . '] ' . $school->post_title,
+            'blockers' => $evaluation['blockers'],
+            'warnings' => $evaluation['warnings'],
+        );
+    }
+
+    private function get_source_records_without_existing_post()
+    {
+        if (! class_exists('Southforsyth_Provider_Registry')) {
+            return array();
+        }
+
+        $provider = Southforsyth_Provider_Registry::get('forsyth_county');
+        if (! $provider || ! method_exists($provider, 'search_uncached')) {
+            return array();
+        }
+
+        $stubs = $provider->search_uncached();
+        if (empty($stubs)) {
+            return array();
+        }
+
+        $posts = get_posts(array(
+            'post_type' => 'school',
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+        ));
+
+        $existing_sources = array();
+        foreach ($posts as $post_id) {
+            foreach (array('_sf_import_source_id', 'sf_source_url') as $meta_key) {
+                $source = Southforsyth_School_Import_Safety::normalize_url(get_post_meta($post_id, $meta_key, true));
+                if ($source) {
+                    $existing_sources[$source] = true;
+                }
+            }
+        }
+
+        $missing = array();
+        foreach ($stubs as $stub) {
+            $source_url = Southforsyth_School_Import_Safety::normalize_url($stub['page_url'] ?? '');
+            if (! $source_url || isset($existing_sources[$source_url])) {
+                continue;
+            }
+
+            $missing[] = array(
+                'title' => Southforsyth_School_Import_Safety::official_display_name($stub['name'] ?? '', $stub['level_label'] ?? ''),
+                'level_label' => Southforsyth_School_Import_Safety::normalize_whitespace($stub['level_label'] ?? ''),
+                'source_url' => $source_url,
+            );
+        }
+
+        return $missing;
+    }
+
     private function publish(array $ids, $reviewer)
     {
         $ids = array_map('intval', array_filter(array_map('trim', $ids)));
@@ -310,5 +531,7 @@ class Southforsyth_Schools_Pilot_Command
 }
 
 if (defined('WP_CLI') && WP_CLI) {
-    WP_CLI::add_command('southforsyth schools-pilot', array(new Southforsyth_Schools_Pilot_Command(), 'schools_pilot'));
+    $southforsyth_schools_pilot_command = new Southforsyth_Schools_Pilot_Command();
+    WP_CLI::add_command('southforsyth schools-pilot', array($southforsyth_schools_pilot_command, 'schools_pilot'));
+    WP_CLI::add_command('southforsyth publish-confirmed-schools', array($southforsyth_schools_pilot_command, 'publish_confirmed_schools'));
 }

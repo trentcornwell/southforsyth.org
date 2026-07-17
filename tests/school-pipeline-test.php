@@ -166,6 +166,8 @@ sf_assert(false !== strpos($import_loader, 'class-school-import-safety.php'), 's
 sf_assert('South Forsyth Middle School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth', 'Middle Schools'), 'middle school display name gets official suffix');
 sf_assert('South Forsyth High School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth High School', 'High Schools'), 'display name suffix is not duplicated');
 sf_assert('Alliance Academy for Innovation' === Southforsyth_School_Import_Safety::official_display_name('Alliance Academy for Innovation', 'Academies of Creative Education'), 'academy display name is not forced into a normal level suffix');
+sf_assert('Forsyth Academy' === Southforsyth_School_Import_Safety::official_display_name('Forsyth Academy', 'High Schools'), 'academy-branded names are preserved under level sections');
+sf_assert('Forsyth Virtual Academy' === Southforsyth_School_Import_Safety::official_display_name('Forsyth Virtual Academy', 'Middle Schools'), 'virtual academy branding is preserved under level sections');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'South Forsyth High School', 'meta' => array('sf_address' => '585 Peachtree Pkwy', 'sf_zip' => '30041')));
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'South Forsyth high-school community is confirmed by coverage classifier');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Middle School', 'meta' => array('sf_address' => '6240 Post Rd', 'sf_zip' => '30040')));
@@ -183,6 +185,7 @@ sf_assert('Outside Coverage' === Southforsyth_School_Import_Safety::normalize_co
 
 $provider = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/providers/class-forsyth-county-provider.php');
 sf_assert(false !== strpos($provider, 'official_display_name'), 'Forsyth County provider preserves complete official display names');
+sf_assert(false !== strpos($provider, 'search_uncached'), 'Forsyth County provider exposes read-only uncached source listing for reports');
 
 $record = array(
     'source' => 'forsyth_county',
@@ -289,5 +292,25 @@ sf_assert(false !== strpos($queries, 'southforsyth_limit_public_school_queries_t
 $admin_columns = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/admin/class-school-list-columns.php');
 sf_assert(false !== strpos($admin_columns, 'COVERAGE_CONFIRMED') && false !== strpos($admin_columns, 'readiness($post_id)'), 'admin school publish action requires confirmed coverage and readiness');
 sf_assert(false !== strpos($admin_columns, "COVERAGE_DECISION_TYPE_META_KEY, 'manual'"), 'admin coverage bulk actions record manual decision provenance');
+sf_assert(false !== strpos($admin_columns, 'sf_filter_readiness') && false !== strpos($admin_columns, 'Missing required fields'), 'admin school screen exposes readiness and missing-required filters');
+
+$pilot_command = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-schools-pilot-command.php');
+sf_assert(false !== strpos($pilot_command, 'publish-confirmed-schools') && false !== strpos($pilot_command, 'publish_confirmed_schools'), 'bulk confirmed school publish command is registered');
+sf_assert(false !== strpos($pilot_command, "post_status' => 'any'") && false !== strpos($pilot_command, "'draft' !== \$school->post_status"), 'bulk publish command considers all schools but only publishes drafts');
+sf_assert(false !== strpos($pilot_command, 'missing/invalid required field') && false !== strpos($pilot_command, 'warnings'), 'bulk publish command reports required blockers and warning-only enrichment gaps');
+sf_assert(false !== strpos($pilot_command, 'get_source_records_without_existing_post') && false !== strpos($pilot_command, 'Source records without an existing school post'), 'bulk publish command reports source records without existing posts');
+sf_assert(false !== strpos($pilot_command, "WP_CLI::add_command('southforsyth publish-confirmed-schools'"), 'publish-confirmed-schools command is registered under the southforsyth namespace');
+
+$functions = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/functions.php');
+sf_assert(false !== strpos($functions, "'import/class-schools-pilot-command.php'") && false !== strpos($functions, "defined('WP_CLI') && WP_CLI"), 'school pilot command file is loaded only for WP-CLI by active theme bootstrap');
+
+$front_page = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/front-page.php');
+sf_assert(false !== strpos($front_page, 'What Is South Forsyth?') && false !== strpos($front_page, 'coverage-definition'), 'homepage includes the South Forsyth definition section');
+
+$coverage_component = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/template-parts/components/coverage-definition.php');
+sf_assert(false !== strpos($coverage_component, 'not an incorporated city') && false !== strpos($coverage_component, 'GA-400 exits 12 through 14'), 'coverage definition component explains legal status and major corridors');
+
+$coverage_template = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/page-templates/coverage.php');
+sf_assert(false !== strpos($coverage_template, 'Template Name: What Is South Forsyth?') && false !== strpos($coverage_template, 'South Forsyth Coverage FAQ'), 'full coverage page template exists with FAQ');
 
 echo "School pipeline tests complete.\n";

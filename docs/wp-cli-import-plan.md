@@ -65,8 +65,10 @@ wp southforsyth import-schools --update-only --verbose
 School names follow the Forsyth County Schools directory section:
 `Elementary Schools` becomes `[Name] Elementary School`, `Middle Schools`
 becomes `[Name] Middle School`, and `High Schools` becomes `[Name] High
-School`. The suffix is not added twice, and special school groups such as
-`Academies of Creative Education` keep their official source names.
+School`. The suffix is not added twice, and complete official branding such
+as `Alliance Academy for Innovation`, `Forsyth Academy`, or `Forsyth Virtual
+Academy` is preserved exactly instead of being forced into a normal level
+suffix.
 
 School identity is the official source ID/source URL. A shared shortened name
 does not merge records; for example, South Forsyth Middle School and South
@@ -113,11 +115,40 @@ Confirmed South Forsyth only:
 wp southforsyth schools-pilot --confirmed-only
 ```
 
+Dry-run publishing every eligible Confirmed South Forsyth draft school:
+
+```bash
+wp southforsyth publish-confirmed-schools --dry-run --verbose
+```
+
+Live publishing every eligible Confirmed South Forsyth draft school:
+
+```bash
+wp southforsyth publish-confirmed-schools
+```
+
 Guarded publish helper, after manual review:
 
 ```bash
 wp southforsyth schools-pilot --publish=<id,id> --reviewer="Reviewer Name"
 ```
+
+Rollback a mistaken publish:
+
+```bash
+wp post update <id> --post_status=draft
+```
+
+`publish-confirmed-schools` is idempotent. It never creates posts from source
+records, never changes already published schools, and never publishes schools
+with `Needs Review`, `Outside Coverage`, missing required metadata, invalid
+website/source fields, or unresolved duplicate conflicts. Dry-run output is
+grouped into:
+
+- schools that would publish
+- schools blocked/protected from publishing, with exact blocker reasons
+- official source records without an existing school post
+- totals for existing posts, publishable posts, blocked/protected posts, and missing source records
 
 ## Exit Behavior
 
