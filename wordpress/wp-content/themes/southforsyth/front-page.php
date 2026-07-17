@@ -102,6 +102,8 @@ $guide_sections = array(
         'align' => 'center',
     ));
 
+    get_template_part('template-parts/components/find-my-schools');
+
     southforsyth_render_card_section('template-parts/components/directory-card', $featured_places, array(
         'id' => 'featured',
         'eyebrow' => 'Featured locally',

@@ -19,8 +19,36 @@ get_header();
 
 $queried_post_type = get_query_var('post_type');
 $post_type_key = is_array($queried_post_type) ? reset($queried_post_type) : $queried_post_type;
+
+// On a taxonomy term archive (e.g. /school-type/elementary/, which the
+// Schools hub's level-filter links point to), WordPress's post_type query
+// var is empty -- it's only set for actual post-type archives. Without
+// this, $card_template below resolves to nothing and every post falls
+// back to the generic content-card template instead of school-card,
+// silently dropping level/sector/address/phone/website/profile-link from
+// exactly the pages meant to showcase them by level.
+if (! $post_type_key && is_tax()) {
+    $queried_term = get_queried_object();
+    if ($queried_term instanceof WP_Term) {
+        $term_taxonomy = get_taxonomy($queried_term->taxonomy);
+        if ($term_taxonomy && ! empty($term_taxonomy->object_type[0])) {
+            $post_type_key = $term_taxonomy->object_type[0];
+        }
+    }
+}
+
 $card_template = southforsyth_get_card_template_for_post_type($post_type_key);
 $hub = southforsyth_get_hub_content($post_type_key);
+
+// A taxonomy term archive (e.g. /school-type/elementary/) is a *filtered
+// view* of a post type's hub, not the hub itself -- $post_type_key now
+// resolves correctly for card rendering (see above), but the page's own
+// title/intro/empty-state should still reflect the specific term (e.g.
+// "Elementary" via get_the_archive_title()), not the generic hub copy
+// ("Schools"), or every level filter would look identical and a filter
+// that happens to match zero posts would misleadingly claim the entire
+// section is empty.
+$is_filtered_taxonomy_view = is_tax();
 ?>
 
 <main id="main-content" class="site-main">
@@ -29,14 +57,15 @@ $hub = southforsyth_get_hub_content($post_type_key);
             <header class="section-header">
                 <h1 class="section-title">
                     <?php
-                    // get_the_archive_title() (not post_type_archive_title(),
-                    // which only handles post type archives) so this still
-                    // works correctly on taxonomy archives that also render
-                    // through this template (e.g. an sf_event_category term).
-                    echo ($hub && ! empty($hub['title'])) ? esc_html($hub['title']) : esc_html(get_the_archive_title());
+                    // get_the_archive_title() intentionally returns HTML (a
+                    // <span> wrapper around the term/prefix, for CSS hooks)
+                    // -- it's meant to be echoed raw, the same as
+                    // the_title(). esc_html() here would double-escape it
+                    // into visible literal tag text.
+                    echo ($hub && ! empty($hub['title']) && ! $is_filtered_taxonomy_view) ? esc_html($hub['title']) : wp_kses_post(get_the_archive_title());
                     ?>
                 </h1>
-                <?php if ($hub && ! empty($hub['intro'])) : ?>
+                <?php if ($hub && ! empty($hub['intro']) && ! $is_filtered_taxonomy_view) : ?>
                     <div class="section-subtitle hub-intro">
                         <?php foreach ($hub['intro'] as $paragraph) : ?>
                             <p><?php echo esc_html($paragraph); ?></p>
@@ -46,6 +75,17 @@ $hub = southforsyth_get_hub_content($post_type_key);
                     <?php the_archive_description('<div class="section-subtitle">', '</div>'); ?>
                 <?php endif; ?>
             </header>
+
+            <?php if ('school' === $post_type_key) : get_template_part('template-parts/components/find-my-schools'); ?>
+                <h2 class="section-title" style="margin-top: var(--space-8);">Browse Schools</h2>
+                <p class="section-subtitle">
+                    <?php
+                    $matching_count = (int) $wp_query->found_posts;
+                    echo esc_html(sprintf('%d %s', $matching_count, 1 === $matching_count ? 'school' : 'schools'));
+                    echo $is_filtered_taxonomy_view ? esc_html(' matching this filter.') : esc_html(' published.');
+                    ?>
+                </p>
+            <?php endif; ?>
 
             <?php if (have_posts()) : ?>
                 <div class="card-grid">
@@ -75,7 +115,7 @@ $hub = southforsyth_get_hub_content($post_type_key);
                         endif; ?>
                     <?php endwhile; ?>
                 </div>
-            <?php elseif ($hub) : ?>
+            <?php elseif ($hub && ! $is_filtered_taxonomy_view) : ?>
                 <article class="card card-placeholder hub-empty-notice">
                     <div class="card__body">
                         <span class="badge-soon">Coming soon</span>

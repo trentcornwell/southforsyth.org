@@ -24,6 +24,23 @@ if (! function_exists('southforsyth_enqueue_assets')) {
             wp_enqueue_script('southforsyth-main', $theme_uri . '/assets/js/main.js', array(), $script_version, true);
             wp_script_add_data('southforsyth-main', 'defer', true);
         }
+
+        // "Find My Schools" JS: only where the component can actually
+        // appear (front page, the school archive/hub, and single school
+        // pages) -- not a global enqueue, matching this theme's
+        // performance philosophy (see inc/performance.php).
+        $find_schools_context = is_front_page()
+            || (is_post_type_archive('school'))
+            || (is_singular('school'));
+        if ($find_schools_context && file_exists($theme_dir . '/assets/js/find-my-schools.js')) {
+            $find_schools_version = filemtime($theme_dir . '/assets/js/find-my-schools.js');
+            wp_enqueue_script('southforsyth-find-my-schools', $theme_uri . '/assets/js/find-my-schools.js', array(), $find_schools_version, true);
+            wp_script_add_data('southforsyth-find-my-schools', 'defer', true);
+            wp_localize_script('southforsyth-find-my-schools', 'sfFindSchools', array(
+                'restUrl' => esc_url_raw(rest_url('southforsyth/v1/find-schools')),
+                'nonce'   => wp_create_nonce('wp_rest'),
+            ));
+        }
     }
 }
 

@@ -497,6 +497,63 @@ class Southforsyth_Forsyth_County_Import_Command
     }
 
     /**
+     * Focused duplicate-only report -- the same identity-matching audit_schools()
+     * runs, without the full source-audit noise, for a quick idempotency check.
+     * Checks both structural duplicates (two posts sharing a source ID/URL,
+     * which the importer should never allow) and title collisions between
+     * genuinely different schools that share a bare community name (e.g. an
+     * elementary and a middle school both called "Vickery Creek") so an
+     * editor can tell the two apart before assuming either is a real dupe.
+     *
+     * ## EXAMPLES
+     *
+     *     wp southforsyth detect-school-duplicates
+     *
+     * @when after_wp_load
+     */
+    public function detect_school_duplicates($args, $assoc_args)
+    {
+        $provider = $this->get_provider();
+        $source_records = $this->source_records($provider);
+        $posts = $this->school_posts();
+        $post_index = $this->index_posts_by_identity($posts);
+
+        WP_CLI::log('===== School duplicate detection =====');
+        $this->log_duplicate_identity_report('Duplicate source IDs (same official FCS record matched to more than one post)', $post_index['source_ids']);
+        $this->log_duplicate_identity_report('Duplicate source URLs', $post_index['source_urls']);
+        $this->log_ambiguous_short_titles($source_records);
+
+        $title_counts = array();
+        foreach ($posts as $post) {
+            $title_counts[$post->post_title][] = $post;
+        }
+        $title_duplicates = array_filter($title_counts, function ($group) {
+            return count($group) > 1;
+        });
+        WP_CLI::log('');
+        WP_CLI::log('Posts sharing an identical title: ' . count($title_duplicates));
+        foreach ($title_duplicates as $title => $group) {
+            $ids = array_map(function ($post) {
+                return '#' . $post->ID . ' [' . $post->post_status . ']';
+            }, $group);
+            WP_CLI::warning('  "' . $title . '" => ' . implode(', ', $ids));
+        }
+
+        $total_issues = count(array_filter($post_index['source_ids'], function ($g) {
+            return count($g) > 1;
+        })) + count(array_filter($post_index['source_urls'], function ($g) {
+            return count($g) > 1;
+        })) + count($title_duplicates);
+
+        WP_CLI::log('');
+        if ($total_issues > 0) {
+            WP_CLI::warning("Found {$total_issues} unresolved duplicate group(s) requiring manual review.");
+        } else {
+            WP_CLI::success('No unresolved duplicate posts found. (Note: schools sharing a bare community name across levels, e.g. an ES/MS pair, are reported above as informational only -- they are not duplicates.)');
+        }
+    }
+
+    /**
      * Apply the shared South Forsyth coverage classifier to existing school posts.
      *
      * ## OPTIONS
@@ -753,4 +810,5 @@ if (defined('WP_CLI') && WP_CLI) {
     WP_CLI::add_command('southforsyth correct-school-titles', array($southforsyth_fcs_command, 'correct_school_titles'));
     WP_CLI::add_command('southforsyth school-coverage-report', array($southforsyth_fcs_command, 'school_coverage_report'));
     WP_CLI::add_command('southforsyth classify-schools', array($southforsyth_fcs_command, 'classify_schools'));
+    WP_CLI::add_command('southforsyth detect-school-duplicates', array($southforsyth_fcs_command, 'detect_school_duplicates'));
 }

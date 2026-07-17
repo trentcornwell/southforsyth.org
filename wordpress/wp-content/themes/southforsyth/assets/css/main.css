@@ -234,6 +234,12 @@ input, button, textarea, select { font: inherit; }
 .section-block { padding-top: var(--space-5); border-top: 1px solid var(--color-border); display: grid; gap: 0.6rem; }
 .section-block:first-child { padding-top: 0; border-top: 0; }
 .section-block h2 { margin: 0; font-size: 1.05rem; }
+.find-my-schools__form { max-width: 640px; margin-top: var(--space-5); }
+.find-my-schools__privacy { font-size: var(--font-size-sm); color: var(--color-muted); margin: 0; }
+.find-my-schools__results:empty { display: none; }
+.find-my-schools__results { margin-top: var(--space-6); }
+.find-my-schools__cards { margin-top: var(--space-4); }
+.find-my-schools__source { font-size: var(--font-size-sm); color: var(--color-muted); margin-top: var(--space-4); }
 /* Single-template ("card-post") variants, used by single.php/page.php. */
 .card__header { padding: 1.35rem 1.35rem 0; }
 .card__header h1,

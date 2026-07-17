@@ -152,6 +152,34 @@ stale silently (no "last updated" signal from most county GIS portals).
   yet, so this stays documentation only — no inert provider class has been
   scaffolded for it, matching the same caution already applied to Georgia
   DOE/GOSA below.
+- **Forsyth County Schools official attendance-boundary GIS** — confirmed
+  and built (unlike the county-wide GIS above). Discovered by inspecting
+  the public "Locate School by Address" Web AppBuilder tool linked from
+  `forsyth.k12.ga.us/district-services/facilities/gis-boundary-planning`:
+  it's backed by a public ArcGIS REST service at
+  `fcsmaps.forsyth.k12.ga.us/arcgis/rest/services/SchoolLocatorRolta1071v8/MapServer`,
+  with no API key or auth required. Two kinds of layers, both used:
+  - **Layer 1, "Schools by Student Address"** — FCS's own maintained,
+    parcel-level address database with pre-computed ES/MS/HS assignment
+    fields (`ES`/`MS`/`HS`). This is the authoritative source for both
+    `Southforsyth_School_Boundary_Service::lookup_by_address()` (the
+    public "Find My Schools" feature, `inc/school-locator.php`) and the
+    `wp southforsyth update-school-boundaries` coverage-verification
+    command — proved during this project's research to be far more
+    reliable than either geocoding an address or computing a zone
+    polygon's centroid (both produced inconsistent results near
+    irregular zone boundaries; this address-point layer is what FCS's
+    own tool actually queries).
+  - **Layers 4/5/6** — the raw Elementary/Middle/High attendance-zone
+    polygons themselves (`ES_NAME`/`MS_NAME`/`HS_NAME` fields), currently
+    labeled FY2023 by FCS. Kept as a documented fallback in
+    `Southforsyth_School_Boundary_Service::query_layer()`, not used by
+    the address-lookup path.
+  No caching layer wraps any of this (unlike every other provider in this
+  theme) — a visitor's submitted address is never persisted, so nothing
+  about the lookup can be cached without effectively storing it. Boundaries
+  are FCS's own and can change between school years; `update-school-boundaries`
+  is meant to be re-run periodically, not treated as a one-time import.
 - **Georgia DOT open data** — traffic and road condition data for the
   "Traffic" homepage placeholder. Would need a genuinely live feed (not a
   one-time pull) to be worth showing; until then, that section stays a
@@ -301,16 +329,48 @@ future directory-type content that needs this same judgment call:
 | `Needs Review` | Default for anything not yet classified or not confidently classifiable. |
 | `Outside Coverage` | Affirmatively placed outside the South Forsyth editorial coverage area. |
 
-Automatic confirmation is limited to the central allowlist in
-`Southforsyth_School_Import_Safety::coverage_allowlist()`: South Forsyth High
-School, Denmark High School, and Lambert High School. Middle and elementary
-schools stay `Needs Review` unless an editor records official boundary,
-attendance-map, feeder/serving-area, address-with-boundary, or manual
-editorial evidence. The classifier must not confirm solely by city name,
-corridor keyword, ZIP, or fabricated feeder pattern. Clearly outside county
-signals include North Forsyth, East Forsyth, West Forsyth, Forsyth Central,
-Coal Mountain, Chestatee, Cumming, Matt, Sawnee, Kelly Mill, Otwell, Liberty,
-Little Mill, Lakeside, Silver City, Poole's Mill, Mashburn, and Chattahoochee.
+Two automatic paths can confirm a school, and both require real evidence —
+neither ever confirms solely by city name, corridor keyword, ZIP, or a
+fabricated feeder pattern:
+
+1. **The name-pattern allowlist** in
+   `Southforsyth_School_Import_Safety::coverage_allowlist()` — a small,
+   deliberately conservative set matched by title: South Forsyth High
+   School, Denmark High School, Lambert High School, South Forsyth Middle
+   School, and Piney Grove Middle School (the last two added after
+   confirming, via forsyth.k12.ga.us, that they're official feeder
+   schools for South Forsyth High).
+2. **The official boundary-verification command**,
+   `wp southforsyth update-school-boundaries` (`Southforsyth_School_Boundary_Command`,
+   `inc/import/class-school-boundary-command.php`) — looks up each
+   school's own official address in FCS's attendance-boundary GIS (see
+   "GIS/open data sources" above) and confirms it if its own zone feeds
+   South Forsyth High, Denmark High, or Lambert High. This is how Daves
+   Creek, Haw Creek, and Shiloh Point elementary (→ South Forsyth High);
+   Big Creek, Brandywine, and Midway elementary (→ Denmark High);
+   Brookwood, Johns Creek, Settles Bridge, and Sharon elementary (→
+   Lambert High); and Lakeside, DeSana, and Riverwatch middle schools
+   were confirmed — none of these match the name-pattern allowlist above,
+   and would otherwise sit in `Needs Review` indefinitely.
+
+A school not found in FCS's official address database (a new address, a
+data gap, or genuinely outside the district) is left at its current
+status by the boundary command, not guessed at.
+
+Schools whose own attendance zone is confirmed to feed a different high
+school are classified `Outside Coverage` by the same boundary command —
+this superseded an earlier, cruder approach (a static keyword list of
+"clearly outside" community names: North Forsyth, East Forsyth, West
+Forsyth, Forsyth Central, Coal Mountain, Chestatee, Cumming, Matt, Sawnee,
+Kelly Mill, Otwell, Liberty, Little Mill, Silver City, Poole's Mill,
+Mashburn, Chattahoochee, and Vickery Creek — still present in
+`coverage_allowlist()`'s companion `outside_names` list as a fast,
+offline first pass during import, but no longer the final word once
+boundary data is available). That keyword list briefly also flagged
+"Lakeside" as outside-coverage by name association; the boundary command
+proved this wrong (Lakeside Middle School's own site is confirmed inside
+South Forsyth High's zone), so "Lakeside" was removed from the keyword
+list entirely rather than left to silently override real evidence.
 
 Every coverage decision should carry provenance in `sf_coverage_decision_*`
 meta: decision source, note, date, and `manual`/`automatic` type.

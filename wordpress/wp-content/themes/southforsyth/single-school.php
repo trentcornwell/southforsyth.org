@@ -223,6 +223,8 @@ while (have_posts()) :
             </aside>
         </div>
 
+        <?php get_template_part('template-parts/components/find-my-schools'); ?>
+
         <?php
         $current_post = get_post();
 

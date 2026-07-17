@@ -142,6 +142,16 @@ southforsyth_require_optional_theme_files(array(
     'community/community.php',
 ));
 
+// Address-to-school lookup ("Find My Schools") — the boundary service and
+// the REST route registration both need to load on every front-end
+// request (the REST route registers on rest_api_init regardless of which
+// page is loading), not just WP-CLI. See docs/data-integration-roadmap.md
+// for the official Forsyth County Schools GIS source this is built on.
+southforsyth_require_optional_theme_files(array(
+    'import/class-school-boundary-service.php',
+    'school-locator.php',
+));
+
 // Admin-only tooling (the "Community Platform" wp-admin menu) — gated
 // behind is_admin() so none of it parses on a front-end page request,
 // matching this theme's existing performance philosophy (see
@@ -165,6 +175,7 @@ if (defined('WP_CLI') && WP_CLI) {
         'import/class-forsyth-county-import-command.php',
         'import/class-geocode-command.php',
         'import/class-schools-pilot-command.php',
+        'import/class-school-boundary-command.php',
     ));
 }
 
