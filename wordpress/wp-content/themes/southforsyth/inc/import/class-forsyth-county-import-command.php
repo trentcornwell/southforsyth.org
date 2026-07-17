@@ -144,8 +144,21 @@ class Southforsyth_Forsyth_County_Import_Command
             $analysis = Southforsyth_School_Import_Safety::analyze_record($record, $update_only);
             $record = $analysis['record'];
             $existing_status = $analysis['post_id'] ? get_post_meta($analysis['post_id'], 'sf_south_forsyth_status', true) : '';
-            if ($analysis['post_id']) {
+            $coverage = array();
+
+            if ($analysis['post_id'] && $existing_status) {
+                // This post already has a coverage decision -- from the
+                // keyword classifier, a human, or (since
+                // wp southforsyth update-school-boundaries) official FCS
+                // boundary data. Classification is that command's job and
+                // classify-schools's job, not this directory scraper's:
+                // preserve it untouched rather than re-deriving with
+                // classify_coverage(), which only knows the conservative
+                // keyword rule and would silently downgrade a
+                // boundary-verified "Confirmed South Forsyth" back to
+                // "Needs Review" every time this importer re-runs.
                 foreach (array(
+                    'sf_south_forsyth_status',
                     Southforsyth_School_Import_Safety::COVERAGE_DECISION_SOURCE_META_KEY,
                     Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY,
                     Southforsyth_School_Import_Safety::COVERAGE_DECISION_DATE_META_KEY,
@@ -153,13 +166,16 @@ class Southforsyth_Forsyth_County_Import_Command
                 ) as $coverage_meta_key) {
                     $record['meta'][$coverage_meta_key] = get_post_meta($analysis['post_id'], $coverage_meta_key, true);
                 }
+            } else {
+                // New record, or an existing post with no classification
+                // yet -- give it a first-pass automatic classification.
+                $coverage = Southforsyth_School_Import_Safety::classify_coverage($record, $existing_status);
+                $record['meta']['sf_south_forsyth_status'] = $coverage['status'];
+                $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_SOURCE_META_KEY] = $coverage['decision_source'];
+                $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY] = $coverage['decision_note'];
+                $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_DATE_META_KEY] = current_time('Y-m-d');
+                $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_TYPE_META_KEY] = $coverage['decision_type'];
             }
-            $coverage = Southforsyth_School_Import_Safety::classify_coverage($record, $existing_status);
-            $record['meta']['sf_south_forsyth_status'] = $coverage['status'];
-            $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_SOURCE_META_KEY] = $coverage['decision_source'];
-            $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY] = $coverage['decision_note'];
-            $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_DATE_META_KEY] = current_time('Y-m-d');
-            $record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_TYPE_META_KEY] = $coverage['decision_type'];
 
             foreach (southforsyth_get_school_completeness_fields() as $field) {
                 if (empty($record['meta'][$field])) {
@@ -177,7 +193,8 @@ class Southforsyth_Forsyth_County_Import_Command
             if ($south_forsyth_only && Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED !== ($record['meta']['sf_south_forsyth_status'] ?? '')) {
                 $stats['coverage_skipped']++;
                 if ($verbose) {
-                    WP_CLI::log("Skipped outside South Forsyth import scope: {$record['title']} — {$record['meta']['sf_south_forsyth_status']} (" . implode(' ', $coverage['reasons']) . ')');
+                    $skip_reason = ! empty($coverage['reasons']) ? implode(' ', $coverage['reasons']) : ($record['meta'][Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY] ?? '');
+                    WP_CLI::log("Skipped outside South Forsyth import scope: {$record['title']} — {$record['meta']['sf_south_forsyth_status']} ({$skip_reason})");
                 }
                 $progress->tick();
                 continue;
