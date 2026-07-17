@@ -113,6 +113,79 @@ if (! function_exists('southforsyth_get_excerpt')) {
             $excerpt = wp_strip_all_tags($post->post_content);
         }
 
-        return wp_trim_words($excerpt, $length, '…');
+        if (! $excerpt && 'school' === $post->post_type) {
+            $excerpt = southforsyth_get_school_factual_summary($post_id);
+        }
+
+        return $excerpt ? wp_trim_words($excerpt, $length, '…') : '';
+    }
+}
+
+if (! function_exists('southforsyth_get_school_factual_summary')) {
+    /**
+     * One-sentence factual fallback for a school with no real excerpt/
+     * content, built only from stored, sourced fields (level/sector
+     * taxonomy, sf_grades_served, sf_city) — never a generic placeholder
+     * and never an invented fact. Returns '' if too little is known to say
+     * anything factual (e.g. no level/sector term assigned yet), so the
+     * caller can render nothing rather than an empty sentence.
+     *
+     * Deliberately uses the school's real mailing city, not the site's
+     * "South Forsyth" editorial coverage label — sf_south_forsyth_status is
+     * a classification decision, not a verified fact about the school (see
+     * docs/data-integration-roadmap.md, "South Forsyth classification
+     * policy"), so it never gets folded into generated content text.
+     */
+    function southforsyth_get_school_factual_summary($post_id)
+    {
+        $terms = wp_get_post_terms($post_id, 'sf_school_type', array('fields' => 'names'));
+        $terms = (! empty($terms) && ! is_wp_error($terms)) ? $terms : array();
+
+        $level_words = array(
+            'Elementary' => 'elementary school',
+            'Middle'     => 'middle school',
+            'High'       => 'high school',
+            'K-8'        => 'K-8 school',
+        );
+        $level = '';
+        foreach ($level_words as $key => $word) {
+            if (in_array($key, $terms, true)) {
+                $level = $word;
+                break;
+            }
+        }
+
+        $sectors = array('Public', 'Private', 'Charter', 'Homeschool Resource');
+        $sector = '';
+        foreach ($sectors as $key) {
+            if (in_array($key, $terms, true)) {
+                $sector = $key;
+                break;
+            }
+        }
+
+        if (! $level && ! $sector) {
+            return '';
+        }
+
+        $descriptor = trim(strtolower($sector) . ' ' . ($level ?: 'school'));
+        $article = preg_match('/^[aeiou]/i', $descriptor) ? 'an' : 'a';
+        $district = get_post_meta($post_id, 'sf_district', true);
+
+        $sentence = sprintf('%s is %s %s', get_the_title($post_id), $article, $descriptor);
+
+        $grades = get_post_meta($post_id, 'sf_grades_served', true);
+        if ($grades) {
+            $sentence .= sprintf(' serving grades %s', $grades);
+        }
+
+        $city = get_post_meta($post_id, 'sf_city', true);
+        if ($city) {
+            $sentence .= sprintf(' in %s', $city);
+        }
+
+        $sentence .= $district ? sprintf(', part of %s.', $district) : '.';
+
+        return $sentence;
     }
 }

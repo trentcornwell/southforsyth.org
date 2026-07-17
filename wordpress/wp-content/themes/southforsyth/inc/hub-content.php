@@ -136,6 +136,7 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                 'intro' => array(
                     'A clear, practical overview of schools serving South Forsyth families — public and private, by level.',
                     'This page is meant to help new and prospective residents get oriented quickly, not to replace the school district\'s own site.',
+                    'School information is imported from the official Forsyth County Schools website and reviewed before publishing. Every school\'s own page shows an "Improve this page" link if you spot something that needs a correction.',
                 ),
                 'empty_title' => 'No school profiles published yet',
                 'empty_description' => 'We haven\'t published any School profiles yet. Real listings will appear here automatically once they\'re added.',
@@ -144,6 +145,12 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                     array('icon' => 'M', 'title' => 'Middle Schools', 'description' => 'Middle schools and their feeder patterns.'),
                     array('icon' => 'H', 'title' => 'High Schools', 'description' => 'High schools, including the area\'s public high school.'),
                     array('icon' => 'P', 'title' => 'Private & Independent Schools', 'description' => 'Private and independent school options in the area.'),
+                ),
+                'level_links' => array(
+                    array('label' => 'Elementary', 'term' => 'Elementary'),
+                    array('label' => 'Middle', 'term' => 'Middle'),
+                    array('label' => 'High', 'term' => 'High'),
+                    array('label' => 'Private', 'term' => 'Private'),
                 ),
                 'links' => array(
                     array('label' => 'New Resident Guide', 'key' => 'new-resident-guide'),
@@ -155,6 +162,7 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                     array('question' => 'Is this an official school district resource?', 'answer' => 'No. SouthForsyth.org is an independent community guide, not affiliated with Forsyth County Schools. Always confirm attendance zones and enrollment directly with the district.'),
                     array('question' => 'Will you list school boundaries?', 'answer' => 'District boundary lines change and are best confirmed directly with Forsyth County Schools — this page will link out to the official source rather than republish boundary maps.'),
                     array('question' => 'Do you cover private schools?', 'answer' => 'Yes, once profiles are published — private and independent schools are part of this same listing.'),
+                    array('question' => 'How is "South Forsyth" defined for this list?', 'answer' => 'Schools are included based on official Forsyth County Schools attendance zones, feeder patterns, and addresses, reviewed editorially — not simply by county membership. See our "What Is South Forsyth?" coverage guide for the full explanation.'),
                 ),
             ),
             'church' => array(
@@ -471,6 +479,44 @@ if (! function_exists('southforsyth_render_hub_links')) {
             echo '<a class="pill-link" href="' . esc_url($url) . '">' . esc_html($link['label'] ?? '') . '</a>' . PHP_EOL;
         }
         echo '</div>' . PHP_EOL;
+    }
+}
+
+if (! function_exists('southforsyth_render_hub_level_links')) {
+    /**
+     * Visible links to sf_school_type taxonomy archives (e.g. /school-type/high/),
+     * which already render through archive.php with no new template code —
+     * this just surfaces links to them from the Schools hub. Separate from
+     * southforsyth_render_hub_links() because that helper only resolves post
+     * type archives and pages, not taxonomy term archives.
+     */
+    function southforsyth_render_hub_level_links($hub)
+    {
+        if (empty($hub['level_links'])) {
+            return;
+        }
+
+        $rendered = false;
+        ob_start();
+        echo '<div class="pill-row pill-row--start" aria-label="Browse schools by level">' . PHP_EOL;
+        foreach ($hub['level_links'] as $level_link) {
+            $term = get_term_by('name', $level_link['term'] ?? '', 'sf_school_type');
+            if (! $term) {
+                continue;
+            }
+            $url = get_term_link($term);
+            if (is_wp_error($url)) {
+                continue;
+            }
+            $rendered = true;
+            echo '<a class="pill-link" href="' . esc_url($url) . '">' . esc_html($level_link['label'] ?? '') . '</a>' . PHP_EOL;
+        }
+        echo '</div>' . PHP_EOL;
+        $markup = ob_get_clean();
+
+        if ($rendered) {
+            echo $markup;
+        }
     }
 }
 

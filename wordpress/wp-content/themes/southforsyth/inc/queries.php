@@ -109,7 +109,7 @@ if (! function_exists('southforsyth_post_to_card')) {
         $city = (! empty($city_terms) && ! is_wp_error($city_terms)) ? $city_terms[0]->name : '';
         $location_parts = array_filter(array($address, $area, $city));
 
-        return array(
+        $card = array(
             'eyebrow'     => $eyebrow,
             'title'       => get_the_title($post),
             'description' => southforsyth_get_excerpt($post->ID, 20),
@@ -121,6 +121,35 @@ if (! function_exists('southforsyth_post_to_card')) {
             'location'    => implode(' · ', $location_parts),
             'grades'      => ('school' === $post->post_type) ? get_post_meta($post->ID, 'sf_grades_served', true) : '',
         );
+
+        if ('school' === $post->post_type) {
+            $terms = wp_get_post_terms($post->ID, 'sf_school_type', array('fields' => 'names'));
+            $terms = (! empty($terms) && ! is_wp_error($terms)) ? $terms : array();
+            $level = '';
+            foreach (array('Elementary', 'Middle', 'High', 'K-8') as $key) {
+                if (in_array($key, $terms, true)) {
+                    $level = $key;
+                    break;
+                }
+            }
+            $sector = '';
+            foreach (array('Public', 'Private', 'Charter', 'Homeschool Resource') as $key) {
+                if (in_array($key, $terms, true)) {
+                    $sector = $key;
+                    break;
+                }
+            }
+
+            $card['level']      = $level;
+            $card['sector']     = $sector;
+            $card['city_meta']  = get_post_meta($post->ID, 'sf_city', true);
+            $card['state']      = get_post_meta($post->ID, 'sf_state', true);
+            $card['zip']        = get_post_meta($post->ID, 'sf_zip', true);
+            $card['phone']      = get_post_meta($post->ID, 'sf_phone', true);
+            $card['website']    = get_post_meta($post->ID, 'sf_website', true);
+        }
+
+        return $card;
     }
 }
 

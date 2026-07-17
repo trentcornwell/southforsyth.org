@@ -133,6 +133,28 @@ class Southforsyth_School_Import_Safety
                 'decision_source' => 'Central coverage allowlist',
                 'decision_note' => 'Initial unquestioned South Forsyth high-school anchor. Confirm official school URL/address before publication.',
             ),
+            // Shares the South Forsyth High School campus/community and name;
+            // no source suggests it is anything but South Forsyth. Added
+            // 2026-07 after correcting bare "South Forsyth" titles exposed
+            // that the allowlist regex only ever matched the high school.
+            'south forsyth middle' => array(
+                'status' => self::COVERAGE_CONFIRMED,
+                'decision_type' => 'automatic',
+                'decision_source' => 'Central coverage allowlist',
+                'decision_note' => 'Same community/campus area as the confirmed South Forsyth High anchor.',
+            ),
+            // Confirmed via forsyth.k12.ga.us's own South Forsyth High School
+            // overview page and Piney Grove Middle's own official page
+            // ("serve...the Denmark and South Communities"), both fetched
+            // live 2026-07: Piney Grove Middle is one of exactly three
+            // official feeder middle schools for South Forsyth High School
+            // (with Lakeside Middle and South Forsyth Middle).
+            'piney grove middle' => array(
+                'status' => self::COVERAGE_CONFIRMED,
+                'decision_type' => 'automatic',
+                'decision_source' => 'Official South Forsyth High School feeder pattern (forsyth.k12.ga.us)',
+                'decision_note' => 'Official feeder middle school for the confirmed South Forsyth High School anchor.',
+            ),
         );
     }
 
@@ -172,9 +194,25 @@ class Southforsyth_School_Import_Safety
         $outside_names = array(
             'north forsyth', 'east forsyth', 'west forsyth', 'forsyth central',
             'coal mountain', 'chestatee', 'cumming', 'matt', 'sawnee',
-            'kelly mill', 'otwell', 'liberty', 'little mill', 'lakeside',
+            'kelly mill', 'otwell', 'liberty', 'little mill',
             'silver city', "poole's mill", 'mashburn', 'chattahoochee',
+            // Vickery Creek Elementary/Middle: confirmed via their own
+            // official forsyth.k12.ga.us pages (fetched live 2026-07) to
+            // feed West Forsyth High School, not a South Forsyth anchor —
+            // despite "Vickery" appearing in this site's general community
+            // coverage prose (coverage-definition.php), which describes
+            // broader local-guide coverage, not school attendance zones.
+            'vickery creek',
         );
+        // 'lakeside' was removed from this list 2026-07: Lakeside Middle
+        // School is one of South Forsyth High School's three official
+        // feeder middle schools per forsyth.k12.ga.us (confirmed live,
+        // alongside Piney Grove Middle and South Forsyth Middle in the
+        // allowlist above). It previously auto-classified as Outside on
+        // a bare keyword match with no verification against real feeder
+        // data. Deliberately left out of both lists now — falls through to
+        // Needs Review pending an explicit human decision (see
+        // docs/data-integration-roadmap.md).
         foreach ($outside_names as $name) {
             if (false !== strpos($haystack, $name)) {
                 return array(

@@ -62,6 +62,13 @@ $hub = southforsyth_get_hub_content($post_type_key);
                             set_query_var('city', $card['city'] ?? '');
                             set_query_var('location', $card['location'] ?? '');
                             set_query_var('grades', $card['grades'] ?? '');
+                            set_query_var('level', $card['level'] ?? '');
+                            set_query_var('sector', $card['sector'] ?? '');
+                            set_query_var('city_meta', $card['city_meta'] ?? '');
+                            set_query_var('state', $card['state'] ?? '');
+                            set_query_var('zip', $card['zip'] ?? '');
+                            set_query_var('phone', $card['phone'] ?? '');
+                            set_query_var('website', $card['website'] ?? '');
                             get_template_part($card_template);
                         else :
                             get_template_part('template-parts/content', 'card');
@@ -92,7 +99,7 @@ $hub = southforsyth_get_hub_content($post_type_key);
                 <p>No results were found for this archive.</p>
             <?php endif; ?>
 
-            <?php if ($hub) : southforsyth_render_hub_links($hub); endif; ?>
+            <?php if ($hub) : southforsyth_render_hub_level_links($hub); southforsyth_render_hub_links($hub); endif; ?>
         </div>
     </section>
 
