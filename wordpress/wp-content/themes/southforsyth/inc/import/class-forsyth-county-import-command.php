@@ -475,19 +475,38 @@ class Southforsyth_Forsyth_County_Import_Command
             Southforsyth_School_Import_Safety::COVERAGE_NEEDS_REVIEW => array(),
             Southforsyth_School_Import_Safety::COVERAGE_OUTSIDE => array(),
         );
+        $current_classifications = array();
+        $proposed_classifications = array();
 
         foreach ($posts as $post) {
-            $status = Southforsyth_School_Import_Safety::normalize_coverage_status(get_post_meta($post->ID, 'sf_south_forsyth_status', true));
-            $groups[$status][] = $post;
+            $current_status = Southforsyth_School_Import_Safety::normalize_coverage_status(get_post_meta($post->ID, 'sf_south_forsyth_status', true));
+            $record = $this->post_to_classification_record($post);
+            $classification = Southforsyth_School_Import_Safety::classify_coverage($record, $current_status);
+            $groups[$classification['status']][] = array(
+                'post' => $post,
+                'current_status' => $current_status,
+                'classification' => $classification,
+            );
+            $current_classifications[] = array('status' => $current_status);
+            $proposed_classifications[] = $classification;
         }
 
         WP_CLI::log('===== School coverage report =====');
-        foreach ($groups as $status => $status_posts) {
+        $current_totals = Southforsyth_School_Import_Safety::summarize_coverage_classifications($current_classifications);
+        $proposed_totals = Southforsyth_School_Import_Safety::summarize_coverage_classifications($proposed_classifications);
+        WP_CLI::log('Current stored totals: ' . $this->coverage_totals_line($current_totals));
+        WP_CLI::log('Proposed classifier totals: ' . $this->coverage_totals_line($proposed_totals));
+
+        foreach ($groups as $status => $records) {
             WP_CLI::log('');
-            WP_CLI::log($status . ': ' . count($status_posts));
-            foreach ($status_posts as $post) {
-                $record = $this->post_to_classification_record($post);
-                $classification = Southforsyth_School_Import_Safety::classify_coverage($record, get_post_meta($post->ID, 'sf_south_forsyth_status', true));
+            WP_CLI::log('Proposed ' . $status . ': ' . count($records));
+            foreach ($records as $item) {
+                $post = $item['post'];
+                $classification = $item['classification'];
+                $readiness = Southforsyth_School_Import_Safety::readiness($post->ID);
+                $eligible = 'draft' === $post->post_status
+                    && Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED === $classification['status']
+                    && $readiness['ready'];
                 WP_CLI::log(sprintf(
                     '  #%d [%s] %s',
                     $post->ID,
@@ -501,16 +520,31 @@ class Southforsyth_Forsyth_County_Import_Command
                     get_post_meta($post->ID, 'sf_zip', true) ?: '(no ZIP)'
                 )));
                 WP_CLI::log('    Type: ' . $this->get_school_type_label($post->ID));
-                WP_CLI::log('    Current status: ' . $status);
-                WP_CLI::log('    Reason: ' . implode(' ', $classification['reasons']));
+                WP_CLI::log('    Current status: ' . $item['current_status']);
+                WP_CLI::log('    Proposed status: ' . $classification['status']);
+                WP_CLI::log('    Classification reason: ' . implode(' ', $classification['reasons']));
                 WP_CLI::log('    Decision type: ' . ($classification['decision_type'] ?? '(none)'));
                 WP_CLI::log('    Evidence/source: ' . ($classification['decision_source'] ?? '(none)'));
                 WP_CLI::log('    Decision note: ' . ($classification['decision_note'] ?? '(none)'));
                 WP_CLI::log('    Official source URL: ' . (get_post_meta($post->ID, 'sf_source_url', true) ?: '(none)'));
+                WP_CLI::log('    Eligible for publishing: ' . ($eligible ? 'yes' : 'no'));
             }
         }
 
         WP_CLI::success('Coverage report complete — no writes performed.');
+    }
+
+    private function coverage_totals_line(array $totals)
+    {
+        return sprintf(
+            '%s: %d; %s: %d; %s: %d',
+            Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED,
+            $totals[Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED],
+            Southforsyth_School_Import_Safety::COVERAGE_NEEDS_REVIEW,
+            $totals[Southforsyth_School_Import_Safety::COVERAGE_NEEDS_REVIEW],
+            Southforsyth_School_Import_Safety::COVERAGE_OUTSIDE,
+            $totals[Southforsyth_School_Import_Safety::COVERAGE_OUTSIDE]
+        );
     }
 
     /**

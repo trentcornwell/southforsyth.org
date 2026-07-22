@@ -158,11 +158,66 @@ class Southforsyth_School_Import_Safety
         );
     }
 
+    /**
+     * Explicit editorial decisions that must be applied before preserving a
+     * legacy stored value. This repairs older automatic Outside Coverage
+     * values without weakening the separate manual-override rule generally.
+     */
+    public static function editorial_review_decisions()
+    {
+        $decisions = array(
+            'vickery creek elementary' => array(
+                'status' => self::COVERAGE_CONFIRMED,
+                'decision_type' => 'manual',
+                'decision_source' => 'SouthForsyth.org coverage policy',
+                'decision_note' => 'Vickery is explicitly included in the adopted editorial coverage area.',
+                'reason' => 'Matched explicit editorial coverage decision for the Vickery community.',
+            ),
+            'vickery creek middle' => array(
+                'status' => self::COVERAGE_CONFIRMED,
+                'decision_type' => 'manual',
+                'decision_source' => 'SouthForsyth.org coverage policy',
+                'decision_note' => 'Vickery is explicitly included in the adopted editorial coverage area.',
+                'reason' => 'Matched explicit editorial coverage decision for the Vickery community.',
+            ),
+        );
+        $needs_review = array(
+            'new hope elementary',
+            'whitlow elementary',
+            'hendricks middle',
+            'alliance academy for innovation',
+        );
+        foreach ($needs_review as $name) {
+            $decisions[$name] = array(
+                'status' => self::COVERAGE_NEEDS_REVIEW,
+                'decision_type' => 'editorial_configuration',
+                'decision_source' => 'SouthForsyth.org coverage review',
+                'decision_note' => 'Coverage is uncertain; human review and conclusive official evidence are required.',
+                'reason' => 'Explicit editorial review decision: uncertain coverage; human review required.',
+            );
+        }
+
+        return $decisions;
+    }
+
     public static function classify_coverage(array $record, $existing_status = '')
     {
         $meta = $record['meta'] ?? array();
         $existing_status = self::normalize_coverage_status($existing_status);
         $existing_decision_type = self::normalize_whitespace($meta[self::COVERAGE_DECISION_TYPE_META_KEY] ?? '');
+
+        $title = self::normalize_whitespace($record['title'] ?? '');
+        foreach (self::editorial_review_decisions() as $name_key => $decision) {
+            if (preg_match('/\b' . preg_quote($name_key, '/') . '(?: school)?\b/i', strtolower($title))) {
+                return array(
+                    'status' => $decision['status'],
+                    'decision_type' => $decision['decision_type'],
+                    'decision_source' => $decision['decision_source'],
+                    'decision_note' => $decision['decision_note'],
+                    'reasons' => array($decision['reason']),
+                );
+            }
+        }
 
         if ('manual' === $existing_decision_type && in_array($existing_status, array(self::COVERAGE_CONFIRMED, self::COVERAGE_NEEDS_REVIEW, self::COVERAGE_OUTSIDE), true)) {
             return array(
@@ -174,7 +229,6 @@ class Southforsyth_School_Import_Safety
             );
         }
 
-        $title = self::normalize_whitespace($record['title'] ?? '');
         $street = self::normalize_whitespace($meta['sf_address'] ?? '');
         $zip = self::normalize_whitespace($meta['sf_zip'] ?? '');
         $haystack = strtolower(trim($title . ' ' . $street));
@@ -186,7 +240,7 @@ class Southforsyth_School_Import_Safety
                     'decision_type' => $decision['decision_type'],
                     'decision_source' => $decision['decision_source'],
                     'decision_note' => $decision['decision_note'],
-                    'reasons' => array('Matched conservative confirmed allowlist: ' . $name_key . '.'),
+                    'reasons' => array($decision['reason'] ?? ('Matched conservative confirmed allowlist: ' . $name_key . '.')),
                 );
             }
         }
@@ -196,13 +250,6 @@ class Southforsyth_School_Import_Safety
             'coal mountain', 'chestatee', 'cumming', 'matt', 'sawnee',
             'kelly mill', 'otwell', 'liberty', 'little mill',
             'silver city', "poole's mill", 'mashburn', 'chattahoochee',
-            // Vickery Creek Elementary/Middle: confirmed via their own
-            // official forsyth.k12.ga.us pages (fetched live 2026-07) to
-            // feed West Forsyth High School, not a South Forsyth anchor —
-            // despite "Vickery" appearing in this site's general community
-            // coverage prose (coverage-definition.php), which describes
-            // broader local-guide coverage, not school attendance zones.
-            'vickery creek',
         );
         // 'lakeside' was removed from this list 2026-07: Lakeside Middle
         // School is one of South Forsyth High School's three official
@@ -259,6 +306,22 @@ class Southforsyth_School_Import_Safety
             'decision_note' => 'Not on the confirmed allowlist and not clearly outside coverage. Requires official boundary, attendance-map, feeder, address, or manual editorial evidence.',
             'reasons' => array('No conservative confirmed allowlist or outside-coverage signal matched; human review required.'),
         );
+    }
+
+    public static function summarize_coverage_classifications(array $classifications)
+    {
+        $totals = array(
+            self::COVERAGE_CONFIRMED => 0,
+            self::COVERAGE_NEEDS_REVIEW => 0,
+            self::COVERAGE_OUTSIDE => 0,
+        );
+
+        foreach ($classifications as $classification) {
+            $status = self::normalize_coverage_status($classification['status'] ?? '');
+            $totals[$status]++;
+        }
+
+        return $totals;
     }
 
     public static function normalize_record(array $record)
