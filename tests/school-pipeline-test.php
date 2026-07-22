@@ -190,6 +190,21 @@ sf_assert(Southforsyth_School_Enrichment_Command::is_official_source_url('https:
 sf_assert(! Southforsyth_School_Enrichment_Command::is_official_source_url('https://example.com/schools'), 'non-official enrichment source is rejected');
 sf_assert(in_array('sf_editorial_summary', Southforsyth_School_Enrichment_Command::allowed_fields(), true)
     && ! in_array('sf_south_forsyth_status', Southforsyth_School_Enrichment_Command::allowed_fields(), true), 'enrichment field allowlist cannot alter coverage classification');
+$audit_fields = Southforsyth_School_Enrichment_Command::audit_fields();
+sf_assert(19 === count($audit_fields) && isset($audit_fields['sf_enrichment_source_notes'], $audit_fields['sf_enrichment_last_checked']), 'school profile audit tracks the complete required field checklist');
+sf_assert(! Southforsyth_School_Enrichment_Command::audit_value_is_present(array())
+    && ! Southforsyth_School_Enrichment_Command::audit_value_is_present('{}')
+    && Southforsyth_School_Enrichment_Command::audit_value_is_present(array('source_url' => 'https://www.forsyth.k12.ga.us/')), 'school profile audit handles empty and populated array/JSON metadata correctly');
+$enrichment_command_source = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-school-enrichment-command.php');
+sf_assert(false !== strpos($enrichment_command_source, "post_status' => 'publish'")
+    && false !== strpos($enrichment_command_source, "meta_value' => Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED"), 'school profile audit scopes targets to published confirmed schools');
+sf_assert(false !== strpos($enrichment_command_source, "WP_CLI::add_command('southforsyth audit-school-profiles'")
+    && false !== strpos($enrichment_command_source, "WP_CLI::add_command('southforsyth enrich-schools'"), 'both school enrichment commands are registered under WP-CLI');
+$audit_start = strpos($enrichment_command_source, 'public function audit_school_profiles');
+$audit_end = strpos($enrichment_command_source, 'private function evaluate_entry', $audit_start);
+$audit_body = substr($enrichment_command_source, $audit_start, $audit_end - $audit_start);
+sf_assert(false === strpos($audit_body, 'update_') && false === strpos($audit_body, 'wp_remote_')
+    && false === strpos($audit_body, 'set_transient') && false === strpos($audit_body, 'delete_'), 'school profile audit contains no write or external-fetch calls');
 sf_assert('South Forsyth Middle School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth', 'Middle Schools'), 'middle school display name gets official suffix');
 sf_assert('South Forsyth High School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth High School', 'High Schools'), 'display name suffix is not duplicated');
 sf_assert('Alliance Academy for Innovation' === Southforsyth_School_Import_Safety::official_display_name('Alliance Academy for Innovation', 'Academies of Creative Education'), 'academy display name is not forced into a normal level suffix');

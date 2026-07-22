@@ -25,6 +25,16 @@ one page-level citation.
 ## Read-only gap report
 
 ```bash
+wp southforsyth audit-school-profiles
+```
+
+This dedicated audit checks the 19 tracked profile fields for published,
+Confirmed South Forsyth schools only and prints per-profile completion plus
+aggregate missing-field totals. It performs no external requests or writes.
+
+The enrichment command also retains its shorter operational gap report:
+
+```bash
 wp southforsyth enrich-schools --verbose
 ```
 

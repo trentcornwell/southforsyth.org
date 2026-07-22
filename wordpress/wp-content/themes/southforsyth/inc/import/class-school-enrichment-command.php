@@ -16,6 +16,57 @@ class Southforsyth_School_Enrichment_Command
 {
     const SOURCE_NOTES_META_KEY = 'sf_enrichment_source_notes';
 
+    public static function audit_fields()
+    {
+        return array(
+            'sf_grades_served' => 'grades served',
+            'sf_principal_name' => 'principal',
+            'sf_boundary_url' => 'boundary URL',
+            'sf_feeder_pattern' => 'feeder pattern',
+            'sf_notable_programs' => 'notable programs',
+            'sf_mascot' => 'mascot',
+            'sf_school_colors' => 'school colors',
+            'sf_lat' => 'latitude',
+            'sf_lng' => 'longitude',
+            'sf_hours' => 'school hours',
+            'sf_enrollment_information_url' => 'enrollment information URL',
+            'sf_parent_resources_url' => 'parent resources URL',
+            'sf_transportation_information_url' => 'transportation information URL',
+            'sf_editorial_summary' => 'editorial summary',
+            'sf_website' => 'official website',
+            'sf_source_url' => 'official source URL',
+            'sf_last_verified' => 'last verified date',
+            self::SOURCE_NOTES_META_KEY => 'enrichment source notes',
+            'sf_enrichment_last_checked' => 'enrichment last checked date',
+        );
+    }
+
+    public static function audit_value_is_present($value)
+    {
+        if (function_exists('maybe_unserialize')) {
+            $value = maybe_unserialize($value);
+        }
+        if (is_string($value) && in_array(substr(ltrim($value), 0, 1), array('{', '['), true)) {
+            $decoded = json_decode($value, true);
+            if (JSON_ERROR_NONE === json_last_error()) {
+                $value = $decoded;
+            }
+        }
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (self::audit_value_is_present($item)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (is_object($value)) {
+            return self::audit_value_is_present(get_object_vars($value));
+        }
+
+        return null !== $value && '' !== trim((string) $value);
+    }
+
     public static function allowed_fields()
     {
         return array(
@@ -131,6 +182,88 @@ class Southforsyth_School_Enrichment_Command
             $stats['blocked']
         ));
         WP_CLI::success($dry_run ? 'Dry run complete — no writes performed.' : 'Enrichment metadata updated. No posts or coverage classifications were changed.');
+    }
+
+    /**
+     * Audit enrichment completeness for published Confirmed South Forsyth
+     * school profiles. This command is strictly read-only: it performs no
+     * HTTP requests and makes no database, cache, option, transient, log,
+     * post, taxonomy, or metadata writes.
+     *
+     * ## EXAMPLES
+     *
+     *     wp southforsyth audit-school-profiles
+     *
+     * @when after_wp_load
+     */
+    public function audit_school_profiles($args, $assoc_args)
+    {
+        $fields = self::audit_fields();
+        $posts = get_posts(array(
+            'post_type' => 'school',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'meta_key' => 'sf_south_forsyth_status',
+            'meta_value' => Southforsyth_School_Import_Safety::COVERAGE_CONFIRMED,
+        ));
+        $missing_counts = array_fill_keys(array_keys($fields), 0);
+        $percentage_total = 0;
+        $complete_profiles = 0;
+        $missing_identity_source = 0;
+
+        WP_CLI::log('===== Published Confirmed South Forsyth school profile audit =====');
+        foreach ($posts as $post) {
+            $missing = array();
+            foreach ($fields as $meta_key => $label) {
+                if (! self::audit_value_is_present(get_post_meta($post->ID, $meta_key, true))) {
+                    $missing[] = $label;
+                    $missing_counts[$meta_key]++;
+                }
+            }
+
+            $completed = count($fields) - count($missing);
+            $percentage = count($fields) ? round(($completed / count($fields)) * 100, 1) : 100;
+            $percentage_total += $percentage;
+            if (empty($missing)) {
+                $complete_profiles++;
+            }
+            if (! self::audit_value_is_present($post->post_title)
+                || ! self::audit_value_is_present(get_post_meta($post->ID, 'sf_website', true))
+                || ! self::audit_value_is_present(get_post_meta($post->ID, 'sf_source_url', true))
+                || ! self::audit_value_is_present(get_post_meta($post->ID, 'sf_last_verified', true))) {
+                $missing_identity_source++;
+            }
+
+            WP_CLI::log(sprintf('#%d %s', $post->ID, $post->post_title));
+            WP_CLI::log(sprintf(
+                '  Publication status: %s; Coverage status: %s',
+                $post->post_status,
+                get_post_meta($post->ID, 'sf_south_forsyth_status', true)
+            ));
+            WP_CLI::log(sprintf(
+                '  Completed: %d; Missing: %d; Completion: %.1f%%',
+                $completed,
+                count($missing),
+                $percentage
+            ));
+            WP_CLI::log('  Exact missing fields: ' . ($missing ? implode(', ', $missing) : '(none)'));
+        }
+
+        $profile_count = count($posts);
+        $average = $profile_count ? round($percentage_total / $profile_count, 1) : 0;
+        WP_CLI::log('');
+        WP_CLI::log('===== Audit totals =====');
+        WP_CLI::log('Profiles audited: ' . $profile_count);
+        WP_CLI::log(sprintf('Average completion percentage: %.1f%%', $average));
+        WP_CLI::log('Profiles at 100%: ' . $complete_profiles);
+        WP_CLI::log('Profiles missing required identity/source fields: ' . $missing_identity_source);
+        WP_CLI::log('Missing by tracked field:');
+        foreach ($fields as $meta_key => $label) {
+            WP_CLI::log(sprintf('  %s: %d', $label, $missing_counts[$meta_key]));
+        }
+        WP_CLI::success('School profile audit complete — no writes or external requests performed.');
     }
 
     private function evaluate_entry($entry)
@@ -272,5 +405,7 @@ class Southforsyth_School_Enrichment_Command
 }
 
 if (defined('WP_CLI') && WP_CLI) {
-    WP_CLI::add_command('southforsyth enrich-schools', array(new Southforsyth_School_Enrichment_Command(), 'enrich_schools'));
+    $southforsyth_school_enrichment_command = new Southforsyth_School_Enrichment_Command();
+    WP_CLI::add_command('southforsyth audit-school-profiles', array($southforsyth_school_enrichment_command, 'audit_school_profiles'));
+    WP_CLI::add_command('southforsyth enrich-schools', array($southforsyth_school_enrichment_command, 'enrich_schools'));
 }
