@@ -65,6 +65,12 @@ class Southforsyth_School_Import_Safety
         return trim(preg_replace('/[^a-z0-9]+/', ' ', $name));
     }
 
+    public static function normalize_official_school_identity($name)
+    {
+        $name = strtolower(self::normalize_whitespace($name));
+        return trim(preg_replace('/[^a-z0-9]+/', ' ', $name));
+    }
+
     public static function official_display_name($name, $level_label)
     {
         $name = self::normalize_whitespace($name);
@@ -112,50 +118,57 @@ class Southforsyth_School_Import_Safety
         return self::COVERAGE_NEEDS_REVIEW;
     }
 
+    /**
+     * Adopted editorial school coverage list. This is deliberately keyed by
+     * normalized official name rather than WordPress post ID so it survives
+     * imports and environment changes. Stable official source identities can
+     * be added to source_ids without changing the classifier.
+     */
+    public static function approved_school_coverage_allowlist()
+    {
+        $official_names = array(
+            'Big Creek Elementary School',
+            'Brandywine Elementary School',
+            'Brookwood Elementary School',
+            'Daves Creek Elementary School',
+            'Haw Creek Elementary School',
+            'Johns Creek Elementary School',
+            'Midway Elementary School',
+            'Settles Bridge Elementary School',
+            'Sharon Elementary School',
+            'Shiloh Point Elementary School',
+            'Vickery Creek Elementary School',
+            'DeSana Middle School',
+            'Lakeside Middle School',
+            'Piney Grove Middle School',
+            'Riverwatch Middle School',
+            'South Forsyth Middle School',
+            'Vickery Creek Middle School',
+            'Denmark High School',
+            'Lambert High School',
+            'South Forsyth High School',
+        );
+        $allowlist = array();
+
+        foreach ($official_names as $official_name) {
+            $allowlist[self::normalize_official_school_identity($official_name)] = array(
+                'official_name' => $official_name,
+                'source_ids' => array(),
+                'status' => self::COVERAGE_CONFIRMED,
+                'decision_type' => 'editorial_configuration',
+                'decision_source' => 'SouthForsyth.org approved school coverage list',
+                'decision_note' => 'Included in the adopted SouthForsyth.org editorial school coverage area',
+                'reason' => 'Matched the adopted SouthForsyth.org editorial school coverage allowlist.',
+            );
+        }
+
+        return $allowlist;
+    }
+
+    /** Backward-compatible name used by reports/tests and older call sites. */
     public static function coverage_allowlist()
     {
-        return array(
-            'south forsyth high' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Central coverage allowlist',
-                'decision_note' => 'Initial unquestioned South Forsyth high-school anchor. Confirm official school URL/address before publication.',
-            ),
-            'denmark high' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Central coverage allowlist',
-                'decision_note' => 'Initial unquestioned South Forsyth high-school anchor. Confirm official school URL/address before publication.',
-            ),
-            'lambert high' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Central coverage allowlist',
-                'decision_note' => 'Initial unquestioned South Forsyth high-school anchor. Confirm official school URL/address before publication.',
-            ),
-            // Shares the South Forsyth High School campus/community and name;
-            // no source suggests it is anything but South Forsyth. Added
-            // 2026-07 after correcting bare "South Forsyth" titles exposed
-            // that the allowlist regex only ever matched the high school.
-            'south forsyth middle' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Central coverage allowlist',
-                'decision_note' => 'Same community/campus area as the confirmed South Forsyth High anchor.',
-            ),
-            // Confirmed via forsyth.k12.ga.us's own South Forsyth High School
-            // overview page and Piney Grove Middle's own official page
-            // ("serve...the Denmark and South Communities"), both fetched
-            // live 2026-07: Piney Grove Middle is one of exactly three
-            // official feeder middle schools for South Forsyth High School
-            // (with Lakeside Middle and South Forsyth Middle).
-            'piney grove middle' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Official South Forsyth High School feeder pattern (forsyth.k12.ga.us)',
-                'decision_note' => 'Official feeder middle school for the confirmed South Forsyth High School anchor.',
-            ),
-        );
+        return self::approved_school_coverage_allowlist();
     }
 
     /**
@@ -165,22 +178,7 @@ class Southforsyth_School_Import_Safety
      */
     public static function editorial_review_decisions()
     {
-        $decisions = array(
-            'vickery creek elementary' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'manual',
-                'decision_source' => 'SouthForsyth.org coverage policy',
-                'decision_note' => 'Vickery is explicitly included in the adopted editorial coverage area.',
-                'reason' => 'Matched explicit editorial coverage decision for the Vickery community.',
-            ),
-            'vickery creek middle' => array(
-                'status' => self::COVERAGE_CONFIRMED,
-                'decision_type' => 'manual',
-                'decision_source' => 'SouthForsyth.org coverage policy',
-                'decision_note' => 'Vickery is explicitly included in the adopted editorial coverage area.',
-                'reason' => 'Matched explicit editorial coverage decision for the Vickery community.',
-            ),
-        );
+        $decisions = array();
         $needs_review = array(
             'new hope elementary',
             'whitlow elementary',
@@ -207,8 +205,16 @@ class Southforsyth_School_Import_Safety
         $existing_decision_type = self::normalize_whitespace($meta[self::COVERAGE_DECISION_TYPE_META_KEY] ?? '');
 
         $title = self::normalize_whitespace($record['title'] ?? '');
-        foreach (self::editorial_review_decisions() as $name_key => $decision) {
-            if (preg_match('/\b' . preg_quote($name_key, '/') . '(?: school)?\b/i', strtolower($title))) {
+        $source_identities = array_filter(array_map(array(__CLASS__, 'normalize_url'), array(
+            $record['source_id'] ?? '',
+            $meta['_sf_import_source_id'] ?? '',
+            $meta['sf_source_url'] ?? '',
+        )));
+
+        foreach (self::approved_school_coverage_allowlist() as $name_key => $decision) {
+            $source_match = ! empty(array_intersect($source_identities, $decision['source_ids']));
+            $name_match = self::normalize_official_school_identity($title) === $name_key;
+            if ($source_match || $name_match) {
                 return array(
                     'status' => $decision['status'],
                     'decision_type' => $decision['decision_type'],
@@ -229,21 +235,20 @@ class Southforsyth_School_Import_Safety
             );
         }
 
-        $street = self::normalize_whitespace($meta['sf_address'] ?? '');
-        $zip = self::normalize_whitespace($meta['sf_zip'] ?? '');
-        $haystack = strtolower(trim($title . ' ' . $street));
-
-        foreach (self::coverage_allowlist() as $name_key => $decision) {
+        foreach (self::editorial_review_decisions() as $name_key => $decision) {
             if (preg_match('/\b' . preg_quote($name_key, '/') . '(?: school)?\b/i', strtolower($title))) {
                 return array(
                     'status' => $decision['status'],
                     'decision_type' => $decision['decision_type'],
                     'decision_source' => $decision['decision_source'],
                     'decision_note' => $decision['decision_note'],
-                    'reasons' => array($decision['reason'] ?? ('Matched conservative confirmed allowlist: ' . $name_key . '.')),
+                    'reasons' => array($decision['reason']),
                 );
             }
         }
+
+        $street = self::normalize_whitespace($meta['sf_address'] ?? '');
+        $haystack = strtolower(trim($title . ' ' . $street));
 
         $outside_names = array(
             'north forsyth', 'east forsyth', 'west forsyth', 'forsyth central',
@@ -287,16 +292,6 @@ class Southforsyth_School_Import_Safety
                     'reasons' => array('Matched outside-coverage county corridor/community: ' . $corridor . '.'),
                 );
             }
-        }
-
-        if (in_array($zip, array('30506', '30534'), true)) {
-            return array(
-                'status' => self::COVERAGE_OUTSIDE,
-                'decision_type' => 'automatic',
-                'decision_source' => 'Conservative outside-coverage rule',
-                'decision_note' => 'Matched a ZIP code outside the South Forsyth editorial coverage area.',
-                'reasons' => array('Matched outside-coverage ZIP support signal: ' . $zip . '.'),
-            );
         }
 
         return array(

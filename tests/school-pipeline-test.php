@@ -172,12 +172,19 @@ $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' =
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'South Forsyth high-school community is confirmed by coverage classifier');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Middle School', 'meta' => array('sf_address' => '6240 Post Rd', 'sf_zip' => '30040')));
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'Vickery Creek Middle is confirmed by the adopted editorial coverage policy');
-sf_assert('manual' === $coverage['decision_type'] && 'SouthForsyth.org coverage policy' === $coverage['decision_source'], 'Vickery Creek Middle records editorial decision provenance');
+sf_assert('editorial_configuration' === $coverage['decision_type'] && 'SouthForsyth.org approved school coverage list' === $coverage['decision_source'], 'Vickery Creek Middle records editorial decision provenance');
+sf_assert('Included in the adopted SouthForsyth.org editorial school coverage area' === $coverage['decision_note'], 'Vickery decision stores the adopted policy note');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Elementary School', 'meta' => array('sf_address' => '6280 Post Rd', 'sf_zip' => '30040')));
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'Vickery Creek Elementary is confirmed by the adopted editorial coverage policy');
+$vickery_decisions = Southforsyth_School_Import_Safety::approved_school_coverage_allowlist();
+sf_assert(isset($vickery_decisions['vickery creek elementary school'], $vickery_decisions['vickery creek middle school'])
+    && Southforsyth_School_Import_Safety::official_display_name('Vickery Creek', 'Elementary Schools')
+        !== Southforsyth_School_Import_Safety::official_display_name('Vickery Creek', 'Middle Schools'), 'Vickery Creek elementary and middle remain separate configured school records');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Unmatched Example School', 'meta' => array('sf_address' => '100 Example Rd', 'sf_zip' => '30041')));
 sf_assert('Needs Review' === $coverage['status'], 'unmatched school becomes Needs Review');
 sf_assert(false !== stripos(implode(' ', $coverage['reasons']), 'human review required'), 'unmatched reason explicitly requires human review');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Unmatched North ZIP School', 'meta' => array('sf_address' => '100 Example Rd', 'sf_zip' => '30506')));
+sf_assert('Needs Review' === $coverage['status'], 'ZIP code alone never produces Outside Coverage');
 $uncertain_classifications = array();
 foreach (array('New Hope Elementary School', 'Whitlow Elementary School', 'Hendricks Middle School', 'Alliance Academy for Innovation') as $uncertain_title) {
     $uncertain = Southforsyth_School_Import_Safety::classify_coverage(array('title' => $uncertain_title, 'meta' => array('sf_zip' => '30040')), 'Outside Coverage');
@@ -193,10 +200,70 @@ $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' =
 sf_assert('Needs Review' === $coverage['status'], 'countywide/special schools remain needs review without a strong South Forsyth signal');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array('sf_coverage_decision_type' => 'manual')), 'Confirmed South Forsyth');
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'manual confirmed coverage status is preserved over weaker automatic classification');
+$coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'New Hope Elementary School', 'meta' => array('sf_coverage_decision_type' => 'manual')), 'Confirmed South Forsyth');
+sf_assert('Confirmed South Forsyth' === $coverage['status'], 'a concrete manual decision overrides the uncertain-school editorial default');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array()), 'Confirmed South Forsyth');
 sf_assert('Outside Coverage' === $coverage['status'], 'unproven legacy confirmed status is re-evaluated conservatively');
 sf_assert(3 <= count(Southforsyth_School_Import_Safety::coverage_allowlist()), 'conservative confirmed allowlist includes the three high-school anchors');
 sf_assert('Outside Coverage' === Southforsyth_School_Import_Safety::normalize_coverage_status('Outside South Forsyth'), 'legacy outside status normalizes to Outside Coverage');
+
+$approved_school_names = array(
+    'Big Creek Elementary School', 'Brandywine Elementary School', 'Brookwood Elementary School',
+    'Daves Creek Elementary School', 'Haw Creek Elementary School', 'Johns Creek Elementary School',
+    'Midway Elementary School', 'Settles Bridge Elementary School', 'Sharon Elementary School',
+    'Shiloh Point Elementary School', 'Vickery Creek Elementary School', 'DeSana Middle School',
+    'Lakeside Middle School', 'Piney Grove Middle School', 'Riverwatch Middle School',
+    'South Forsyth Middle School', 'Vickery Creek Middle School', 'Denmark High School',
+    'Lambert High School', 'South Forsyth High School',
+);
+$demoted_school_names = array(
+    'Big Creek Elementary School', 'Brandywine Elementary School', 'Brookwood Elementary School',
+    'Daves Creek Elementary School', 'Haw Creek Elementary School', 'Johns Creek Elementary School',
+    'Midway Elementary School', 'Settles Bridge Elementary School', 'Sharon Elementary School',
+    'Shiloh Point Elementary School', 'DeSana Middle School', 'Lakeside Middle School',
+    'Riverwatch Middle School',
+);
+foreach ($approved_school_names as $approved_school_name) {
+    $approved = Southforsyth_School_Import_Safety::classify_coverage(array('title' => $approved_school_name), 'Needs Review');
+    sf_assert('Confirmed South Forsyth' === $approved['status'], $approved_school_name . ' is in the approved 20-school coverage list');
+}
+sf_assert(20 === count(Southforsyth_School_Import_Safety::approved_school_coverage_allowlist()), 'approved school coverage list contains exactly 20 distinct schools');
+foreach ($demoted_school_names as $demoted_school_name) {
+    sf_assert('Confirmed South Forsyth' === Southforsyth_School_Import_Safety::classify_coverage(array('title' => $demoted_school_name), 'Needs Review')['status'], $demoted_school_name . ' is restored from Needs Review');
+}
+$allowlist_precedence = Southforsyth_School_Import_Safety::classify_coverage(array(
+    'title' => 'Big Creek Elementary School',
+    'meta' => array('sf_address' => '100 Coal Mountain Rd'),
+));
+sf_assert('Confirmed South Forsyth' === $allowlist_precedence['status'], 'approved allowlist takes precedence over a weaker automatic outside signal');
+
+$outside_fixture_names = array(
+    'Chestatee Elementary School', 'Coal Mountain Elementary School', 'Cumming Elementary School',
+    'Kelly Mill Elementary School', 'Mashburn Elementary School', 'Matt Elementary School',
+    "Poole's Mill Elementary School", 'Sawnee Elementary School', 'Silver City Elementary School',
+    'Chattahoochee Elementary School', 'Liberty Middle School', 'Little Mill Middle School',
+    'North Forsyth Middle School', 'Otwell Middle School', 'East Forsyth High School',
+    'Forsyth Central High School', 'North Forsyth High School', 'West Forsyth High School',
+);
+$classification_fixture = array();
+foreach ($approved_school_names as $fixture_name) {
+    $classification_fixture[] = Southforsyth_School_Import_Safety::classify_coverage(array('title' => $fixture_name));
+}
+foreach (array('New Hope Elementary School', 'Whitlow Elementary School', 'Hendricks Middle School', 'Alliance Academy for Innovation') as $fixture_name) {
+    $classification_fixture[] = Southforsyth_School_Import_Safety::classify_coverage(array('title' => $fixture_name));
+}
+foreach ($outside_fixture_names as $fixture_name) {
+    $classification_fixture[] = Southforsyth_School_Import_Safety::classify_coverage(array('title' => $fixture_name));
+}
+$fixture_totals = Southforsyth_School_Import_Safety::summarize_coverage_classifications($classification_fixture);
+sf_assert(20 === $fixture_totals['Confirmed South Forsyth'] && 4 === $fixture_totals['Needs Review'] && 18 === $fixture_totals['Outside Coverage'], '42-school fixture calculates to 20 Confirmed, 4 Needs Review, and 18 Outside Coverage');
+$published_confirmed_fixture = array(
+    'Denmark High School', 'Lambert High School', 'South Forsyth High School',
+    'South Forsyth Middle School', 'Piney Grove Middle School',
+);
+$fixture_confirmed_drafts = array_values(array_diff($approved_school_names, $published_confirmed_fixture));
+sf_assert(count($fixture_confirmed_drafts) === count($approved_school_names) - count($published_confirmed_fixture)
+    && 5 === count($published_confirmed_fixture), 'publishing fixture calculates eligible confirmed drafts while protecting five published schools');
 
 $provider = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/providers/class-forsyth-county-provider.php');
 sf_assert(false !== strpos($provider, 'official_display_name'), 'Forsyth County provider preserves complete official display names');
@@ -318,6 +385,12 @@ sf_assert(false !== strpos($pilot_command, 'get_source_records_without_existing_
 sf_assert(false !== strpos($pilot_command, "WP_CLI::add_command('southforsyth publish-confirmed-schools'"), 'publish-confirmed-schools command is registered under the southforsyth namespace');
 sf_assert('Confirmed South Forsyth' === Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Elementary School'))['status']
     && 'Confirmed South Forsyth' === Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Middle School'))['status'], 'publish dry-run classifier includes both Vickery Creek schools');
+$publish_start = strpos($pilot_command, 'public function publish_confirmed_schools');
+$publish_end = strpos($pilot_command, 'private function get_review_schools', $publish_start);
+$publish_body = substr($pilot_command, $publish_start, $publish_end - $publish_start);
+sf_assert(false !== strpos($publish_body, 'if ($dry_run)') && false !== strpos($publish_body, 'wp_update_post')
+    && strpos($publish_body, 'if ($dry_run)') < strpos($publish_body, 'wp_update_post'), 'publishing dry-run reaches no publishing write path');
+sf_assert(false !== strpos($pilot_command, 'only drafts are eligible') && false !== strpos($pilot_command, 'coverage status is '), 'publishing report protects published and non-confirmed schools with explicit reasons');
 
 $coverage_command = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-forsyth-county-import-command.php');
 $classify_start = strpos($coverage_command, 'public function classify_schools');
