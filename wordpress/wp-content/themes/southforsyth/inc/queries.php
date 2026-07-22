@@ -167,12 +167,7 @@ if (! function_exists('southforsyth_get_latest_items')) {
         );
 
         if ('school' === $post_type) {
-            $args['meta_query'] = array(
-                array(
-                    'key' => 'sf_south_forsyth_status',
-                    'value' => 'Confirmed South Forsyth',
-                ),
-            );
+            $args['meta_query'] = southforsyth_get_public_school_meta_query();
         }
 
         $query = new WP_Query($args);
@@ -190,6 +185,54 @@ if (! function_exists('southforsyth_get_latest_items')) {
     }
 }
 
+if (! function_exists('southforsyth_get_public_school_meta_query')) {
+    /**
+     * One public-visibility rule for every school query. A post must be
+     * editorially confirmed and must not carry an unresolved duplicate flag.
+     */
+    function southforsyth_get_public_school_meta_query()
+    {
+        return array(
+            'relation' => 'AND',
+            array(
+                'key'   => 'sf_south_forsyth_status',
+                'value' => 'Confirmed South Forsyth',
+            ),
+            array(
+                'relation' => 'OR',
+                array(
+                    'key'     => 'sf_duplicate_warning',
+                    'compare' => 'NOT EXISTS',
+                ),
+                array(
+                    'key'   => 'sf_duplicate_warning',
+                    'value' => '',
+                ),
+            ),
+        );
+    }
+}
+
+if (! function_exists('southforsyth_is_public_school')) {
+    function southforsyth_is_public_school($post)
+    {
+        if (! $post || 'school' !== $post->post_type) {
+            return true;
+        }
+
+        return 'publish' === $post->post_status
+            && 'Confirmed South Forsyth' === get_post_meta($post->ID, 'sf_south_forsyth_status', true)
+            && '' === (string) get_post_meta($post->ID, 'sf_duplicate_warning', true);
+    }
+}
+
+if (! function_exists('southforsyth_filter_public_school_posts')) {
+    function southforsyth_filter_public_school_posts(array $posts)
+    {
+        return array_values(array_filter($posts, 'southforsyth_is_public_school'));
+    }
+}
+
 if (! function_exists('southforsyth_limit_public_school_queries_to_confirmed')) {
     function southforsyth_limit_public_school_queries_to_confirmed($query)
     {
@@ -204,13 +247,10 @@ if (! function_exists('southforsyth_limit_public_school_queries_to_confirmed')) 
         }
 
         $meta_query = (array) $query->get('meta_query');
-        $meta_query[] = array(
-            'key' => 'sf_south_forsyth_status',
-            'value' => 'Confirmed South Forsyth',
-        );
-        if (count($meta_query) > 1 && empty($meta_query['relation'])) {
-            $meta_query['relation'] = 'AND';
-        }
+        $visibility_query = southforsyth_get_public_school_meta_query();
+        $meta_query = empty($meta_query)
+            ? $visibility_query
+            : array('relation' => 'AND', $meta_query, $visibility_query);
         $query->set('meta_query', $meta_query);
     }
 }
@@ -264,7 +304,7 @@ if (! function_exists('southforsyth_get_related_entities')) {
             )),
         ));
 
-        return $query->posts;
+        return array_slice(southforsyth_filter_public_school_posts($query->posts), 0, $count);
     }
 }
 
@@ -301,6 +341,9 @@ if (! function_exists('southforsyth_get_nearby_places')) {
 
         $nearby = array();
         foreach ($candidates as $candidate) {
+            if (! southforsyth_is_public_school($candidate)) {
+                continue;
+            }
             $c_lat = (float) get_post_meta($candidate->ID, 'sf_lat', true);
             $c_lng = (float) get_post_meta($candidate->ID, 'sf_lng', true);
             if (! $c_lat || ! $c_lng) {
@@ -356,6 +399,9 @@ if (! function_exists('southforsyth_get_featured_places')) {
 
         $cards = array();
         foreach ($query->posts as $post) {
+            if (! southforsyth_is_public_school($post)) {
+                continue;
+            }
             $cards[] = southforsyth_post_to_card($post);
         }
 

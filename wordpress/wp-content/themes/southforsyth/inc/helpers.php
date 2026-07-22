@@ -48,6 +48,14 @@ if (! function_exists('southforsyth_render_card_section')) {
             set_query_var('area', $card['area'] ?? '');
             set_query_var('city', $card['city'] ?? '');
             set_query_var('location', $card['location'] ?? '');
+            set_query_var('grades', $card['grades'] ?? '');
+            set_query_var('level', $card['level'] ?? '');
+            set_query_var('sector', $card['sector'] ?? '');
+            set_query_var('city_meta', $card['city_meta'] ?? '');
+            set_query_var('state', $card['state'] ?? '');
+            set_query_var('zip', $card['zip'] ?? '');
+            set_query_var('phone', $card['phone'] ?? '');
+            set_query_var('website', $card['website'] ?? '');
             set_query_var('icon', $card['icon'] ?? '');
             set_query_var('status', $card['status'] ?? '');
             get_template_part($template_part);

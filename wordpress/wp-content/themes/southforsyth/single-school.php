@@ -45,8 +45,7 @@ while (have_posts()) :
     $full_address = trim(implode(', ', array_filter(array($address, trim($city . ' ' . $state . ' ' . $zip)))));
     $phone = get_post_meta($post_id, 'sf_phone', true);
     $website = get_post_meta($post_id, 'sf_website', true);
-    $principal = get_post_meta($post_id, 'sf_principal_name', true);
-    $hours = get_post_meta($post_id, 'sf_hours', true);
+    $staff_directory_url = get_post_meta($post_id, 'sf_staff_directory_url', true);
     $district = get_post_meta($post_id, 'sf_district', true);
     $source_url = get_post_meta($post_id, 'sf_source_url', true);
     $last_verified = get_post_meta($post_id, 'sf_last_verified', true);
@@ -64,7 +63,7 @@ while (have_posts()) :
     ?>
 
     <main id="main-content" class="site-main">
-        <div class="container layout-content">
+        <div class="container container-narrow school-profile">
             <article class="card card-post">
                 <header class="card__header">
                     <p class="eyebrow"><?php echo esc_html($district ?: 'School'); ?></p>
@@ -115,30 +114,21 @@ while (have_posts()) :
 
                     <?php
                     $info_items = array_filter(array(
-                        'Principal'      => $principal,
+                        'District'       => $district,
                         'Grades'         => $grades,
                         'School type'    => implode(' · ', $type_parts),
+                        'Designation'    => $sector,
                         'Address'        => $full_address,
                         'Phone'          => $phone,
-                        'Hours'          => $hours,
                     ));
                     ?>
-                    <?php if (! empty($info_items) || $website || $source_url || $last_verified) : ?>
+                    <?php if (! empty($info_items)) : ?>
                         <section class="section-block">
                             <h2>School Information</h2>
                             <ul class="card-meta">
                                 <?php foreach ($info_items as $label => $value) : ?>
                                     <li><strong><?php echo esc_html($label); ?>:</strong> <?php echo esc_html($value); ?></li>
                                 <?php endforeach; ?>
-                                <?php if ($website) : ?>
-                                    <li><strong>Official website:</strong> <a href="<?php echo esc_url($website); ?>" rel="noopener" target="_blank"><?php echo esc_html($website); ?></a></li>
-                                <?php endif; ?>
-                                <?php if ($source_url) : ?>
-                                    <li><strong>Forsyth County Schools profile:</strong> <a href="<?php echo esc_url($source_url); ?>" rel="noopener" target="_blank">Official source</a></li>
-                                <?php endif; ?>
-                                <?php if ($last_verified) : ?>
-                                    <li><strong>Last verified:</strong> <?php echo esc_html($last_verified); ?></li>
-                                <?php endif; ?>
                             </ul>
                         </section>
                     <?php endif; ?>
@@ -171,15 +161,12 @@ while (have_posts()) :
                         get_template_part('template-parts/components/map-embed');
                     endif; ?>
 
-                    <?php if ($website || $source_url || $phone || $directions_url || $boundary_url) : ?>
+                    <?php if ($staff_directory_url || $phone || $directions_url || $boundary_url) : ?>
                         <section class="section-block">
                             <h2>Contact &amp; Links</h2>
                             <ul class="card-meta">
-                                <?php if ($website) : ?>
-                                    <li><a href="<?php echo esc_url($website); ?>" rel="noopener" target="_blank">Official school website</a></li>
-                                <?php endif; ?>
-                                <?php if ($source_url) : ?>
-                                    <li><a href="<?php echo esc_url($source_url); ?>" rel="noopener" target="_blank">Official district profile</a></li>
+                                <?php if ($staff_directory_url) : ?>
+                                    <li><a href="<?php echo esc_url($staff_directory_url); ?>" rel="noopener" target="_blank">Staff directory</a></li>
                                 <?php endif; ?>
                                 <?php if ($phone) : ?>
                                     <li><a href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $phone)); ?>"><?php echo esc_html($phone); ?></a></li>
@@ -195,14 +182,18 @@ while (have_posts()) :
                     <?php endif; ?>
 
                     <?php if ($source_url || $last_verified) : ?>
-                        <p class="card-location">
+                        <section class="section-block school-profile__source" aria-labelledby="school-source-heading">
+                            <h2 id="school-source-heading">Source &amp; verification</h2>
+                            <p class="card-location">
                             <?php if ($source_url) : ?>
                                 Source: <a href="<?php echo esc_url($source_url); ?>" rel="noopener" target="_blank">Official Forsyth County Schools page</a>.
                             <?php endif; ?>
                             <?php if ($last_verified) : ?>
                                 Last verified <?php echo esc_html($last_verified); ?>.
                             <?php endif; ?>
-                        </p>
+                            </p>
+                            <p><a href="mailto:hello@southforsyth.org?subject=<?php echo esc_attr(rawurlencode('Correction: ' . get_the_title())); ?>">Report a correction to this profile</a></p>
+                        </section>
                     <?php endif; ?>
 
                     <?php
@@ -218,9 +209,6 @@ while (have_posts()) :
                     <?php endif; ?>
                 </div>
             </article>
-            <aside class="sidebar">
-                <?php dynamic_sidebar('sidebar-1'); ?>
-            </aside>
         </div>
 
         <?php get_template_part('template-parts/components/find-my-schools'); ?>

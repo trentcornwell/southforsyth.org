@@ -240,6 +240,19 @@ input, button, textarea, select { font: inherit; }
 .find-my-schools__results { margin-top: var(--space-6); }
 .find-my-schools__cards { margin-top: var(--space-4); }
 .find-my-schools__source { font-size: var(--font-size-sm); color: var(--color-muted); margin-top: var(--space-4); }
+
+/* Schools launch directory and profiles. */
+.school-directory__header { max-width: 760px; }
+.school-directory__header > p:not(.eyebrow) { max-width: 68ch; }
+.school-directory__count { margin-top: var(--space-5); color: var(--color-secondary); }
+.school-directory__groups { display: grid; gap: var(--space-10); margin-top: var(--space-8); }
+.school-directory__group > .section-title { margin-bottom: var(--space-5); }
+.school-directory__grid { align-items: stretch; }
+.school-directory__correction { margin-bottom: var(--space-8); }
+.school-profile { max-width: 900px; }
+.school-profile .card-post { overflow: hidden; }
+.school-profile__source { padding: var(--space-5); background: var(--color-bg-soft); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.school-profile__source h2 { font-size: var(--font-size-lg); }
 /* Single-template ("card-post") variants, used by single.php/page.php. */
 .card__header { padding: 1.35rem 1.35rem 0; }
 .card__header h1,

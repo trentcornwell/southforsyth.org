@@ -136,7 +136,7 @@ if (! function_exists('southforsyth_get_hub_definitions')) {
                 'intro' => array(
                     'A clear, practical overview of schools serving South Forsyth families — public and private, by level.',
                     'This page is meant to help new and prospective residents get oriented quickly, not to replace the school district\'s own site.',
-                    'School information is imported from the official Forsyth County Schools website and reviewed before publishing. Every school\'s own page shows an "Improve this page" link if you spot something that needs a correction.',
+                    'School information is checked against official school and district sources before publishing. Every profile includes source details and a correction link.',
                 ),
                 'empty_title' => 'No school profiles published yet',
                 'empty_description' => 'We haven\'t published any School profiles yet. Real listings will appear here automatically once they\'re added.',

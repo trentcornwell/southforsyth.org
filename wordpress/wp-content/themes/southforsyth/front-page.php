@@ -12,6 +12,7 @@ get_header();
 $featured_places = southforsyth_get_featured_places(3);
 $latest_events = southforsyth_get_latest_items('event', 3);
 $latest_guides = southforsyth_get_latest_items('guide', 3);
+$featured_schools = southforsyth_get_latest_items('school', 3, array(), 'Verified school');
 
 $guide_sections = array(
     array(
@@ -101,6 +102,19 @@ $guide_sections = array(
         'intro' => 'Use SouthForsyth.org as a starting point for finding places to go, people to meet, resources to share, and organizations serving our community.',
         'align' => 'center',
     ));
+
+    if ($featured_schools) {
+        southforsyth_render_card_section('template-parts/components/school-card', $featured_schools, array(
+            'id' => 'schools',
+            'eyebrow' => 'Verified South Forsyth schools',
+            'title' => 'Explore Local Schools',
+            'intro' => 'Start with verified school profiles, then browse the complete directory by elementary, middle, and high school level.',
+            'align' => 'center',
+            'soft' => true,
+            'cta_link' => southforsyth_get_hub_url('school'),
+            'cta_text' => 'Browse all verified schools',
+        ));
+    }
 
     get_template_part('template-parts/components/find-my-schools');
 

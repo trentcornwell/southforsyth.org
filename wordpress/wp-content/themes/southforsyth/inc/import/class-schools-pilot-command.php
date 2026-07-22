@@ -100,7 +100,11 @@ class Southforsyth_Schools_Pilot_Command
                 if ($dry_run) {
                     $would_publish[] = $line;
                 } else {
-                    $result = wp_update_post(array('ID' => $school->ID, 'post_status' => 'publish'), true);
+                    $result = wp_update_post(array(
+                        'ID'          => $school->ID,
+                        'post_name'   => sanitize_title($school->post_title),
+                        'post_status' => 'publish',
+                    ), true);
                     if (is_wp_error($result)) {
                         $evaluation['blockers'][] = 'publish failed: ' . $result->get_error_message();
                         $skipped[] = $this->publish_report_line($school, $evaluation);
@@ -205,6 +209,10 @@ class Southforsyth_Schools_Pilot_Command
             WP_CLI::log('  Level: ' . $this->get_level_label($school->ID));
             WP_CLI::log('  Grades: ' . ($this->meta($school->ID, 'sf_grades_served') ?: '(none)'));
             WP_CLI::log('  Address: ' . ($this->meta($school->ID, 'sf_address') ?: '(none)'));
+            WP_CLI::log('  City/state/ZIP: ' . trim(implode(', ', array_filter(array(
+                $this->meta($school->ID, 'sf_city'),
+                trim($this->meta($school->ID, 'sf_state') . ' ' . $this->meta($school->ID, 'sf_zip')),
+            )))));
             WP_CLI::log('  Phone: ' . ($this->meta($school->ID, 'sf_phone') ?: '(none)'));
             WP_CLI::log('  Website: ' . ($this->meta($school->ID, 'sf_website') ?: '(none)'));
             WP_CLI::log('  Coordinates: ' . $this->coordinate_status($school->ID));
@@ -213,8 +221,13 @@ class Southforsyth_Schools_Pilot_Command
             WP_CLI::log('  Source URL: ' . ($this->meta($school->ID, 'sf_source_url') ?: '(none)'));
             WP_CLI::log('  Last verified: ' . ($this->meta($school->ID, 'sf_last_verified') ?: '(none)'));
             WP_CLI::log('  Classification: ' . $this->meta($school->ID, 'sf_south_forsyth_status'));
+            WP_CLI::log('  Coverage reason: ' . ($this->meta($school->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY) ?: '(none recorded)'));
+            WP_CLI::log('  Coverage evidence/source: ' . ($this->meta($school->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_SOURCE_META_KEY) ?: '(none recorded)'));
+            WP_CLI::log('  Decision type: ' . ($this->meta($school->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_TYPE_META_KEY) ?: '(none recorded)'));
             WP_CLI::log('  Duplicate check: ' . $this->duplicate_status($school->ID));
             WP_CLI::log('  Readiness: ' . $readiness['label'] . (empty($readiness['missing']) ? '' : ' — missing ' . implode(', ', $readiness['missing'])));
+            $publish_evaluation = $this->evaluate_publish_confirmed_school($school);
+            WP_CLI::log('  Publication blockers: ' . (empty($publish_evaluation['blockers']) ? '(none)' : implode('; ', $publish_evaluation['blockers'])));
             WP_CLI::log('  Preview URL: ' . get_preview_post_link($school->ID));
 
             if (! empty($flags)) {
@@ -367,20 +380,20 @@ class Southforsyth_Schools_Pilot_Command
         }
 
         $website = $this->meta($id, 'sf_website');
+        $terms = wp_get_post_terms($id, 'sf_school_type', array('fields' => 'names'));
         $required = array(
-            'complete official school name' => (bool) $school->post_title,
+            'complete official school name' => $this->has_complete_official_name($school, $terms),
             'official website' => $website && (bool) filter_var($website, FILTER_VALIDATE_URL),
             'address' => (bool) $this->meta($id, 'sf_address'),
             'city' => (bool) $this->meta($id, 'sf_city'),
             'state' => (bool) $this->meta($id, 'sf_state'),
             'ZIP code' => (bool) $this->meta($id, 'sf_zip'),
             'district' => (bool) $this->meta($id, 'sf_district'),
-            'official source URL' => (bool) $this->meta($id, 'sf_source_url'),
+            'official source URL or stable source ID' => (bool) ($this->meta($id, 'sf_source_url') ?: $this->meta($id, '_sf_import_source_id')),
             'last verified date' => (bool) $this->meta($id, 'sf_last_verified'),
             'no unresolved duplicate conflict' => ! $this->meta($id, Southforsyth_School_Import_Safety::DUPLICATE_WARNING_META_KEY) && false === strpos($this->duplicate_status($id), 'Possible duplicate'),
         );
 
-        $terms = wp_get_post_terms($id, 'sf_school_type', array('fields' => 'names'));
         $required['school type'] = ! empty($terms) && ! is_wp_error($terms);
 
         foreach ($required as $label => $passed) {
@@ -411,6 +424,27 @@ class Southforsyth_Schools_Pilot_Command
         }
 
         return array('blockers' => $blockers, 'warnings' => $warnings);
+    }
+
+    private function has_complete_official_name($school, $terms = null)
+    {
+        $title = trim((string) $school->post_title);
+        if ('' === $title || 'Alliance Academy for Innovation' === $title) {
+            return '' !== $title;
+        }
+
+        if (null === $terms) {
+            $terms = wp_get_post_terms($school->ID, 'sf_school_type', array('fields' => 'names'));
+        }
+        $terms = is_wp_error($terms) ? array() : (array) $terms;
+        $suffixes = array('Elementary' => 'Elementary School', 'Middle' => 'Middle School', 'High' => 'High School');
+        foreach ($suffixes as $level => $suffix) {
+            if (in_array($level, $terms, true)) {
+                return (bool) preg_match('/' . preg_quote($suffix, '/') . '$/i', $title);
+            }
+        }
+
+        return true;
     }
 
     private function publish_report_line($school, array $evaluation)

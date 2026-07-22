@@ -103,6 +103,14 @@
  * shape as the moderation audit trail above, so "who made this public and
  * when" is answerable the same way "who approved this suggestion and
  * when" already is.
+ *
+ * `sf_staff_directory_url`: a link to the school's own official staff
+ * directory page, added to the school-only group. Deliberately a link, not
+ * scraped/stored teacher contact data — individual staff emails are the
+ * school's own published property and change constantly (turnover,
+ * reassignment); sending users to the source stays accurate and avoids
+ * republishing personal contact info without consent, which a stored,
+ * theme-owned copy could not honestly guarantee stayed current or scoped.
  */
 
 if (! defined('ABSPATH')) {
@@ -194,14 +202,15 @@ if (! function_exists('southforsyth_register_post_meta')) {
         // Public/Private/Charter/Homeschool Resource) live in the
         // sf_school_type taxonomy instead — see inc/school-provisioning.php.
         $school_fields = array(
-            'sf_grades_served'    => 'string',
-            'sf_principal_name'   => 'string',
-            'sf_boundary_url'     => 'string',
-            'sf_feeder_pattern'   => 'string',
-            'sf_notable_programs' => 'string',
-            'sf_mascot'           => 'string',
-            'sf_school_colors'    => 'string',
-            'sf_mission'          => 'string',
+            'sf_grades_served'      => 'string',
+            'sf_principal_name'     => 'string',
+            'sf_boundary_url'       => 'string',
+            'sf_feeder_pattern'     => 'string',
+            'sf_notable_programs'   => 'string',
+            'sf_mascot'             => 'string',
+            'sf_school_colors'      => 'string',
+            'sf_mission'            => 'string',
+            'sf_staff_directory_url' => 'string',
         );
 
         foreach ($school_fields as $meta_key => $type) {

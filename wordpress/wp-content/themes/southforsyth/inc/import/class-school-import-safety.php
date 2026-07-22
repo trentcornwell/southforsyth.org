@@ -520,10 +520,7 @@ class Southforsyth_School_Import_Safety
         $website = get_post_meta($post_id, 'sf_website', true);
         $geocode = self::geocode_status($post_id);
         $phone = get_post_meta($post_id, 'sf_phone', true);
-        $source = get_post_meta($post_id, '_sf_import_source', true);
         $source_id = get_post_meta($post_id, '_sf_import_source_id', true);
-
-        $phone_required = ('forsyth_county' === $source || '' !== (string) $phone);
 
         $required_checks = array(
             'official name' => (bool) get_the_title($post_id),
@@ -533,7 +530,6 @@ class Southforsyth_School_Import_Safety
             'city' => (bool) get_post_meta($post_id, 'sf_city', true),
             'state' => (bool) get_post_meta($post_id, 'sf_state', true),
             'ZIP' => (bool) get_post_meta($post_id, 'sf_zip', true),
-            'phone when officially available' => ! $phone_required || (bool) $phone,
             'school type' => ! empty($terms) && ! is_wp_error($terms),
             'district' => (bool) get_post_meta($post_id, 'sf_district', true),
             'last verified' => (bool) get_post_meta($post_id, 'sf_last_verified', true),
@@ -542,6 +538,7 @@ class Southforsyth_School_Import_Safety
 
         $recommended_checks = array(
             'grades served' => (bool) get_post_meta($post_id, 'sf_grades_served', true),
+            'phone' => (bool) $phone,
             'principal' => (bool) get_post_meta($post_id, 'sf_principal_name', true),
             'latitude/longitude' => $geocode['acceptable'] || (bool) get_post_meta($post_id, 'sf_geocode_waived', true),
             'boundary link' => (bool) get_post_meta($post_id, 'sf_boundary_url', true),

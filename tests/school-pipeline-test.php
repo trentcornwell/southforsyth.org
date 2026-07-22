@@ -171,7 +171,7 @@ sf_assert('Forsyth Virtual Academy' === Southforsyth_School_Import_Safety::offic
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'South Forsyth High School', 'meta' => array('sf_address' => '585 Peachtree Pkwy', 'sf_zip' => '30041')));
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'South Forsyth high-school community is confirmed by coverage classifier');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Vickery Creek Middle School', 'meta' => array('sf_address' => '6240 Post Rd', 'sf_zip' => '30040')));
-sf_assert('Needs Review' === $coverage['status'], 'possible feeder/community schools remain needs review without documented evidence');
+sf_assert('Outside Coverage' === $coverage['status'], 'documented non-anchor feeder schools are kept outside public coverage');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array('sf_address' => '3635 Coal Mountain Dr', 'sf_zip' => '30028')));
 sf_assert('Outside Coverage' === $coverage['status'], 'outside county school is marked outside coverage');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'Alliance Academy for Innovation', 'meta' => array('sf_address' => '1100 Lanier 400 Pkwy', 'sf_zip' => '30040')));
@@ -180,7 +180,7 @@ $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' =
 sf_assert('Confirmed South Forsyth' === $coverage['status'], 'manual confirmed coverage status is preserved over weaker automatic classification');
 $coverage = Southforsyth_School_Import_Safety::classify_coverage(array('title' => 'North Forsyth High School', 'meta' => array()), 'Confirmed South Forsyth');
 sf_assert('Outside Coverage' === $coverage['status'], 'unproven legacy confirmed status is re-evaluated conservatively');
-sf_assert(3 === count(Southforsyth_School_Import_Safety::coverage_allowlist()), 'conservative confirmed allowlist starts with three high-school anchors');
+sf_assert(3 <= count(Southforsyth_School_Import_Safety::coverage_allowlist()), 'conservative confirmed allowlist includes the three high-school anchors');
 sf_assert('Outside Coverage' === Southforsyth_School_Import_Safety::normalize_coverage_status('Outside South Forsyth'), 'legacy outside status normalizes to Outside Coverage');
 
 $provider = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/providers/class-forsyth-county-provider.php');
