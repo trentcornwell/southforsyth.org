@@ -636,11 +636,13 @@ class Southforsyth_Forsyth_County_Import_Command
             $current_source = get_post_meta($post->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_SOURCE_META_KEY, true);
             $current_note = get_post_meta($post->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_NOTE_META_KEY, true);
             $current_type = get_post_meta($post->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_TYPE_META_KEY, true);
+            $current_date = get_post_meta($post->ID, Southforsyth_School_Import_Safety::COVERAGE_DECISION_DATE_META_KEY, true);
 
             if ($stored_status === $target_status
                 && $current_source === ($classification['decision_source'] ?? '')
                 && $current_note === ($classification['decision_note'] ?? '')
-                && $current_type === ($classification['decision_type'] ?? '')) {
+                && $current_type === ($classification['decision_type'] ?? '')
+                && '' !== (string) $current_date) {
                 $unchanged++;
                 continue;
             }
