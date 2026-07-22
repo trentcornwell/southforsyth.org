@@ -53,6 +53,26 @@ function sanitize_title($title)
     return trim($slug, '-');
 }
 
+function sanitize_key($key)
+{
+    return preg_replace('/[^a-z0-9_\-]/', '', strtolower($key));
+}
+
+function sanitize_text_field($value)
+{
+    return trim(strip_tags((string) $value));
+}
+
+function sanitize_textarea_field($value)
+{
+    return trim(strip_tags((string) $value));
+}
+
+function wp_parse_url($url)
+{
+    return parse_url($url);
+}
+
 function get_posts($args)
 {
     $posts = array_values($GLOBALS['sf_test_posts']);
@@ -158,11 +178,18 @@ require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/
 require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-school-import-safety.php';
 require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-geocode-match-evaluator.php';
 require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-geocode-command.php';
+require_once __DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/class-school-enrichment-command.php';
 
 $functions = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/functions.php');
 $import_loader = file_get_contents(__DIR__ . '/../wordpress/wp-content/themes/southforsyth/inc/import/import.php');
 sf_assert(false !== strpos($functions, 'import/class-geocode-match-evaluator.php') && false !== strpos($functions, 'import/class-schools-pilot-command.php'), 'missing school class load no longer occurs');
 sf_assert(false !== strpos($import_loader, 'class-school-import-safety.php'), 'school safety helper is loaded with import pipeline');
+sf_assert(false !== strpos($functions, 'class-school-enrichment-command.php'), 'school enrichment command is loaded only with WP-CLI tooling');
+sf_assert(Southforsyth_School_Enrichment_Command::is_official_source_url('https://www.forsyth.k12.ga.us/enrollment'), 'district HTTPS source is trusted for enrichment');
+sf_assert(Southforsyth_School_Enrichment_Command::is_official_source_url('https://bigcreek.forsyth.k12.ga.us/activities'), 'official school subdomain is trusted for enrichment');
+sf_assert(! Southforsyth_School_Enrichment_Command::is_official_source_url('https://example.com/schools'), 'non-official enrichment source is rejected');
+sf_assert(in_array('sf_editorial_summary', Southforsyth_School_Enrichment_Command::allowed_fields(), true)
+    && ! in_array('sf_south_forsyth_status', Southforsyth_School_Enrichment_Command::allowed_fields(), true), 'enrichment field allowlist cannot alter coverage classification');
 sf_assert('South Forsyth Middle School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth', 'Middle Schools'), 'middle school display name gets official suffix');
 sf_assert('South Forsyth High School' === Southforsyth_School_Import_Safety::official_display_name('South Forsyth High School', 'High Schools'), 'display name suffix is not duplicated');
 sf_assert('Alliance Academy for Innovation' === Southforsyth_School_Import_Safety::official_display_name('Alliance Academy for Innovation', 'Academies of Creative Education'), 'academy display name is not forced into a normal level suffix');

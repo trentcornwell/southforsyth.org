@@ -176,6 +176,7 @@ if (defined('WP_CLI') && WP_CLI) {
         'import/class-geocode-command.php',
         'import/class-schools-pilot-command.php',
         'import/class-school-boundary-command.php',
+        'import/class-school-enrichment-command.php',
     ));
 }
 

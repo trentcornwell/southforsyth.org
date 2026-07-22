@@ -186,6 +186,10 @@ wp post update <id> --post_status=draft
 
 Then review the school in wp-admin, correct its `sf_south_forsyth_status` or required metadata, and rerun the dry-run command.
 
+## School profile enrichment
+
+Published confirmed school profiles have a separate, source-attributed enrichment workflow. It accepts reviewed facts only from official Forsyth County Schools or school subdomains, records a source per field, refuses conflicting non-empty values, and never creates, publishes, deletes, or reclassifies schools. See [docs/school-profile-enrichment.md](docs/school-profile-enrichment.md).
+
 ## Evergreen content strategy
 The theme now includes a long-term evergreen content strategy aimed at high-intent local searches. The planning document is available at [wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md](wordpress/wp-content/themes/southforsyth/docs/evergreen-content-strategy.md), and the content planning helper lives in [wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php](wordpress/wp-content/themes/southforsyth/inc/evergreen-content.php).
 

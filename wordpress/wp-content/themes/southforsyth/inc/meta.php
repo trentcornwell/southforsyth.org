@@ -211,6 +211,15 @@ if (! function_exists('southforsyth_register_post_meta')) {
             'sf_school_colors'      => 'string',
             'sf_mission'            => 'string',
             'sf_staff_directory_url' => 'string',
+            'sf_extracurricular_activities' => 'string',
+            'sf_athletics'                 => 'string',
+            'sf_enrollment_information_url' => 'string',
+            'sf_parent_resources_url'       => 'string',
+            'sf_transportation_information_url' => 'string',
+            'sf_editorial_summary'          => 'string',
+            'sf_enrichment_status'          => 'string',
+            'sf_enrichment_source_notes'    => 'string',
+            'sf_enrichment_last_checked'    => 'string',
         );
 
         foreach ($school_fields as $meta_key => $type) {
@@ -218,7 +227,9 @@ if (! function_exists('southforsyth_register_post_meta')) {
                 'type'         => $type,
                 'single'       => true,
                 'show_in_rest' => true,
-                'sanitize_callback' => 'sanitize_text_field',
+                'sanitize_callback' => in_array($meta_key, array('sf_editorial_summary', 'sf_extracurricular_activities', 'sf_athletics'), true)
+                    ? 'sanitize_textarea_field'
+                    : ('sf_enrichment_source_notes' === $meta_key ? 'southforsyth_sanitize_school_source_notes' : 'sanitize_text_field'),
             ));
         }
 
@@ -323,6 +334,30 @@ if (! function_exists('southforsyth_register_post_meta')) {
                 'default'      => false,
             ));
         }
+    }
+}
+
+if (! function_exists('southforsyth_sanitize_school_source_notes')) {
+    function southforsyth_sanitize_school_source_notes($value)
+    {
+        $decoded = is_array($value) ? $value : json_decode((string) $value, true);
+        if (! is_array($decoded)) {
+            return '{}';
+        }
+
+        $clean = array();
+        foreach ($decoded as $field => $source) {
+            if (! is_array($source)) {
+                continue;
+            }
+            $clean[sanitize_key($field)] = array(
+                'source_url' => esc_url_raw($source['source_url'] ?? ''),
+                'source_note' => sanitize_text_field($source['source_note'] ?? ''),
+                'checked_at' => sanitize_text_field($source['checked_at'] ?? ''),
+            );
+        }
+
+        return wp_json_encode($clean, JSON_UNESCAPED_SLASHES);
     }
 }
 

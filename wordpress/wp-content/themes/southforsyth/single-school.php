@@ -46,6 +46,8 @@ while (have_posts()) :
     $phone = get_post_meta($post_id, 'sf_phone', true);
     $website = get_post_meta($post_id, 'sf_website', true);
     $staff_directory_url = get_post_meta($post_id, 'sf_staff_directory_url', true);
+    $principal = get_post_meta($post_id, 'sf_principal_name', true);
+    $hours = get_post_meta($post_id, 'sf_hours', true);
     $district = get_post_meta($post_id, 'sf_district', true);
     $source_url = get_post_meta($post_id, 'sf_source_url', true);
     $last_verified = get_post_meta($post_id, 'sf_last_verified', true);
@@ -53,6 +55,15 @@ while (have_posts()) :
     $feeder_pattern = get_post_meta($post_id, 'sf_feeder_pattern', true);
     $programs = get_post_meta($post_id, 'sf_notable_programs', true);
     $mission = get_post_meta($post_id, 'sf_mission', true);
+    $editorial_summary = get_post_meta($post_id, 'sf_editorial_summary', true);
+    $activities = get_post_meta($post_id, 'sf_extracurricular_activities', true);
+    $athletics = get_post_meta($post_id, 'sf_athletics', true);
+    $enrollment_url = get_post_meta($post_id, 'sf_enrollment_information_url', true);
+    $parent_resources_url = get_post_meta($post_id, 'sf_parent_resources_url', true);
+    $transportation_url = get_post_meta($post_id, 'sf_transportation_information_url', true);
+    $enrichment_checked = get_post_meta($post_id, 'sf_enrichment_last_checked', true);
+    $field_sources = json_decode((string) get_post_meta($post_id, 'sf_enrichment_source_notes', true), true);
+    $field_sources = is_array($field_sources) ? $field_sources : array();
     $lat = get_post_meta($post_id, 'sf_lat', true);
     $lng = get_post_meta($post_id, 'sf_lng', true);
     $directions_url = $full_address
@@ -103,7 +114,7 @@ while (have_posts()) :
                     // (sf_mission), otherwise a factual summary built only from
                     // stored fields (southforsyth_get_school_factual_summary) —
                     // never promotional language, never a placeholder.
-                    $overview = $mission ?: southforsyth_get_excerpt($post_id, 40);
+                    $overview = $editorial_summary ?: ($mission ?: southforsyth_get_excerpt($post_id, 40));
                     ?>
                     <?php if ($overview) : ?>
                         <section class="section-block">
@@ -115,11 +126,13 @@ while (have_posts()) :
                     <?php
                     $info_items = array_filter(array(
                         'District'       => $district,
+                        'Principal'      => $principal,
                         'Grades'         => $grades,
                         'School type'    => implode(' · ', $type_parts),
                         'Designation'    => $sector,
                         'Address'        => $full_address,
                         'Phone'          => $phone,
+                        'School hours'   => $hours,
                     ));
                     ?>
                     <?php if (! empty($info_items)) : ?>
@@ -152,6 +165,31 @@ while (have_posts()) :
                         <section class="section-block">
                             <h2>Programs</h2>
                             <p><?php echo esc_html($programs); ?></p>
+                        </section>
+                    <?php endif; ?>
+
+                    <?php if ($activities || $athletics) : ?>
+                        <section class="section-block">
+                            <h2>Student Life</h2>
+                            <?php if ($activities) : ?>
+                                <h3>Activities</h3>
+                                <p><?php echo esc_html($activities); ?></p>
+                            <?php endif; ?>
+                            <?php if ($athletics) : ?>
+                                <h3>Athletics</h3>
+                                <p><?php echo esc_html($athletics); ?></p>
+                            <?php endif; ?>
+                        </section>
+                    <?php endif; ?>
+
+                    <?php if ($enrollment_url || $parent_resources_url || $transportation_url) : ?>
+                        <section class="section-block">
+                            <h2>Family Resources</h2>
+                            <ul class="card-meta">
+                                <?php if ($enrollment_url) : ?><li><a href="<?php echo esc_url($enrollment_url); ?>" rel="noopener" target="_blank">Official enrollment information</a></li><?php endif; ?>
+                                <?php if ($parent_resources_url) : ?><li><a href="<?php echo esc_url($parent_resources_url); ?>" rel="noopener" target="_blank">Official parent resources</a></li><?php endif; ?>
+                                <?php if ($transportation_url) : ?><li><a href="<?php echo esc_url($transportation_url); ?>" rel="noopener" target="_blank">Official transportation information</a></li><?php endif; ?>
+                            </ul>
                         </section>
                     <?php endif; ?>
 
@@ -191,7 +229,24 @@ while (have_posts()) :
                             <?php if ($last_verified) : ?>
                                 Last verified <?php echo esc_html($last_verified); ?>.
                             <?php endif; ?>
+                            <?php if ($enrichment_checked) : ?>
+                                Enrichment sources checked <?php echo esc_html($enrichment_checked); ?>.
+                            <?php endif; ?>
                             </p>
+                            <?php if ($field_sources) : ?>
+                                <details>
+                                    <summary>Field-level official sources</summary>
+                                    <ul class="card-meta">
+                                        <?php foreach ($field_sources as $field => $source) :
+                                            if (empty($source['source_url'])) {
+                                                continue;
+                                            }
+                                            ?>
+                                            <li><strong><?php echo esc_html(ucwords(str_replace('_', ' ', preg_replace('/^sf_/', '', $field)))); ?>:</strong> <a href="<?php echo esc_url($source['source_url']); ?>" rel="noopener" target="_blank">official source</a><?php echo ! empty($source['checked_at']) ? esc_html(' · checked ' . $source['checked_at']) : ''; ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </details>
+                            <?php endif; ?>
                             <p><a href="mailto:hello@southforsyth.org?subject=<?php echo esc_attr(rawurlencode('Correction: ' . get_the_title())); ?>">Report a correction to this profile</a></p>
                         </section>
                     <?php endif; ?>
